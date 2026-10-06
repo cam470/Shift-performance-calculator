@@ -12,7 +12,7 @@
    COMPONENTS
      .card                 glass panel
      .card.hero            brighter panel with a violet glow
-     .btn                  button. Add .primary .secondary .danger .wide
+     .btn                  button. Add .primary .secondary .danger .wide .sm
      .icon-btn             square icon button
      .f                    field: <label class="f">Name<input></label>
      input, select         styled automatically
@@ -77,6 +77,11 @@
 /* ---------- base ---------- */
 *{box-sizing:border-box}
 html,body{margin:0}
+/* Stops Safari zooming in when a button is tapped twice quickly.
+   Pinch to zoom still works for anyone who needs it. */
+html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+button,a,label,select,input,.check{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{-webkit-user-select:none;user-select:none}
 body{
   min-height:100vh;
   background:var(--ns-bg);
@@ -148,6 +153,8 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .btn.danger:hover{background:rgba(255,107,139,.2)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn.wide{width:100%}
+.btn.sm{height:34px;padding:0 12px;font-size:13px;border-radius:10px;gap:6px}
+.btn.sm svg.i{width:15px;height:15px}
 .icon-btn{
   width:38px;height:38px;border-radius:var(--ns-r-sm);display:grid;place-items:center;
   border:1px solid var(--ns-line);background:var(--ns-surface);color:var(--ns-muted);cursor:pointer;
@@ -161,7 +168,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 input,select{
   width:100%;height:44px;padding:0 14px;
   border:1px solid var(--ns-line-2);border-radius:var(--ns-r-sm);
-  background:var(--ns-sunk);color:var(--ns-ink);font-size:15px;font-weight:500;
+  background:var(--ns-sunk);color:var(--ns-ink);font-size:16px;font-weight:500;
   transition:border-color .15s, box-shadow .15s, background .15s;
 }
 input::placeholder{color:var(--ns-faint)}

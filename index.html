@@ -66,7 +66,31 @@
 .mx-r{font-weight:700;font-size:14px;color:var(--ns-ink-2)}
 .matrix input{height:54px;font-size:22px}
 
+.trend{margin-top:22px;padding-top:18px;border-top:1px solid var(--ns-line)}
+.trend-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.trend h3{margin:0;font-size:14px;font-weight:700;color:var(--ns-ink-2)}
+.trend h3 span{color:var(--ns-faint);font-weight:600;margin-left:4px}
+#trendChart svg{display:block;width:100%;height:auto;overflow:visible}
+.t-area{fill:url(#tFill)}
+.t-line{fill:none;stroke:var(--ns-violet-hi);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(167,139,250,.8))}
+.t-target{stroke:rgba(255,255,255,.35);stroke-width:1;stroke-dasharray:4 4}
+.t-tlabel{fill:var(--ns-muted);font:700 10px var(--ns-font)}
+.t-dot{stroke:#140F2A;stroke-width:2.5}
+.t-dot.good{fill:var(--ns-good);filter:drop-shadow(0 0 5px var(--ns-good))}
+.t-dot.bad{fill:var(--ns-bad);filter:drop-shadow(0 0 5px var(--ns-bad))}
+.t-val{fill:var(--ns-ink);font:700 10.5px var(--ns-font);text-anchor:middle}
+.t-x{fill:var(--ns-faint);font:600 9.5px var(--ns-font);text-anchor:middle}
+.t-x tspan.s{fill:var(--ns-muted);font-weight:700}
+.trend-empty{margin:6px 0 0;padding:18px;border-radius:var(--ns-r-sm);border:1px dashed var(--ns-line-2);color:var(--ns-muted);font-size:13px;text-align:center}
+
 /* results */
+@media (min-width:1001px){
+  .results-card{display:flex;flex-direction:column}
+  .results-card .kpis{flex:1}
+  .results-card .kpi{display:flex;flex-direction:column}
+  .results-card .kpi-pa{margin-top:auto}
+  .results-card .kpi-var{font-size:52px;margin-top:18px}
+}
 .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .kpi{position:relative;overflow:hidden;border-radius:var(--ns-r);padding:16px;border:1px solid var(--ns-line);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015))}
 .kpi::after{content:"";position:absolute;right:-50px;top:-60px;width:160px;height:160px;border-radius:50%;opacity:.0;transition:opacity .3s;pointer-events:none}
@@ -76,10 +100,16 @@
 .kpi-name::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ns-faint);flex:none}
 .kpi[data-tone=good] .kpi-name::before{background:var(--ns-good);box-shadow:0 0 10px var(--ns-good)}
 .kpi[data-tone=bad] .kpi-name::before{background:var(--ns-bad);box-shadow:0 0 10px var(--ns-bad)}
-.kpi-hint{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:1px solid var(--ns-line);font-size:12px;color:var(--ns-faint);font-weight:600}
+.kpi-hint{margin:-8px 0 12px;font-size:12px;color:var(--ns-faint);font-weight:600}
 .kpi-var{font-size:42px;font-weight:600;line-height:1.05;margin:14px 0 14px;letter-spacing:-.04em}
-.kpi-pa{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:var(--ns-faint);font-weight:600}
-.kpi-pa b{display:block;font-size:15px;color:var(--ns-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.kpi-pa{display:grid;gap:16px;font-size:12px;color:var(--ns-faint);font-weight:600}
+.kpi-pa>span{display:grid;grid-template-columns:1fr auto;align-items:baseline}
+.kpi-pa b{font-size:15px;color:var(--ns-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.pa-bar{grid-column:1/-1;display:block;height:8px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.pa-bar i{display:block;height:100%;width:0;border-radius:999px;background:rgba(167,139,250,.45);transition:width .35s}
+.kpi-pa>span+span .pa-bar i{background:linear-gradient(90deg,var(--ns-violet-lo),var(--ns-violet-hi))}
+.kpi[data-tone=good] .kpi-pa>span+span .pa-bar i{background:var(--ns-good);box-shadow:0 0 8px rgba(62,224,160,.6)}
+.kpi[data-tone=bad] .kpi-pa>span+span .pa-bar i{background:var(--ns-bad);box-shadow:0 0 8px rgba(255,107,139,.6)}
 .summary{margin:14px 0 0;font-size:14px;color:var(--ns-ink-2);padding:12px 14px;border-radius:var(--ns-r-sm);background:var(--ns-violet-soft);border:1px solid rgba(167,139,250,.2)}
 
 /* FTDS live */
@@ -174,7 +204,7 @@ select.unset{color:var(--ns-faint)}
 .h-stat b{display:block;font-size:38px;font-weight:600;line-height:1.1;margin-top:8px;letter-spacing:-.04em}
 .h-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .h-title{margin:0 auto 0 0;font-size:17px;font-weight:700}
-.h-tools input{width:auto;font-size:14px;height:42px}
+.h-tools input{width:auto;height:42px}
 .h-tools .seg{height:42px}
 .h-list{padding:0;overflow:hidden}
 .h-head,.h-row{display:grid;grid-template-columns:1.2fr .55fr repeat(6,minmax(0,1fr)) 1.3fr .95fr;gap:8px;align-items:center;padding:14px 22px}
@@ -255,9 +285,7 @@ select.unset{color:var(--ns-faint)}
   .setup-ctl input{width:100%}
   .matrix{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);gap:10px}
   .kpis{grid-template-columns:1fr}
-  .kpi{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;align-items:center}
-  .kpi-var{margin:8px 0 0;font-size:38px}
-  .kpi-pa{grid-column:2;grid-row:1/3}
+  .kpi-var{margin:8px 0 14px;font-size:38px}
   .band{padding:20px}
   .band-grid{grid-template-columns:1fr}
   .band-inputs{grid-template-columns:1fr}
@@ -347,26 +375,35 @@ select.unset{color:var(--ns-faint)}
             <input type="number" id="pd" min="0" inputmode="numeric" aria-label="Planned drivers">
             <input type="number" id="ad" min="0" inputmode="numeric" aria-label="Actual drivers">
           </div>
+          <div class="trend">
+            <div class="trend-head">
+              <h3>Last 7 shifts <span>FTDS</span></h3>
+              <span class="chip" id="trendAvg" hidden></span>
+            </div>
+            <div id="trendChart"></div>
+          </div>
         </section>
 
-        <section class="card">
-          <div class="card-head"><h2>Shift results</h2></div>
+        <section class="card results-card">
+          <div class="card-head"><h2>Shift results</h2>
+            <button class="btn secondary sm" id="copySummary" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy summary</button>
+          </div>
           <div class="kpis">
             <div class="kpi" id="k_vol">
               <div class="kpi-name">Volume vs plan</div>
               <div class="kpi-var num" id="volVar">–</div>
-              <div class="kpi-pa"><span>Planned<b id="volP">–</b></span><span>Actual<b id="volA">–</b></span></div>
               <div class="kpi-hint" id="bufHint"></div>
+              <div class="kpi-pa"><span>Planned<b id="volP">–</b><i class="pa-bar"><i id="volPB"></i></i></span><span>Actual<b id="volA">–</b><i class="pa-bar"><i id="volAB"></i></i></span></div>
             </div>
             <div class="kpi" id="k_ppr">
               <div class="kpi-name">PPR vs plan</div>
               <div class="kpi-var num" id="pprVar">–</div>
-              <div class="kpi-pa"><span>Planned<b id="pprP">–</b></span><span>Actual<b id="pprA">–</b></span></div>
+              <div class="kpi-pa"><span>Planned<b id="pprP">–</b><i class="pa-bar"><i id="pprPB"></i></i></span><span>Actual<b id="pprA">–</b><i class="pa-bar"><i id="pprAB"></i></i></span></div>
             </div>
             <div class="kpi" id="k_drv">
               <div class="kpi-name">Drivers vs plan</div>
               <div class="kpi-var num" id="drvVar">–</div>
-              <div class="kpi-pa"><span>Planned<b id="drvP">–</b></span><span>Actual<b id="drvA">–</b></span></div>
+              <div class="kpi-pa"><span>Planned<b id="drvP">–</b><i class="pa-bar"><i id="drvPB"></i></i></span><span>Actual<b id="drvA">–</b><i class="pa-bar"><i id="drvAB"></i></i></span></div>
             </div>
           </div>
           <p class="summary" id="summaryLine"></p>
@@ -377,7 +414,7 @@ select.unset{color:var(--ns-faint)}
         <div class="band-head"><h2><span class="glow-dot" aria-hidden="true"></span>FTDS live</h2><span class="chip violet">Target 98%</span></div>
         <div class="band-grid">
           <div class="band-inputs">
-            <label class="f">Volume<input type="number" id="ftdsVol" min="0" inputmode="numeric"></label>
+            <label class="f"><span>Volume<span class="sub" id="ftdsVolHint">Copied from actual volume</span></span><input type="number" id="ftdsVol" min="0" inputmode="numeric"></label>
             <div class="f"><label for="rej">Rejected parcels <span class="sub">Recorded only, not counted in FTDS</span></label>
               <div class="stepper">
                 <button type="button" data-step="rej:-1" aria-label="One less rejected">−</button>
@@ -534,6 +571,9 @@ let notes = { red: [], rej: [] };
 const shown = { red: -1, rej: -1 };
 let reports = [];
 let memoryStore = [];
+// FTDS volume copies actual volume until someone types a different number in it.
+// Clearing it starts the copying again.
+let volLinked = true;
 
 /* ---------- calculations ---------- */
 function compute(){
@@ -571,6 +611,11 @@ function summaryText(c){
 }
 
 /* ---------- render this shift ---------- */
+function setBars(key, p, a){
+  const top = Math.max(has(p) ? p : 0, has(a) ? a : 0);
+  $(key + "PB").style.width = top && has(p) ? (p / top * 100) + "%" : "0%";
+  $(key + "AB").style.width = top && has(a) ? (a / top * 100) + "%" : "0%";
+}
 function setKpi(key, v, p, a, d, tone = toneOf(v)){
   $(key + "Var").textContent = signed(v, d);
   $(key + "Var").className = "kpi-var num " + tone;
@@ -595,11 +640,17 @@ function renderSlots(max, used){
   $("slotsText").textContent = `${Math.min(used, max)} of ${max} used` + (used > max ? `, ${used - max} over` : "");
 }
 
+function syncVolLink(){
+  if (volLinked && $("ftdsVol").value !== $("av").value) $("ftdsVol").value = $("av").value;
+  $("ftdsVolHint").textContent = volLinked ? "Copied from actual volume" : "Typed in. Clear it to copy actual volume again";
+}
 function render(){
+  syncVolLink();
   const c = compute();
   setKpi("vol", c.volVar, fmtInt(c.pv), fmtInt(c.av), 0, volTone(c.volVar));
   setKpi("ppr", c.pprVar, fmt1(c.planPpr), fmt1(c.actualPpr), 1);
   setKpi("drv", c.drvVar, fmtInt(c.pd), fmtInt(c.ad), 0);
+  setBars("vol", c.pv, c.av); setBars("ppr", c.planPpr, c.actualPpr); setBars("drv", c.pd, c.ad);
   $("summaryLine").textContent = summaryText(c);
 
   const band = $("ftdsBand");
@@ -776,6 +827,7 @@ function clearForm(){
   FIELDS.forEach(f => $(f).value = "");
   $("date").value = today();
   notes = { red: [], rej: [] }; shown.red = -1; shown.rej = -1;
+  volLinked = true;
   setShift(new Date().getHours() < 12 ? "AM" : "PM");
 }
 function loadDraft(){
@@ -785,6 +837,7 @@ function loadDraft(){
     if (!d) return;
     FIELDS.forEach(f => { if (typeof d[f] === "string") $(f).value = d[f]; });
     if (!$("date").value) $("date").value = today();
+    volLinked = !$("ftdsVol").value || $("ftdsVol").value === $("av").value;
     if (d.shift) setShift(d.shift);
     if (d.notes){ notes.red = d.notes.red || []; notes.rej = d.notes.rej || []; }
   } catch (e) {}
@@ -861,12 +914,98 @@ function resetShift(){
   toast("Ready for the next shift");
 }
 
+/* ---------- last 7 shifts chart ---------- */
+function renderTrend(msg){
+  const box = $("trendChart"), avgEl = $("trendAvg");
+  if (msg){ box.innerHTML = `<p class="trend-empty">${msg}</p>`; avgEl.hidden = true; return; }
+  // reports are newest first, so take 7 and flip them to read left to right
+  const pts = reports.filter(r => has(r.ftds)).slice(0, 7).reverse();
+  if (!pts.length){
+    box.innerHTML = `<p class="trend-empty">Save a shift and your last 7 shifts show here.</p>`;
+    avgEl.hidden = true; return;
+  }
+  const elig = pts.reduce((a, r) => a + (r.eligible || 0), 0);
+  const first = pts.reduce((a, r) => a + (r.firstTime || 0), 0);
+  const avg = elig ? first / elig * 100 : pts.reduce((a, r) => a + r.ftds, 0) / pts.length;
+  avgEl.hidden = false;
+  avgEl.textContent = `Average ${avg.toFixed(2)}%`;
+  avgEl.className = "chip " + (avg >= 98 ? "good" : "bad");
+
+  const W = 340, H = 132, L = 30, Rt = 10, T = 20, B = 32, n = pts.length;
+  const vals = pts.map(r => r.ftds);
+  const lo = Math.min(97.5, Math.floor((Math.min(...vals) - 0.3) * 2) / 2);
+  const hi = Math.min(100, Math.max(98.5, Math.ceil((Math.max(...vals) + 0.3) * 2) / 2));
+  const x = i => n === 1 ? (L + W - Rt) / 2 : L + 14 + i * (W - Rt - 14 - (L + 14)) / (n - 1);
+  const y = v => T + (hi - Math.min(hi, Math.max(lo, v))) / (hi - lo) * (H - T - B);
+  const base = H - B, y98 = y(98);
+  const line = pts.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(r.ftds).toFixed(1)}`).join(" ");
+  const area = n > 1 ? `${line} L${x(n - 1).toFixed(1)} ${base} L${x(0).toFixed(1)} ${base} Z` : "";
+  const day = r => prettyDate(r.date, { day: "numeric", month: "short" });
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="FTDS for the last ${n} shifts">
+    <defs><linearGradient id="tFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity=".45"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${area ? `<path class="t-area" d="${area}"/>` : ""}
+    <line class="t-target" x1="${L}" x2="${W - Rt}" y1="${y98}" y2="${y98}"/>
+    <text class="t-tlabel" x="0" y="${y98 + 3.5}">98%</text>
+    ${n > 1 ? `<path class="t-line" d="${line}"/>` : ""}
+    ${pts.map((r, i) => `
+      <circle class="t-dot ${r.ftds >= 98 ? "good" : "bad"}" cx="${x(i)}" cy="${y(r.ftds)}" r="5"><title>${esc(day(r))} ${esc(r.shift)}: ${r.ftds.toFixed(2)}%</title></circle>
+      <text class="t-val" x="${x(i)}" y="${y(r.ftds) - 10}">${r.ftds.toFixed(1)}</text>
+      <text class="t-x" x="${x(i)}" y="${base + 16}">${esc(day(r))}<tspan class="s" x="${x(i)}" dy="12">${esc(r.shift || "")}</tspan></text>`).join("")}
+  </svg>`;
+}
+
+/* ---------- copy summary ---------- */
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  // older browsers
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+  ta.remove(); return ok;
+}
+function summaryForCopy(){
+  const c = compute();
+  const num = s => s === "–" ? "Not entered" : s.replace("−", "-");
+  const date = prettyDate($("date").value, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return [
+    `${date ? date + ", " : ""}${shift} shift`,
+    "",
+    `Planned Volume: ${num(fmtInt(c.pv))}`,
+    `Actual Volume: ${num(fmtInt(c.av))}`,
+    `Volume Variance: ${num(signed(c.volVar, 0))}`,
+    "",
+    `Planned PPR: ${num(fmt1(c.planPpr))}`,
+    `Actual PPR: ${num(fmt1(c.actualPpr))}`,
+    `PPR Variance: ${num(signed(c.pprVar, 1))}`,
+    "",
+    `Planned drivers: ${num(fmtInt(c.pd))}`,
+    `Actual drivers: ${num(fmtInt(c.ad))}`,
+    `Driver Variance: ${num(signed(c.drvVar, 0))}`
+  ].join("\n");
+}
+let copyTimer;
+$("copySummary").addEventListener("click", async () => {
+  const c = compute();
+  if (![c.pv, c.av, c.pd, c.ad].some(has)) return toast("Enter the shift figures first", "bad");
+  const btn = $("copySummary");
+  if (await copyText(summaryForCopy())){
+    toast("Summary copied. Paste it into WhatsApp or email");
+    btn.lastChild.textContent = "Copied";
+    clearTimeout(copyTimer); copyTimer = setTimeout(() => btn.lastChild.textContent = "Copy summary", 2000);
+  } else toast("Couldn't copy. Your browser blocked it", "bad");
+});
+
 /* ---------- history ---------- */
 async function loadHistory(){
   $("histList").innerHTML = `<p class="empty pad">Loading reports…</p>`;
+  renderTrend("Loading your last shifts…");
   try {
     reports = await store.list();
   } catch (e) {
+    renderTrend("Couldn't load your last shifts.");
     $("histList").innerHTML = `<p class="empty pad">Couldn't load history. ${e.code === "permission-denied" ? "Check the database rules in Firebase." : "Check your connection and press Refresh."}</p>`;
     return;
   }
@@ -875,6 +1014,7 @@ async function loadHistory(){
     (b.shift || "").localeCompare(a.shift || "") ||
     ((toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
   renderHistory();
+  renderTrend();
 }
 
 function renderHistory(){
@@ -976,6 +1116,10 @@ $("hRefresh").addEventListener("click", loadHistory);
 
 /* ---------- wiring ---------- */
 $("bufHint").textContent = `±${VOLUME_BUFFER} is fine`;
+$("ftdsVol").addEventListener("input", () => {
+  const v = $("ftdsVol").value;
+  volLinked = v === "" || v === $("av").value;
+});
 FIELDS.forEach(f => $(f).addEventListener("input", render));
 document.querySelectorAll("[data-shift]").forEach(b => b.addEventListener("click", () => { setShift(b.dataset.shift); render(); }));
 document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => {
