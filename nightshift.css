@@ -1,0 +1,237 @@
+/* =====================================================================
+   Nightshift UI  v1.0
+   A small dark violet glass framework. Built for Shift Report, but it
+   works on any page. Load it first, then your own page styles:
+
+     <link rel="stylesheet" href="nightshift.css">
+
+   THEME
+     Everything is driven by the tokens in :root below. Change the
+     violet values to re-colour the whole app in one place.
+
+   COMPONENTS
+     .card                 glass panel
+     .card.hero            brighter panel with a violet glow
+     .btn                  button. Add .primary .secondary .danger .wide
+     .icon-btn             square icon button
+     .f                    field: <label class="f">Name<input></label>
+     input, select         styled automatically
+     .seg                  segmented toggle. Active button: aria-checked="true"
+     .stepper              minus, input, plus
+     .check                tick box pill:
+                           <label class="check"><input type="checkbox"><span>Text</span></label>
+     .chip                 small pill. Add .violet .good .bad .warn .am .pm
+     .count                counter badge. Add .done for green
+     .bar > i              progress bar. Set the width on the <i>
+     .nav > .tab           navigation. Active tab: aria-selected="true"
+     .toast                pop up message. Add .show to display, .bad for errors
+     .glow-dot             small glowing status light
+     .good .bad .warn .flat   text colours for performance
+     .num                  lines numbers up in columns
+     .sr                   hidden visually, still read by screen readers
+   ===================================================================== */
+
+:root{
+  color-scheme: dark;
+
+  /* base */
+  --ns-bg: #0B0916;
+  --ns-bg-2: #141026;
+  --ns-surface: rgba(255,255,255,.045);
+  --ns-surface-2: rgba(255,255,255,.075);
+  --ns-sunk: rgba(6,4,16,.45);
+  --ns-line: rgba(255,255,255,.085);
+  --ns-line-2: rgba(255,255,255,.15);
+
+  /* text */
+  --ns-ink: #F5F2FF;
+  --ns-ink-2: #D9D2F5;
+  --ns-muted: #A49CC6;
+  --ns-faint: #6F6893;
+
+  /* violet */
+  --ns-violet: #8B5CF6;
+  --ns-violet-hi: #A78BFA;
+  --ns-violet-lo: #6D3FE0;
+  --ns-violet-deep: #3B2491;
+  --ns-violet-soft: rgba(139,92,246,.16);
+  --ns-violet-line: rgba(167,139,250,.38);
+
+  /* performance */
+  --ns-good: #3EE0A0;  --ns-good-soft: rgba(62,224,160,.13);
+  --ns-bad:  #FF6B8B;  --ns-bad-soft:  rgba(255,107,139,.13);
+  --ns-warn: #FFC15E;  --ns-warn-soft: rgba(255,193,94,.13);
+
+  /* shape and depth */
+  --ns-r-lg: 22px;
+  --ns-r: 16px;
+  --ns-r-sm: 12px;
+  --ns-blur: 22px;
+  --ns-edge: inset 0 1px 0 rgba(255,255,255,.07);
+  --ns-shadow: 0 24px 48px -24px rgba(0,0,0,.7);
+  --ns-glow: 0 10px 30px -8px rgba(139,92,246,.7);
+
+  --ns-font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;
+  background:var(--ns-bg);
+  color:var(--ns-ink);
+  font:15px/1.5 var(--ns-font);
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+}
+/* the violet haze behind everything, kept on its own layer so it doesn't scroll */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60vw 50vh at 18% -8%, rgba(124,77,255,.32), transparent 70%),
+    radial-gradient(50vw 50vh at 100% 35%, rgba(98,52,214,.20), transparent 70%),
+    radial-gradient(60vw 45vh at 40% 110%, rgba(76,40,170,.22), transparent 70%),
+    linear-gradient(180deg, var(--ns-bg-2), var(--ns-bg) 60%);
+}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ns-violet-hi);outline-offset:2px}
+[hidden]{display:none!important}
+::selection{background:rgba(139,92,246,.45)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.good{color:var(--ns-good)}
+.bad{color:var(--ns-bad)}
+.warn{color:var(--ns-warn)}
+.flat{color:var(--ns-ink)}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- glass card ---------- */
+.card{
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+  border:1px solid var(--ns-line);
+  border-radius:var(--ns-r-lg);
+  padding:22px;
+  box-shadow:var(--ns-edge), var(--ns-shadow);
+  -webkit-backdrop-filter:blur(var(--ns-blur));
+  backdrop-filter:blur(var(--ns-blur));
+}
+.card.hero{
+  border-color:var(--ns-violet-line);
+  background:
+    radial-gradient(90% 120% at 100% 100%, rgba(167,139,250,.28), transparent 60%),
+    radial-gradient(70% 90% at 0% 0%, rgba(109,63,224,.35), transparent 70%),
+    linear-gradient(160deg, rgba(76,45,170,.55), rgba(25,17,58,.75));
+  box-shadow:var(--ns-edge), 0 30px 60px -30px rgba(109,63,224,.8);
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:42px;padding:0 18px;border-radius:var(--ns-r-sm);
+  border:1px solid transparent;font-weight:700;font-size:14px;letter-spacing:.005em;
+  cursor:pointer;white-space:nowrap;
+  transition:transform .12s, box-shadow .2s, background .2s, border-color .2s;
+}
+.btn:active{transform:translateY(1px)}
+.btn.primary{
+  color:#fff;
+  background:linear-gradient(180deg, var(--ns-violet-hi), var(--ns-violet) 45%, var(--ns-violet-lo));
+  border-color:rgba(196,181,253,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25), var(--ns-glow);
+}
+.btn.primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 12px 36px -8px rgba(139,92,246,.95)}
+.btn.secondary{background:var(--ns-surface);border-color:var(--ns-line-2);color:var(--ns-ink-2)}
+.btn.secondary:hover{background:var(--ns-surface-2);color:var(--ns-ink)}
+.btn.danger{background:var(--ns-bad-soft);border-color:rgba(255,107,139,.35);color:var(--ns-bad)}
+.btn.danger:hover{background:rgba(255,107,139,.2)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.wide{width:100%}
+.icon-btn{
+  width:38px;height:38px;border-radius:var(--ns-r-sm);display:grid;place-items:center;
+  border:1px solid var(--ns-line);background:var(--ns-surface);color:var(--ns-muted);cursor:pointer;
+}
+.icon-btn:hover{color:var(--ns-ink);background:var(--ns-surface-2)}
+.link{background:none;border:0;color:var(--ns-violet-hi);font-weight:700;font-size:14px;cursor:pointer;padding:2px 0;justify-self:start}
+.link:hover{color:#C4B5FD}
+
+/* ---------- fields ---------- */
+.f{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:600;color:var(--ns-muted)}
+input,select{
+  width:100%;height:44px;padding:0 14px;
+  border:1px solid var(--ns-line-2);border-radius:var(--ns-r-sm);
+  background:var(--ns-sunk);color:var(--ns-ink);font-size:15px;font-weight:500;
+  transition:border-color .15s, box-shadow .15s, background .15s;
+}
+input::placeholder{color:var(--ns-faint)}
+input:hover,select:hover{border-color:rgba(255,255,255,.22)}
+input:focus,select:focus{outline:none;border-color:var(--ns-violet-hi);background:rgba(20,14,44,.7);box-shadow:0 0 0 4px rgba(139,92,246,.22)}
+input[type=number]{font-variant-numeric:tabular-nums;font-size:18px;font-weight:700;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=date],input[type=month]{min-width:0;display:block;-webkit-appearance:none;appearance:none;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=month]::-webkit-calendar-picker-indicator{filter:invert(.75) sepia(1) hue-rotate(210deg) saturate(3);cursor:pointer}
+select{
+  padding-right:40px;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background:var(--ns-sunk) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23A78BFA' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 15px center;
+}
+select option{background:#1A1433;color:var(--ns-ink)}
+
+/* ---------- segmented toggle ---------- */
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;height:44px;padding:4px;border-radius:var(--ns-r-sm);background:var(--ns-sunk);border:1px solid var(--ns-line)}
+.seg button{border:0;background:transparent;border-radius:9px;padding:0 16px;font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--ns-muted);cursor:pointer}
+.seg button:hover{color:var(--ns-ink)}
+.seg button[aria-checked=true]{color:#fff;background:linear-gradient(180deg, var(--ns-violet-hi), var(--ns-violet-lo));box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 6px 18px -6px rgba(139,92,246,.8)}
+
+/* ---------- stepper ---------- */
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px}
+.stepper button{height:44px;border-radius:var(--ns-r-sm);border:1px solid var(--ns-line-2);background:var(--ns-surface);color:var(--ns-ink);font-size:20px;line-height:1;cursor:pointer}
+.stepper button:hover{background:var(--ns-violet-soft);border-color:var(--ns-violet-line)}
+.stepper input{text-align:center}
+
+/* ---------- tick box pill ---------- */
+.check{position:relative;cursor:pointer}
+.check input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.check span{display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 14px 0 11px;border-radius:999px;border:1px solid var(--ns-line-2);background:var(--ns-surface);font-weight:600;font-size:14px;color:var(--ns-ink-2)}
+.check span::before{content:"";width:17px;height:17px;border-radius:50%;border:1.5px solid var(--ns-faint);background:center/10px 8px no-repeat;flex:none}
+.check input:checked+span{border-color:var(--ns-violet-line);background:var(--ns-violet-soft);color:#fff}
+.check input:checked+span::before{border-color:var(--ns-violet-hi);background-color:var(--ns-violet);box-shadow:0 0 12px rgba(139,92,246,.8);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='white' stroke-width='2.2'/%3E%3C/svg%3E")}
+.check input:focus-visible+span{outline:2px solid var(--ns-violet-hi);outline-offset:2px}
+
+/* ---------- chips, counters, progress ---------- */
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.03em;border:1px solid var(--ns-line-2);background:var(--ns-surface);color:var(--ns-ink-2)}
+.chip.violet,.chip.pm{background:var(--ns-violet-soft);border-color:var(--ns-violet-line);color:#C9B8FF}
+.chip.am,.chip.warn{background:var(--ns-warn-soft);border-color:rgba(255,193,94,.35);color:var(--ns-warn)}
+.chip.good{background:var(--ns-good-soft);border-color:rgba(62,224,160,.35);color:var(--ns-good)}
+.chip.bad{background:var(--ns-bad-soft);border-color:rgba(255,107,139,.35);color:var(--ns-bad)}
+.count{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--ns-surface-2);border:1px solid var(--ns-line);color:var(--ns-muted)}
+.count.done{background:var(--ns-good-soft);border-color:rgba(62,224,160,.35);color:var(--ns-good)}
+.bar{height:5px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg, var(--ns-violet-lo), var(--ns-violet-hi));box-shadow:0 0 12px rgba(167,139,250,.8);transition:width .3s}
+
+/* ---------- navigation ---------- */
+.nav{display:grid;gap:6px}
+.tab{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid transparent;border-radius:var(--ns-r-sm);background:transparent;color:var(--ns-muted);font-weight:700;font-size:14px;cursor:pointer;text-align:left}
+.tab:hover{color:var(--ns-ink);background:var(--ns-surface)}
+.tab[aria-selected=true]{color:#fff;border-color:rgba(196,181,253,.4);background:linear-gradient(180deg, var(--ns-violet-hi), var(--ns-violet) 50%, var(--ns-violet-lo));box-shadow:inset 0 1px 0 rgba(255,255,255,.25), var(--ns-glow)}
+
+/* ---------- status light ---------- */
+.glow-dot{width:9px;height:9px;border-radius:50%;background:var(--ns-faint);flex:none}
+.glow-dot.good{background:var(--ns-good);box-shadow:0 0 0 4px var(--ns-good-soft), 0 0 14px var(--ns-good)}
+.glow-dot.warn{background:var(--ns-warn);box-shadow:0 0 0 4px var(--ns-warn-soft), 0 0 14px var(--ns-warn)}
+.glow-dot.bad{background:var(--ns-bad);box-shadow:0 0 0 4px var(--ns-bad-soft), 0 0 14px var(--ns-bad)}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;right:24px;bottom:24px;z-index:50;max-width:calc(100% - 32px);
+  padding:13px 18px;border-radius:var(--ns-r);font-weight:600;font-size:14px;color:#fff;
+  background:rgba(30,22,62,.85);border:1px solid var(--ns-violet-line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  box-shadow:var(--ns-glow);
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s, transform .2s;
+}
+.toast.show{opacity:1;transform:none}
+.toast.bad{border-color:rgba(255,107,139,.5);box-shadow:0 10px 30px -8px rgba(255,107,139,.6)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

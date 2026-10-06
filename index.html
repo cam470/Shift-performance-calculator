@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0916">
+<title>Shift Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Nightshift UI framework. Keep nightshift.css in the same folder as this file. -->
+<link rel="stylesheet" href="nightshift.css">
+<style>
+/* ---------- Shift Report page layout (uses Nightshift UI tokens) ---------- */
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.mark{width:30px;height:30px;border-radius:10px;flex:none;position:relative;
+  background:linear-gradient(90deg,var(--ns-violet) 0 38%,#D7CBFF 38% 62%,var(--ns-violet) 62%);
+  box-shadow:inset 0 -8px 0 rgba(30,10,80,.35), 0 0 18px rgba(139,92,246,.7)}
+
+/* sign in */
+.login{min-height:100vh;display:grid;place-items:center;padding:40px 20px}
+.login-wrap{width:min(400px,100%);text-align:center}
+.orb{width:120px;height:120px;margin:0 auto -20px;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%, #fff 0 4%, #C9B8FF 10%, rgba(139,92,246,.75) 32%, rgba(109,63,224,.25) 55%, transparent 70%);
+  filter:blur(1px)}
+.login-wrap .brand{justify-content:center;margin-bottom:18px}
+.login-wrap h1{font-size:34px;line-height:1.15;font-weight:700;letter-spacing:-.03em;margin:0 0 8px}
+.login-wrap .lead{color:var(--ns-muted);margin:0 0 26px}
+.login .card{text-align:left}
+.login form{display:grid;gap:16px}
+.form-msg{min-height:20px;margin:0;font-size:14px}
+.setup{background:var(--ns-warn-soft);color:var(--ns-warn);border:1px solid rgba(255,193,94,.3);border-radius:var(--ns-r-sm);padding:12px 14px;font-size:14px;margin:0 0 18px}
+#previewBtn{margin-top:14px}
+
+/* shell */
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;padding:22px 16px;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border-right:1px solid var(--ns-line);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.side .brand{padding:6px 8px 30px}
+.me{margin-top:auto;display:flex;align-items:center;gap:11px;padding:12px;border-radius:var(--ns-r);background:var(--ns-surface);border:1px solid var(--ns-line)}
+.avatar{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(160deg,var(--ns-violet-hi),var(--ns-violet-deep));box-shadow:0 0 14px rgba(139,92,246,.6)}
+.me-text{min-width:0;flex:1;display:flex;flex-direction:column}
+.me-text b{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.role{align-self:flex-start;margin-top:3px}
+.main{min-width:0}
+.preview-bar{text-align:center;font-size:13px;font-weight:600;padding:8px 16px;color:var(--ns-warn);background:var(--ns-warn-soft);border-bottom:1px solid rgba(255,193,94,.2)}
+.pagehead{position:sticky;top:0;z-index:5;background:rgba(11,9,22,.6);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid var(--ns-line)}
+.pagehead-inner{max-width:1200px;margin:0 auto;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pagehead h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.pagehead p{margin:4px 0 0;color:var(--ns-muted);font-size:14px;font-weight:500}
+.actionbar{display:flex;align-items:center;gap:10px}
+.draft{color:var(--ns-faint);font-size:13px;margin-right:6px}
+.content{max-width:1200px;margin:0 auto;padding:28px 32px 64px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:20px;margin-bottom:20px}
+.row.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.card h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
+
+/* shift setup */
+.setup-ctl{display:flex;gap:8px;align-items:center}
+.setup-ctl input{width:168px}
+.matrix{display:grid;grid-template-columns:80px minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center}
+.mx-h{font-size:12px;font-weight:700;color:var(--ns-faint);letter-spacing:.04em}
+.mx-r{font-weight:700;font-size:14px;color:var(--ns-ink-2)}
+.matrix input{height:54px;font-size:22px}
+
+/* results */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi{position:relative;overflow:hidden;border-radius:var(--ns-r);padding:16px;border:1px solid var(--ns-line);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015))}
+.kpi::after{content:"";position:absolute;right:-50px;top:-60px;width:160px;height:160px;border-radius:50%;opacity:.0;transition:opacity .3s;pointer-events:none}
+.kpi[data-tone=good]::after{opacity:1;background:radial-gradient(circle,rgba(62,224,160,.13),transparent 65%)}
+.kpi[data-tone=bad]::after{opacity:1;background:radial-gradient(circle,rgba(255,107,139,.13),transparent 65%)}
+.kpi-name{font-size:13px;font-weight:600;color:var(--ns-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kpi-name::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ns-faint);flex:none}
+.kpi[data-tone=good] .kpi-name::before{background:var(--ns-good);box-shadow:0 0 10px var(--ns-good)}
+.kpi[data-tone=bad] .kpi-name::before{background:var(--ns-bad);box-shadow:0 0 10px var(--ns-bad)}
+.kpi-hint{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:1px solid var(--ns-line);font-size:12px;color:var(--ns-faint);font-weight:600}
+.kpi-var{font-size:42px;font-weight:600;line-height:1.05;margin:14px 0 14px;letter-spacing:-.04em}
+.kpi-pa{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:var(--ns-faint);font-weight:600}
+.kpi-pa b{display:block;font-size:15px;color:var(--ns-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.summary{margin:14px 0 0;font-size:14px;color:var(--ns-ink-2);padding:12px 14px;border-radius:var(--ns-r-sm);background:var(--ns-violet-soft);border:1px solid rgba(167,139,250,.2)}
+
+/* FTDS live */
+.band{margin-bottom:20px;padding:26px}
+.band h2{display:flex;align-items:center;gap:10px}
+.band[data-state=good] .glow-dot{background:var(--ns-good);box-shadow:0 0 0 4px var(--ns-good-soft),0 0 14px var(--ns-good)}
+.band[data-state=warn] .glow-dot{background:var(--ns-warn);box-shadow:0 0 0 4px var(--ns-warn-soft),0 0 14px var(--ns-warn)}
+.band[data-state=bad]  .glow-dot{background:var(--ns-bad);box-shadow:0 0 0 4px var(--ns-bad-soft),0 0 14px var(--ns-bad)}
+.band-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.band-grid{display:grid;grid-template-columns:minmax(0,250px) 290px minmax(0,1fr);gap:34px;align-items:center}
+.band-inputs{display:grid;gap:14px}
+.band .f{color:var(--ns-ink-2)}
+.band .f .sub{display:block;font-weight:500;font-size:12px;color:var(--ns-muted)}
+.band input{background:rgba(10,6,28,.45);border-color:rgba(255,255,255,.16)}
+
+.gauge{position:relative;width:290px;max-width:100%;margin:0 auto}
+.gauge svg{display:block;width:100%;height:auto;overflow:visible}
+.g-track,.g-val{fill:none;stroke-width:13;stroke-linecap:round}
+.g-track{stroke:rgba(255,255,255,.09)}
+.g-val{stroke:var(--ns-violet-hi);transition:stroke-dasharray .45s ease;filter:drop-shadow(0 0 8px currentColor)}
+.band[data-state=idle] .g-val{opacity:0}
+.band[data-state=good] .g-val{stroke:var(--ns-good);color:var(--ns-good)}
+.band[data-state=warn] .g-val{stroke:var(--ns-warn);color:var(--ns-warn)}
+.band[data-state=bad]  .g-val{stroke:var(--ns-bad);color:var(--ns-bad)}
+.g-tick{stroke:#fff;stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 0 4px #fff)}
+.g-txt{fill:var(--ns-muted);font:600 11px var(--ns-font)}
+.g-center{position:absolute;left:0;right:0;bottom:4px;text-align:center}
+.ftds-pct{font-size:50px;font-weight:600;color:#fff;line-height:1;letter-spacing:-.04em;text-shadow:0 0 30px rgba(167,139,250,.55)}
+.g-label{font-size:12px;color:var(--ns-muted);margin-top:6px;font-weight:500}
+
+.status{font-size:20px;font-weight:700;color:#fff;margin:0 0 20px;line-height:1.3;letter-spacing:-.01em}
+.slots-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--ns-muted);margin-bottom:10px;font-weight:500}
+.slots-head b{color:#fff}
+.slots{display:flex;flex-wrap:wrap;gap:5px;min-height:14px}
+.slot{width:22px;height:10px;border-radius:999px;background:rgba(255,255,255,.1)}
+.slot.used{background:var(--ns-violet-hi);box-shadow:0 0 8px rgba(167,139,250,.8)}
+.band[data-state=warn] .slot.used{background:var(--ns-warn);box-shadow:0 0 8px rgba(255,193,94,.7)}
+.slot.over{background:var(--ns-bad);box-shadow:0 0 8px rgba(255,107,139,.8)}
+.slot-more,.slot-note{font-size:13px;color:var(--ns-muted);align-self:center}
+
+.band-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:28px}
+.band-stats div{min-width:0;padding:14px;border-radius:var(--ns-r);background:rgba(10,6,28,.35);border:1px solid rgba(255,255,255,.08)}
+.band-stats span{display:block;font-size:12px;color:var(--ns-muted);line-height:1.3;font-weight:600}
+.band-stats b{display:block;font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;margin-top:6px;letter-spacing:-.03em}
+.band-stats small{display:block;font-size:11px;color:var(--ns-faint);margin-top:2px;font-weight:500}
+
+/* notes */
+.notes-panel{--kind:var(--ns-violet-hi);--kind-soft:var(--ns-violet-soft)}
+.notes-panel.rej{--kind:var(--ns-warn);--kind-soft:var(--ns-warn-soft)}
+.np-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.np-head h2{margin-right:auto;display:flex;align-items:center;gap:10px}
+.np-head h2::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--kind);box-shadow:0 0 10px var(--kind)}
+.notes-panel .bar{margin-bottom:18px}
+.notes-panel.rej .bar i{background:linear-gradient(90deg,#E89A2C,var(--ns-warn));box-shadow:0 0 12px rgba(255,193,94,.6)}
+.notes-panel.complete .bar i{background:var(--ns-good);box-shadow:0 0 12px rgba(62,224,160,.7)}
+.note{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px 12px;align-items:start;padding:14px;margin-top:10px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:rgba(255,255,255,.03);transition:border-color .2s,background .2s}
+.note:first-child{margin-top:0}
+.note>.f,.note>.damage{grid-column:2}
+.notes-panel{container-type:inline-size}
+@container (min-width:470px){
+  .note{grid-template-columns:34px minmax(196px,1fr) minmax(0,1.1fr)}
+  .note>.f{grid-column:auto}
+  .note>.damage,.note>.other{grid-column:2/-1}
+}
+.note-n{grid-row:1;grid-column:1;width:34px;height:34px;margin-top:24px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--kind);background:var(--kind-soft);border:1px solid rgba(255,255,255,.08)}
+.note.done{border-color:rgba(62,224,160,.3);background:rgba(62,224,160,.04)}
+.note.done .note-n{color:#062B1C;background:var(--ns-good);box-shadow:0 0 14px rgba(62,224,160,.6)}
+.note.invalid{border-color:rgba(255,107,139,.35)}
+.note.invalid .note-n{color:var(--ns-bad);background:var(--ns-bad-soft)}
+input.jdw{font-weight:700;letter-spacing:.03em;font-variant-numeric:tabular-nums}
+input.jdw::placeholder{letter-spacing:0;font-weight:500}
+input.jdw.invalid{border-color:var(--ns-bad);background:var(--ns-bad-soft);color:var(--ns-bad)}
+input.jdw.invalid:focus{box-shadow:0 0 0 4px var(--ns-bad-soft)}
+select.unset{color:var(--ns-faint)}
+.hint{display:none;font-style:normal;font-size:12px;font-weight:600;color:var(--ns-bad)}
+.note.invalid .hint{display:block}
+.damage{padding:12px;border-radius:var(--ns-r-sm);background:var(--ns-warn-soft);border:1px solid rgba(255,193,94,.25)}
+.damage-label{display:block;font-size:13px;font-weight:700;color:var(--ns-warn);margin-bottom:10px}
+.note.need-damage .damage-label::after{content:" (tick at least one)";font-weight:500;color:var(--ns-muted)}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.notes-panel.rej .check input:checked+span{border-color:rgba(255,193,94,.5);background:var(--ns-warn-soft)}
+.notes-panel.rej .check input:checked+span::before{background-color:var(--ns-warn);border-color:var(--ns-warn);box-shadow:0 0 12px rgba(255,193,94,.7)}
+.empty-notes{margin:0;padding:22px;border-radius:var(--ns-r);border:1px dashed var(--ns-line-2);color:var(--ns-muted);font-size:14px;background:rgba(255,255,255,.02)}
+.empty{color:var(--ns-muted);margin:0;font-size:14px}
+.empty.pad{padding:40px 20px;text-align:center}
+.warnline{margin:12px 0 0;font-size:13px;color:var(--ns-warn)}
+
+/* history */
+.h-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:26px}
+.h-stat{padding:20px 22px}
+.h-stat span{color:var(--ns-muted);font-size:13px;font-weight:600}
+.h-stat b{display:block;font-size:38px;font-weight:600;line-height:1.1;margin-top:8px;letter-spacing:-.04em}
+.h-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.h-title{margin:0 auto 0 0;font-size:17px;font-weight:700}
+.h-tools input{width:auto;font-size:14px;height:42px}
+.h-tools .seg{height:42px}
+.h-list{padding:0;overflow:hidden}
+.h-head,.h-row{display:grid;grid-template-columns:1.2fr .55fr repeat(6,minmax(0,1fr)) 1.3fr .95fr;gap:8px;align-items:center;padding:14px 22px}
+.h-head{font-size:12px;color:var(--ns-faint);font-weight:700;letter-spacing:.02em;border-bottom:1px solid var(--ns-line)}
+.h-head span:last-child{text-align:right}
+.h-item{border-top:1px solid var(--ns-line)}
+.h-head+.h-item{border-top:0}
+.h-row{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;font-size:14px;min-height:60px;color:var(--ns-ink)}
+.h-row:hover{background:rgba(255,255,255,.035)}
+.h-row[aria-expanded=true]{background:var(--ns-violet-soft)}
+.h-row small{display:none}
+.h-row b.num{font-size:15px;font-weight:700}
+.h-date b{font-weight:700}
+.h-by{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ns-ink-2)}
+.h-ftds{text-align:right;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.h-detail{padding:22px;background:rgba(6,4,16,.35);border-top:1px solid var(--ns-line)}
+.d-summary{margin:0 0 16px;font-size:14px;color:var(--ns-ink-2)}
+.d-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.d-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--ns-line);border-radius:var(--ns-r);overflow:hidden;background:rgba(255,255,255,.03)}
+.d-table th,.d-table td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--ns-line);font-size:14px}
+.d-table th:first-child{text-align:left;font-weight:700}
+.d-table thead th{font-size:12px;color:var(--ns-faint);font-weight:700}
+.d-table td.num{font-weight:700}
+.d-table tbody tr:last-child th,.d-table tbody tr:last-child td{border-bottom:0}
+.d-ftds{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:0}
+.d-ftds div{padding:10px 12px;border-radius:var(--ns-r-sm);border:1px solid var(--ns-line);background:rgba(255,255,255,.03)}
+.d-ftds dt{font-size:12px;color:var(--ns-muted);font-weight:600}
+.d-ftds dd{margin:3px 0 0;font-size:18px;font-weight:700}
+.d-notes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.d-notes h4{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ns-ink-2)}
+.d-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:n}
+.d-list li{display:grid;grid-template-columns:22px 160px minmax(0,1fr);gap:10px;align-items:baseline;padding:10px 14px;font-size:14px;border-radius:var(--ns-r-sm);border:1px solid var(--ns-line);background:rgba(255,255,255,.03)}
+.d-list li::before{counter-increment:n;content:counter(n);font-weight:800;color:var(--ns-violet-hi);font-variant-numeric:tabular-nums}
+.d-list b{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.d-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;color:var(--ns-muted);font-size:13px}
+
+/* responsive */
+@media (max-width:1200px){
+  .app{display:block}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 20px;border-right:0;border-bottom:1px solid var(--ns-line)}
+  .side .brand{padding:0;margin-right:auto}
+  .me{order:2;margin:0;padding:6px 6px 6px 12px}
+  .avatar{display:none}
+  .nav{order:3;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:var(--ns-r-sm);background:var(--ns-sunk);border:1px solid var(--ns-line);min-width:300px}
+  .tab{justify-content:center;padding:8px 12px}
+  .pagehead-inner,.content{padding-left:20px;padding-right:20px}
+  .band-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px}
+  .band-inputs{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));order:2}
+  .band-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:1000px){
+  .row,.row.even{grid-template-columns:1fr}
+  .d-grid,.d-notes{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .nav{flex-basis:100%;min-width:0}
+  .pagehead{position:static;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border:0}
+  .pagehead-inner{padding:20px 16px 0}
+  .pagehead h1{font-size:28px}
+  .content{padding:16px 16px 104px}
+  .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(14,10,30,.82);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--ns-line)}
+  .actionbar .btn{flex:1}
+  .draft{display:none}
+  .toast{left:16px;right:16px;bottom:88px}
+  .h-head{display:none}
+  .h-row{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:12px;padding:16px}
+  .h-row small{display:block;font-size:11px;color:var(--ns-faint);font-weight:600}
+  .h-date{grid-column:span 2;order:-3}
+  .h-shift{order:-2}
+  .h-ftds{order:-1}
+  .h-by{grid-column:span 2}
+}
+@media (max-width:600px){
+  .card{padding:18px;border-radius:20px}
+  .card-head{align-items:stretch}
+  .setup-ctl{width:100%}
+  .setup-ctl label{flex:1}
+  .setup-ctl input{width:100%}
+  .matrix{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .kpis{grid-template-columns:1fr}
+  .kpi{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;align-items:center}
+  .kpi-var{margin:8px 0 0;font-size:38px}
+  .kpi-pa{grid-column:2;grid-row:1/3}
+  .band{padding:20px}
+  .band-grid{grid-template-columns:1fr}
+  .band-inputs{grid-template-columns:1fr}
+  .band-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .h-summary{gap:10px}
+  .h-stat{padding:14px}
+  .h-stat b{font-size:26px}
+  .d-list li{grid-template-columns:22px minmax(0,1fr)}
+  .d-list li span{grid-column:2}
+}
+</style>
+</head>
+<body>
+
+<!-- Sign in -->
+<section id="loginView" class="login">
+  <div class="login-wrap">
+    <div class="orb" aria-hidden="true"></div>
+    <div class="brand"><span class="mark" aria-hidden="true"></span>Shift Report</div>
+    <h1>Ready for your shift?</h1>
+    <p class="lead">Sign in with the email and password your manager set up for you.</p>
+    <div class="card">
+      <p class="setup" id="setupMsg" hidden>Firebase isn't connected yet. Paste your Firebase config into this file to turn on sign in. You can still preview the layout below.</p>
+      <form id="loginForm" novalidate>
+        <label class="f">Email<input type="email" id="email" autocomplete="username"></label>
+        <label class="f">Password<input type="password" id="password" autocomplete="current-password"></label>
+        <button class="btn primary wide" id="loginBtn" type="submit">Sign in</button>
+        <button class="link" id="forgot" type="button">Forgot password</button>
+        <p class="form-msg" id="loginMsg" role="status"></p>
+      </form>
+      <button class="btn secondary wide" id="previewBtn" type="button" hidden>Preview the layout</button>
+    </div>
+  </div>
+</section>
+
+<!-- App -->
+<div id="appView" class="app" hidden>
+  <aside class="side">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>Shift Report</div>
+    <nav class="nav" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" type="button" data-tab="shift" aria-selected="true">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg>This shift</button>
+      <button class="tab" role="tab" type="button" data-tab="history" aria-selected="false">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>History</button>
+    </nav>
+    <div class="me">
+      <span class="avatar" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5"/></svg></span>
+      <div class="me-text"><b id="whoName"></b><span class="chip violet role" id="whoRole" hidden>Admin</span></div>
+      <button class="icon-btn" id="signOut" type="button" aria-label="Sign out" title="Sign out">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10"/></svg></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="preview-bar" id="previewBanner" hidden>Preview mode. Reports saved here disappear when you close the page.</div>
+    <header class="pagehead">
+      <div class="pagehead-inner">
+        <div><h1 id="pageTitle">PM shift</h1><p id="pageSub"></p></div>
+        <div class="actionbar" id="actionbar">
+          <span class="draft">Kept on this device until you save</span>
+          <button class="btn secondary" id="reset" type="button">Reset for next shift</button>
+          <button class="btn primary" id="save" type="button">Save shift report</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- This shift -->
+    <main id="shiftView" class="content">
+      <div class="row">
+        <section class="card setup-card">
+          <div class="card-head">
+            <h2>Shift setup</h2>
+            <div class="setup-ctl">
+              <label><span class="sr">Date</span><input type="date" id="date"></label>
+              <div class="seg" role="radiogroup" aria-label="Shift">
+                <button type="button" role="radio" data-shift="AM">AM</button>
+                <button type="button" role="radio" data-shift="PM">PM</button>
+              </div>
+            </div>
+          </div>
+          <div class="matrix">
+            <span></span><span class="mx-h">Planned</span><span class="mx-h">Actual</span>
+            <span class="mx-r">Volume</span>
+            <input type="number" id="pv" min="0" inputmode="numeric" aria-label="Planned volume">
+            <input type="number" id="av" min="0" inputmode="numeric" aria-label="Actual volume">
+            <span class="mx-r">Drivers</span>
+            <input type="number" id="pd" min="0" inputmode="numeric" aria-label="Planned drivers">
+            <input type="number" id="ad" min="0" inputmode="numeric" aria-label="Actual drivers">
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Shift results</h2></div>
+          <div class="kpis">
+            <div class="kpi" id="k_vol">
+              <div class="kpi-name">Volume vs plan</div>
+              <div class="kpi-var num" id="volVar">–</div>
+              <div class="kpi-pa"><span>Planned<b id="volP">–</b></span><span>Actual<b id="volA">–</b></span></div>
+              <div class="kpi-hint" id="bufHint"></div>
+            </div>
+            <div class="kpi" id="k_ppr">
+              <div class="kpi-name">PPR vs plan</div>
+              <div class="kpi-var num" id="pprVar">–</div>
+              <div class="kpi-pa"><span>Planned<b id="pprP">–</b></span><span>Actual<b id="pprA">–</b></span></div>
+            </div>
+            <div class="kpi" id="k_drv">
+              <div class="kpi-name">Drivers vs plan</div>
+              <div class="kpi-var num" id="drvVar">–</div>
+              <div class="kpi-pa"><span>Planned<b id="drvP">–</b></span><span>Actual<b id="drvA">–</b></span></div>
+            </div>
+          </div>
+          <p class="summary" id="summaryLine"></p>
+        </section>
+      </div>
+
+      <section class="card hero band" id="ftdsBand" data-state="idle">
+        <div class="band-head"><h2><span class="glow-dot" aria-hidden="true"></span>FTDS live</h2><span class="chip violet">Target 98%</span></div>
+        <div class="band-grid">
+          <div class="band-inputs">
+            <label class="f">Volume<input type="number" id="ftdsVol" min="0" inputmode="numeric"></label>
+            <div class="f"><label for="rej">Rejected parcels <span class="sub">Recorded only, not counted in FTDS</span></label>
+              <div class="stepper">
+                <button type="button" data-step="rej:-1" aria-label="One less rejected">−</button>
+                <input type="number" id="rej" min="0" inputmode="numeric" placeholder="0">
+                <button type="button" data-step="rej:1" aria-label="One more rejected">+</button>
+              </div>
+            </div>
+            <div class="f"><label for="red">Redeliveries <span class="sub">Each one counts against FTDS</span></label>
+              <div class="stepper">
+                <button type="button" data-step="red:-1" aria-label="One less redelivery">−</button>
+                <input type="number" id="red" min="0" inputmode="numeric" placeholder="0">
+                <button type="button" data-step="red:1" aria-label="One more redelivery">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="gauge">
+            <svg viewBox="0 0 200 116" aria-hidden="true">
+              <path class="g-track" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/>
+              <path class="g-val" id="gaugeVal" d="M14 100 A86 86 0 0 1 186 100" pathLength="100" style="stroke-dasharray:0 100"/>
+              <line class="g-tick" x1="122.6" y1="30.5" x2="131.5" y2="3.2"/>
+              <text class="g-txt" x="14" y="116" text-anchor="middle">95%</text>
+              <text class="g-txt" x="186" y="116" text-anchor="middle">100%</text>
+              <text class="g-txt" x="140" y="0" text-anchor="start">98%</text>
+            </svg>
+            <div class="g-center"><div class="ftds-pct num" id="ftdsPct">–</div><div class="g-label">First time delivery success</div></div>
+          </div>
+
+          <div class="band-main">
+            <p class="status" id="ftdsStatus">Enter the volume to start</p>
+            <div class="slots-head"><span>Redelivery allowance at 98%</span><b id="slotsText"></b></div>
+            <div class="slots" id="slots"></div>
+          </div>
+        </div>
+        <div class="band-stats">
+          <div><span>First time deliveries</span><b id="sFirst">–</b></div>
+          <div><span>Max redeliveries at 98%</span><b id="sMax">–</b></div>
+          <div><span>Further allowed</span><b id="sFurther">–</b></div>
+          <div><span>Bridge to 100%</span><b id="sBridge">–</b></div>
+          <div><span>Margin vs 98%</span><b id="sMargin">–</b></div>
+          <div><span>Parcels delivered</span><b id="sDelivered">–</b><small>Doesn't affect FTDS</small></div>
+        </div>
+      </section>
+
+      <div class="row even">
+        <section class="card notes-panel red" id="redPanel"><div class="np-head"><h2>Redelivery notes</h2><span class="count" id="redCount">None</span></div><div class="bar"><i id="redBar"></i></div><div id="redNotes"></div></section>
+        <section class="card notes-panel rej" id="rejPanel"><div class="np-head"><h2>Rejection notes</h2><span class="count" id="rejCount">None</span></div><div class="bar"><i id="rejBar"></i></div><div id="rejNotes"></div></section>
+      </div>
+    </main>
+
+    <!-- History -->
+    <main id="historyView" class="content" hidden>
+      <div class="h-summary">
+        <div class="card h-stat"><span>Shifts</span><b class="num" id="hShifts">0</b></div>
+        <div class="card h-stat"><span>Overall FTDS</span><b class="num" id="hFtds">–</b></div>
+        <div class="card h-stat"><span>Below 98%</span><b class="num" id="hBelow">0</b></div>
+      </div>
+      <div class="h-tools">
+        <h2 class="h-title" id="hTitle">Reports</h2>
+        <div class="seg" role="radiogroup" aria-label="Filter by shift">
+          <button type="button" role="radio" data-hf="all" aria-checked="true">All</button>
+          <button type="button" role="radio" data-hf="AM" aria-checked="false">AM</button>
+          <button type="button" role="radio" data-hf="PM" aria-checked="false">PM</button>
+        </div>
+        <input type="month" id="hMonth" aria-label="Filter by month">
+        <button class="btn secondary" id="hRefresh" type="button">Refresh</button>
+      </div>
+      <div class="card h-list" id="histList"></div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+/* ============================================================
+   1. PASTE YOUR FIREBASE CONFIG HERE
+   Firebase console > gear icon > Project settings > Your apps
+   Replace this whole block with the one Firebase gives you.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_PROJECT_ID.appspot.com",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+
+/* 2. Should staff see every report, or only their own?
+   false = staff see their own, admins see all.
+   true  = everyone sees all (also change the read rule, see setup guide). */
+const STAFF_SEE_ALL = false;
+
+/* 3. Volume buffer. A difference between planned and actual volume
+   up to this many parcels, over or under, shows green. More shows red. */
+const VOLUME_BUFFER = 100;
+
+/* 4. Reasons in the dropdowns. Edit these to match yours.
+   "Other" lets staff type their own reason. Remove it if you don't want that. */
+const REDELIVERY_REASONS = ["Customer requested afternoon", "Customer unavailable", "Wrong address", "Driver failed to deliver on time", "Other"];
+const REJECTION_REASONS = ["Damaged parcel", "Customer doesn't want parcel", "No address or phone number", "Other"];
+const DAMAGED = "Damaged parcel";               // this reason asks who damaged it
+const DAMAGE_SOURCES = ["MK truck", "Driver", "Depot"];
+
+const FB_VERSION = "10.12.2";
+const configured = !String(firebaseConfig.apiKey).startsWith("PASTE");
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const FIELDS = ["date","pv","av","pd","ad","ftdsVol","rej","red"];
+const MAX_NOTES = 60;
+const has = x => Number.isFinite(x);
+const val = id => { const v = $(id).value; if (v === "") return NaN; const x = Number(v); return has(x) && x >= 0 ? x : NaN; };
+const fmtInt = x => has(x) ? Math.round(x).toLocaleString("en-GB") : "–";
+const fmt1 = x => has(x) ? x.toFixed(1) : "–";
+const nz = x => has(x) ? x : null;
+const r2 = x => has(x) ? Math.round(x * 100) / 100 : null;
+function signed(x, d = 0){
+  if (!has(x)) return "–";
+  const r = Number(x.toFixed(d));
+  if (r === 0) return (0).toFixed(d);
+  return (r > 0 ? "+" : "−") + Math.abs(r).toFixed(d);
+}
+const toneOf = x => !has(x) ? "" : x > 0 ? "good" : x < 0 ? "bad" : "flat";
+const volTone = x => !has(x) ? "" : Math.abs(x) <= VOLUME_BUFFER ? "good" : "bad";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function prettyDate(iso, opts){ if (!iso) return ""; const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", opts); }
+const toDate = ts => !ts ? null : ts.toDate ? ts.toDate() : new Date(ts);
+const JDW_RE = /^JDW\d{12}$/;
+const jdwState = v => !v.trim() ? "empty" : JDW_RE.test(v.trim()) ? "ok" : "bad";
+const blankNote = () => ({ jdw: "", reason: "", damagedBy: [], other: "" });
+const reasonDone = x => !!x.reason && (x.reason !== DAMAGED || (x.damagedBy || []).length > 0) && (x.reason !== "Other" || !!(x.other || "").trim());
+const isDone = x => jdwState(x.jdw) === "ok" && reasonDone(x);
+function listJoin(a){ return a.length > 1 ? a.slice(0, -1).join(", ") + " and " + a[a.length - 1] : a.join(""); }
+function reasonText(x){
+  if (!x.reason) return "";
+  if (x.reason === DAMAGED && (x.damagedBy || []).length) return `${DAMAGED} (${listJoin(x.damagedBy)})`;
+  if (x.reason === "Other") return (x.other || "").trim() ? "Other: " + x.other.trim() : "Other";
+  return x.reason;
+}
+
+let toastTimer;
+function toast(msg, kind = ""){
+  const t = $("toast"); t.textContent = msg; t.className = "toast show " + kind;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = "toast", 3200);
+}
+
+/* ---------- state ---------- */
+let fb = null, user = null, profile = null, preview = false;
+let shift = "PM", tab = "shift", hFilter = "all";
+let notes = { red: [], rej: [] };
+const shown = { red: -1, rej: -1 };
+let reports = [];
+let memoryStore = [];
+
+/* ---------- calculations ---------- */
+function compute(){
+  const pv = val("pv"), av = val("av"), pd = val("pd"), ad = val("ad"), fv = val("ftdsVol");
+  const rej = has(val("rej")) ? val("rej") : 0;
+  const red = has(val("red")) ? val("red") : 0;
+  const planPpr = has(pv) && pd > 0 ? pv / pd : NaN;
+  const actualPpr = has(av) && ad > 0 ? av / ad : NaN;
+  const volVar = has(pv) && has(av) ? av - pv : NaN;
+  const pprVar = has(planPpr) && has(actualPpr) ? actualPpr - planPpr : NaN;
+  const drvVar = has(pd) && has(ad) ? ad - pd : NaN;
+  // Rejected parcels are recorded only. They don't change FTDS or the allowance.
+  const eligible = has(fv) ? fv : NaN;
+  const firstTime = has(eligible) ? Math.max(0, eligible - red) : NaN;
+  const ftds = eligible > 0 ? firstTime / eligible * 100 : NaN;
+  const max98 = eligible > 0 ? Math.floor(eligible * 0.02 + 1e-9) : NaN;
+  const further = has(max98) ? Math.max(0, max98 - red) : NaN;
+  // Parcels delivered takes off redeliveries and rejections. Shown only, not used in FTDS.
+  const delivered = has(fv) ? Math.max(0, fv - red - rej) : NaN;
+  return { pv, av, pd, ad, fv, rej, red, planPpr, actualPpr, volVar, pprVar, drvVar,
+           eligible, firstTime, ftds, max98, further, delivered,
+           bridge: has(ftds) ? 100 - ftds : NaN, margin: has(ftds) ? ftds - 98 : NaN };
+}
+
+function summaryText(c){
+  const part = (name, v, d) => {
+    if (!has(v)) return null;
+    const r = Number(v.toFixed(d));
+    return r === 0 ? `${name} on plan` : `${name} ${Math.abs(r).toFixed(d)} ${r > 0 ? "above" : "below"} plan`;
+  };
+  let vol = part("Volume", c.volVar, 0);
+  if (vol && Math.round(c.volVar) !== 0) vol += Math.abs(c.volVar) <= VOLUME_BUFFER ? `, within the ${VOLUME_BUFFER} buffer` : `, outside the ${VOLUME_BUFFER} buffer`;
+  const parts = [vol, part("PPR", c.pprVar, 1), part("Drivers", c.drvVar, 0)].filter(Boolean);
+  return parts.length ? parts.join(". ") + "." : "Enter planned and actual figures to see how the shift is tracking.";
+}
+
+/* ---------- render this shift ---------- */
+function setKpi(key, v, p, a, d, tone = toneOf(v)){
+  $(key + "Var").textContent = signed(v, d);
+  $(key + "Var").className = "kpi-var num " + tone;
+  $(key + "P").textContent = p; $(key + "A").textContent = a;
+  $("k_" + key).dataset.tone = tone;
+}
+
+function renderSlots(max, used){
+  const box = $("slots");
+  if (!has(max)){ box.innerHTML = ""; $("slotsText").textContent = ""; return; }
+  if (max === 0 && used === 0){
+    box.innerHTML = `<span class="slot-note">Under 50 parcels, so any redelivery drops you below 98%</span>`;
+    $("slotsText").textContent = "0 allowed"; return;
+  }
+  const total = Math.max(max, used), cap = 120;
+  let html = "";
+  for (let i = 0; i < Math.min(total, cap); i++){
+    html += `<i class="slot ${i < used ? (i < max ? "used" : "over") : ""}"></i>`;
+  }
+  if (total > cap) html += `<span class="slot-more">+${total - cap}</span>`;
+  box.innerHTML = html;
+  $("slotsText").textContent = `${Math.min(used, max)} of ${max} used` + (used > max ? `, ${used - max} over` : "");
+}
+
+function render(){
+  const c = compute();
+  setKpi("vol", c.volVar, fmtInt(c.pv), fmtInt(c.av), 0, volTone(c.volVar));
+  setKpi("ppr", c.pprVar, fmt1(c.planPpr), fmt1(c.actualPpr), 1);
+  setKpi("drv", c.drvVar, fmtInt(c.pd), fmtInt(c.ad), 0);
+  $("summaryLine").textContent = summaryText(c);
+
+  const band = $("ftdsBand");
+  if (!has(c.ftds)){
+    band.dataset.state = "idle";
+    $("ftdsPct").textContent = "–";
+    $("ftdsStatus").textContent = has(c.fv) ? "Volume is zero" : "Enter the volume to start";
+  } else {
+    const state = c.ftds < 98 ? "bad" : c.further <= 1 ? "warn" : "good";
+    band.dataset.state = state;
+    $("ftdsPct").textContent = c.ftds.toFixed(2) + "%";
+    $("ftdsStatus").textContent =
+      state === "bad"  ? `Below target by ${(98 - c.ftds).toFixed(2)}%` :
+      state === "warn" ? (c.further === 0 ? "On target. No more redeliveries allowed" : "On target. Only 1 more redelivery allowed") :
+                         `On target with ${c.further} redeliveries to spare`;
+  }
+  renderSlots(c.max98, c.red);
+  // gauge arc runs from 95% to 100%. Skipped if the page has no gauge.
+  const g = document.getElementById("gaugeVal");
+  if (g) g.style.strokeDasharray = `${has(c.ftds) ? Math.min(1, Math.max(0, (c.ftds - 95) / 5)) * 100 : 0} 100`;
+  $("sFirst").textContent = fmtInt(c.firstTime);
+  $("sDelivered").textContent = fmtInt(c.delivered);
+  $("sMax").textContent = fmtInt(c.max98);
+  $("sFurther").textContent = fmtInt(c.further);
+  $("sBridge").textContent = has(c.bridge) ? c.bridge.toFixed(2) + "%" : "–";
+  $("sMargin").textContent = has(c.margin) ? signed(c.margin, 2) + "%" : "–";
+
+  syncNotes("red", c.red);
+  syncNotes("rej", c.rej);
+  updateNoteCounts();
+  updateTitle();
+  saveDraft();
+}
+
+/* ---------- notes ---------- */
+const jdwPrefixOk = v => { v = v.trim(); return "JDW".startsWith(v.slice(0, 3)) && /^\d{0,12}$/.test(v.slice(3)); };
+function normNote(t, x){
+  x = { ...blankNote(), ...(x || {}) };
+  if (!Array.isArray(x.damagedBy)) x.damagedBy = [];
+  const list = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
+  if (x.reason && !list.includes(x.reason)){        // older drafts had typed reasons
+    if (list.includes("Other")){ x.other = x.other || x.reason; x.reason = "Other"; } else x.reason = "";
+  }
+  return x;
+}
+function noteState(el, item, typing = false){
+  const st = jdwState(item.jdw);
+  // while typing, only go red once it can't become a valid JDW
+  const bad = st === "bad" && (!typing || !jdwPrefixOk(item.jdw));
+  el.classList.toggle("done", isDone(item));
+  el.classList.toggle("invalid", bad);
+  el.querySelector("[data-k=jdw]").classList.toggle("invalid", bad);
+  el.querySelector("select").classList.toggle("unset", !item.reason);
+  const dmg = el.querySelector(".damage"), oth = el.querySelector(".other");
+  if (dmg) dmg.hidden = item.reason !== DAMAGED;
+  if (oth) oth.hidden = item.reason !== "Other";
+  el.classList.toggle("need-damage", item.reason === DAMAGED && !item.damagedBy.length);
+}
+function noteHTML(t, x, i){
+  const reasons = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
+  const opts = reasons.map(r => `<option value="${esc(r)}"${r === x.reason ? " selected" : ""}>${esc(r)}</option>`).join("");
+  const damage = reasons.includes(DAMAGED) ? `
+    <div class="damage" hidden>
+      <span class="damage-label">Damaged by</span>
+      <div class="checks">${DAMAGE_SOURCES.map(d => `<label class="check"><input type="checkbox" data-dmg="${esc(d)}"${x.damagedBy.includes(d) ? " checked" : ""}><span>${esc(d)}</span></label>`).join("")}</div>
+    </div>` : "";
+  const other = reasons.includes("Other") ? `
+    <label class="f other" hidden><span>Other reason</span><input data-k="other" value="${esc(x.other)}" autocomplete="off" placeholder="Type the reason"></label>` : "";
+  return `<div class="note" data-i="${i}">
+    <span class="note-n num">${i + 1}</span>
+    <label class="f"><span>JDW</span><input class="jdw" data-k="jdw" value="${esc(x.jdw)}" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="JDW and 12 numbers"><em class="hint">Must be JDW and 12 numbers</em></label>
+    <label class="f"><span>Reason</span><select data-k="reason"><option value="">Choose a reason</option>${opts}</select></label>
+    ${damage}${other}
+  </div>`;
+}
+function syncNotes(t, raw){
+  raw = Math.floor(raw) || 0;
+  if (raw === shown[t]) return;
+  shown[t] = raw;
+  const count = Math.min(raw, MAX_NOTES);
+  while (notes[t].length < count) notes[t].push(blankNote());
+  notes[t] = notes[t].map(x => normNote(t, x));
+  const box = $(t + "Notes");
+  if (!count){
+    box.innerHTML = t === "red"
+      ? `<p class="empty-notes">No redeliveries. Press + on Redeliveries in FTDS live and a note appears here for each one.</p>`
+      : `<p class="empty-notes">No rejections. Press + on Rejected parcels in FTDS live and a note appears here for each one.</p>`;
+    return;
+  }
+  box.innerHTML = notes[t].slice(0, count).map((x, i) => noteHTML(t, x, i)).join("")
+    + (raw > MAX_NOTES ? `<p class="warnline">Showing the first ${MAX_NOTES}. Check the count is right.</p>` : "");
+  box.querySelectorAll(".note").forEach(el => noteState(el, notes[t][+el.dataset.i]));
+}
+function updateNoteCounts(){
+  ["red","rej"].forEach(t => {
+    const n = Math.max(0, Math.min(shown[t], MAX_NOTES));
+    const done = notes[t].slice(0, n).filter(isDone).length;
+    const el = $(t + "Count");
+    el.textContent = n ? `${done} of ${n} done` : "None";
+    el.classList.toggle("done", n > 0 && done === n);
+    $(t + "Bar").style.width = n ? (done / n * 100) + "%" : "0%";
+    $(t + "Panel").classList.toggle("complete", n > 0 && done === n);
+  });
+}
+["red","rej"].forEach(t => {
+  const box = $(t + "Notes");
+  const itemOf = el => { const note = el.closest(".note"); return [note, notes[t][+note.dataset.i]]; };
+  const update = (el, typing) => {
+    const [note, item] = itemOf(el);
+    if (el.dataset.dmg){
+      const set = new Set(item.damagedBy);
+      el.checked ? set.add(el.dataset.dmg) : set.delete(el.dataset.dmg);
+      item.damagedBy = DAMAGE_SOURCES.filter(d => set.has(d));
+    } else {
+      if (el.dataset.k === "jdw"){
+        const pos = el.selectionStart, v = el.value.toUpperCase().replace(/\s+/g, "");
+        if (v !== el.value){ el.value = v; try { el.setSelectionRange(pos, pos); } catch (_) {} }
+      }
+      item[el.dataset.k] = el.value;
+    }
+    noteState(note, item, typing); updateNoteCounts(); saveDraft();
+    if (el.tagName === "SELECT" && item.reason === "Other") note.querySelector("[data-k=other]")?.focus();
+  };
+  box.addEventListener("input", e => {
+    const el = e.target;
+    if (el.tagName === "INPUT" && el.type !== "checkbox" && el.dataset.k) update(el, true);
+  });
+  box.addEventListener("change", e => {
+    const el = e.target;
+    if (el.tagName === "SELECT" || el.type === "checkbox") update(el, false);
+  });
+  box.addEventListener("focusout", e => {
+    if (e.target.dataset.k !== "jdw") return;
+    const [note, item] = itemOf(e.target); noteState(note, item);
+  });
+});
+
+/* ---------- shift, title, tabs ---------- */
+function setShift(s){
+  shift = s;
+  document.querySelectorAll("[data-shift]").forEach(b => b.setAttribute("aria-checked", b.dataset.shift === s));
+}
+function updateTitle(){
+  if (tab === "shift"){
+    $("pageTitle").textContent = shift + " shift";
+    $("pageSub").textContent = prettyDate($("date").value, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) || "Pick a date";
+  } else {
+    $("pageTitle").textContent = "Shift history";
+    $("pageSub").textContent = (profile?.role === "admin" || STAFF_SEE_ALL) ? "Every report saved at the station" : "Reports you have saved";
+  }
+}
+function showTab(t){
+  tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  $("shiftView").hidden = t !== "shift";
+  $("actionbar").hidden = t !== "shift";
+  $("historyView").hidden = t !== "history";
+  updateTitle();
+  if (t === "history") renderHistory();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- draft kept on this device ---------- */
+const draftKey = () => "shiftDraft:" + (user ? user.uid : "none");
+function saveDraft(){
+  if (!user) return;
+  try {
+    const d = { shift, notes };
+    FIELDS.forEach(f => d[f] = $(f).value);
+    localStorage.setItem(draftKey(), JSON.stringify(d));
+  } catch (e) {}
+}
+function clearForm(){
+  FIELDS.forEach(f => $(f).value = "");
+  $("date").value = today();
+  notes = { red: [], rej: [] }; shown.red = -1; shown.rej = -1;
+  setShift(new Date().getHours() < 12 ? "AM" : "PM");
+}
+function loadDraft(){
+  clearForm();
+  try {
+    const d = JSON.parse(localStorage.getItem(draftKey()) || "null");
+    if (!d) return;
+    FIELDS.forEach(f => { if (typeof d[f] === "string") $(f).value = d[f]; });
+    if (!$("date").value) $("date").value = today();
+    if (d.shift) setShift(d.shift);
+    if (d.notes){ notes.red = d.notes.red || []; notes.rej = d.notes.rej || []; }
+  } catch (e) {}
+}
+
+/* ---------- storage: Firestore, or memory in preview ---------- */
+const store = {
+  async list(){
+    if (preview) return memoryStore.slice();
+    const { collection, query, where, orderBy, limit, getDocs } = fb.fs;
+    const col = collection(fb.db, "shifts");
+    const seeAll = profile.role === "admin" || STAFF_SEE_ALL;
+    const q = seeAll ? query(col, orderBy("createdAt", "desc"), limit(300))
+                     : query(col, where("submittedByUid", "==", user.uid), limit(300));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async add(rec){
+    if (preview){ memoryStore.push({ ...rec, id: "p" + Date.now(), createdAt: new Date() }); return; }
+    await fb.fs.addDoc(fb.fs.collection(fb.db, "shifts"), { ...rec, createdAt: fb.fs.serverTimestamp() });
+  },
+  async remove(id){
+    if (preview){ memoryStore = memoryStore.filter(r => r.id !== id); return; }
+    await fb.fs.deleteDoc(fb.fs.doc(fb.db, "shifts", id));
+  }
+};
+
+/* ---------- save and reset ---------- */
+async function saveShift(){
+  const c = compute(), date = $("date").value;
+  if (!date) return toast("Add the shift date before saving", "bad");
+  if (!has(c.av)) return toast("Add the actual volume before saving", "bad");
+  if (!has(c.fv)) return toast("Add the volume in FTDS live before saving", "bad");
+  const clean = x => ({
+    jdw: x.jdw.trim(), reason: x.reason,
+    damagedBy: x.reason === DAMAGED ? x.damagedBy.slice() : [],
+    other: x.reason === "Other" ? (x.other || "").trim() : "",
+    text: reasonText(x)
+  });
+  const rn = notes.red.slice(0, Math.min(shown.red, MAX_NOTES)).map(clean);
+  const jn = notes.rej.slice(0, Math.min(shown.rej, MAX_NOTES)).map(clean);
+  const missing = [...rn, ...jn].filter(x => !x.jdw || !reasonDone(x)).length;
+  if (missing && !confirm(`${missing} note${missing > 1 ? "s aren't" : " isn't"} finished. Each one needs a JDW and a reason${jn.some(x => x.reason === DAMAGED) ? ", and damaged parcels need who damaged them" : ""}. Save anyway?`)) return;
+  const badJdw = [...rn, ...jn].filter(x => jdwState(x.jdw) === "bad").length;
+  if (badJdw && !confirm(`${badJdw} JDW number${badJdw > 1 ? "s aren't" : " isn't"} in the right format (JDW and 12 numbers). Save anyway?`)) return;
+  const dup = reports.find(r => r.date === date && r.shift === shift);
+  if (dup && !confirm(`A ${shift} report for ${prettyDate(date, { day: "numeric", month: "short" })} was already saved by ${dup.submittedBy}. Save another one?`)) return;
+
+  const rec = {
+    date, shift,
+    planVolume: nz(c.pv), actualVolume: nz(c.av), planDrivers: nz(c.pd), actualDrivers: nz(c.ad),
+    volumeVar: nz(c.volVar), planPpr: r2(c.planPpr), actualPpr: r2(c.actualPpr), pprVar: r2(c.pprVar), driverVar: nz(c.drvVar),
+    ftdsVolume: nz(c.fv), rejected: c.rej, redeliveries: c.red, eligible: nz(c.eligible), firstTime: nz(c.firstTime),
+    ftds: r2(c.ftds), max98: nz(c.max98), parcelsDelivered: nz(c.delivered),
+    summary: summaryText(c),
+    redeliveryNotes: rn, rejectionNotes: jn,
+    submittedBy: profile.name, submittedByEmail: user.email || "", submittedByUid: user.uid
+  };
+  const btn = $("save"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    await store.add(rec);
+    toast("Shift report saved");
+    await loadHistory();
+  } catch (e) {
+    toast("Report not saved. " + (e.code === "permission-denied" ? "Your account isn't allowed to save. Check the database rules." : "Check your connection and try again."), "bad");
+  } finally {
+    btn.disabled = false; btn.textContent = "Save shift report";
+  }
+}
+function resetShift(){
+  if (!confirm("Clear this shift and start the next one? Saved reports stay in history.")) return;
+  try { localStorage.removeItem(draftKey()); } catch (e) {}
+  clearForm(); render();
+  toast("Ready for the next shift");
+}
+
+/* ---------- history ---------- */
+async function loadHistory(){
+  $("histList").innerHTML = `<p class="empty pad">Loading reports…</p>`;
+  try {
+    reports = await store.list();
+  } catch (e) {
+    $("histList").innerHTML = `<p class="empty pad">Couldn't load history. ${e.code === "permission-denied" ? "Check the database rules in Firebase." : "Check your connection and press Refresh."}</p>`;
+    return;
+  }
+  reports.sort((a, b) =>
+    (b.date || "").localeCompare(a.date || "") ||
+    (b.shift || "").localeCompare(a.shift || "") ||
+    ((toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
+  renderHistory();
+}
+
+function renderHistory(){
+  const seeAll = profile?.role === "admin" || STAFF_SEE_ALL;
+  $("hTitle").textContent = seeAll ? "All reports" : "Your reports";
+  const month = $("hMonth").value;
+  const rows = reports.filter(r => (hFilter === "all" || r.shift === hFilter) && (!month || (r.date || "").startsWith(month)));
+  const elig = rows.reduce((s, r) => s + (r.eligible || 0), 0);
+  const first = rows.reduce((s, r) => s + (r.firstTime || 0), 0);
+  const overall = elig ? first / elig * 100 : NaN;
+  const below = rows.filter(r => has(r.ftds) && r.ftds < 98).length;
+  $("hShifts").textContent = rows.length;
+  $("hFtds").textContent = has(overall) ? overall.toFixed(2) + "%" : "–";
+  $("hFtds").className = "num " + (has(overall) ? (overall >= 98 ? "good" : "bad") : "");
+  $("hBelow").textContent = below;
+  $("hBelow").className = "num " + (rows.length ? (below ? "bad" : "good") : "");
+
+  if (!rows.length){
+    $("histList").innerHTML = `<p class="empty pad">${reports.length ? "No reports match these filters." : "No reports saved yet. Save a shift and it shows up here."}</p>`;
+    return;
+  }
+  const head = `<div class="h-head"><span>Date</span><span>Shift</span><span>Volume</span><span>Volume var</span><span>PPR var</span><span>Driver var</span><span>Redeliveries</span><span>Rejected</span><span>Saved by</span><span>FTDS</span></div>`;
+  $("histList").innerHTML = head + rows.map(r => {
+    const ft = has(r.ftds) ? (r.ftds >= 98 ? "good" : "bad") : "";
+    return `<article class="h-item">
+      <button class="h-row" type="button" aria-expanded="false" data-id="${esc(r.id)}">
+        <span class="h-date"><small>Date</small><b>${esc(prettyDate(r.date, { weekday: "short", day: "numeric", month: "short" }))}</b></span>
+        <span class="h-shift"><small>Shift</small><span class="chip ${r.shift === "AM" ? "am" : "pm"}">${esc(r.shift)}</span></span>
+        <span><small>Volume</small><b class="num">${fmtInt(r.actualVolume)}</b></span>
+        <span><small>Volume var</small><b class="num ${volTone(r.volumeVar)}">${signed(r.volumeVar, 0)}</b></span>
+        <span><small>PPR var</small><b class="num ${toneOf(r.pprVar)}">${signed(r.pprVar, 1)}</b></span>
+        <span><small>Driver var</small><b class="num ${toneOf(r.driverVar)}">${signed(r.driverVar, 0)}</b></span>
+        <span><small>Redeliveries</small><b class="num">${fmtInt(r.redeliveries)}</b></span>
+        <span><small>Rejected</small><b class="num">${fmtInt(r.rejected)}</b></span>
+        <span class="h-by"><small>Saved by</small>${esc(r.submittedBy)}</span>
+        <span class="h-ftds ${ft}"><small>FTDS</small>${has(r.ftds) ? r.ftds.toFixed(2) + "%" : "–"}</span>
+      </button>
+      <div class="h-detail" hidden></div>
+    </article>`;
+  }).join("");
+}
+
+function notesList(a){
+  return a && a.length
+    ? `<ol class="d-list">${a.map(x => `<li><b class="${x.jdw && !JDW_RE.test(x.jdw) ? "bad" : ""}">${esc(x.jdw) || "No JDW"}</b><span>${esc(x.text || reasonText(x)) || "No reason given"}</span></li>`).join("")}</ol>`
+    : `<p class="empty">None recorded</p>`;
+}
+function detailHTML(r){
+  const lines = [
+    ["Volume", fmtInt(r.planVolume), fmtInt(r.actualVolume), r.volumeVar, 0],
+    ["PPR", fmt1(r.planPpr), fmt1(r.actualPpr), r.pprVar, 1],
+    ["Drivers", fmtInt(r.planDrivers), fmtInt(r.actualDrivers), r.driverVar, 0]
+  ];
+  const ftds = [
+    ["FTDS volume", fmtInt(r.ftdsVolume)], ["Rejected", fmtInt(r.rejected)],
+    ["First time", fmtInt(r.firstTime)], ["Redeliveries", fmtInt(r.redeliveries)], ["Max at 98%", fmtInt(r.max98)],
+    ["Margin vs 98%", has(r.ftds) ? signed(r.ftds - 98, 2) + "%" : "–"],
+    ["Parcels delivered", fmtInt(r.parcelsDelivered)]
+  ];
+  const when = toDate(r.createdAt)?.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return `
+    ${r.summary ? `<p class="d-summary">${esc(r.summary)}</p>` : ""}
+    <div class="d-grid">
+      <table class="d-table"><thead><tr><th></th><th>Planned</th><th>Actual</th><th>Variance</th></tr></thead>
+        <tbody>${lines.map(x => `<tr><th>${x[0]}</th><td class="num">${x[1]}</td><td class="num">${x[2]}</td><td class="num ${x[0] === "Volume" ? volTone(x[3]) : toneOf(x[3])}">${signed(x[3], x[4])}</td></tr>`).join("")}</tbody>
+      </table>
+      <dl class="d-ftds">${ftds.map(([k, v]) => `<div><dt>${k}</dt><dd class="num">${v}</dd></div>`).join("")}</dl>
+    </div>
+    <div class="d-notes">
+      <div><h4>Redelivery notes</h4>${notesList(r.redeliveryNotes)}</div>
+      <div><h4>Rejection notes</h4>${notesList(r.rejectionNotes)}</div>
+    </div>
+    <div class="d-foot">
+      <span>Saved by ${esc(r.submittedBy)}${r.submittedByEmail ? ` (${esc(r.submittedByEmail)})` : ""}${when ? " on " + when : ""}</span>
+      ${profile.role === "admin" ? `<button class="btn danger" type="button" data-del="${esc(r.id)}">Delete report</button>` : ""}
+    </div>`;
+}
+
+$("histList").addEventListener("click", async e => {
+  const del = e.target.closest("[data-del]");
+  if (del){
+    if (!confirm("Delete this report for everyone? This can't be undone.")) return;
+    try { await store.remove(del.dataset.del); toast("Report deleted"); await loadHistory(); }
+    catch (err) { toast("Couldn't delete the report", "bad"); }
+    return;
+  }
+  const row = e.target.closest(".h-row"); if (!row) return;
+  const box = row.nextElementSibling, open = row.getAttribute("aria-expanded") === "true";
+  if (!open && !box.innerHTML){ const r = reports.find(x => x.id === row.dataset.id); if (r) box.innerHTML = detailHTML(r); }
+  row.setAttribute("aria-expanded", !open); box.hidden = open;
+});
+document.querySelectorAll("[data-hf]").forEach(b => b.addEventListener("click", () => {
+  hFilter = b.dataset.hf;
+  document.querySelectorAll("[data-hf]").forEach(x => x.setAttribute("aria-checked", x === b));
+  renderHistory();
+}));
+$("hMonth").addEventListener("input", renderHistory);
+$("hRefresh").addEventListener("click", loadHistory);
+
+/* ---------- wiring ---------- */
+$("bufHint").textContent = `±${VOLUME_BUFFER} is fine`;
+FIELDS.forEach(f => $(f).addEventListener("input", render));
+document.querySelectorAll("[data-shift]").forEach(b => b.addEventListener("click", () => { setShift(b.dataset.shift); render(); }));
+document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => {
+  const [id, d] = b.dataset.step.split(":");
+  const cur = has(val(id)) ? val(id) : 0;
+  $(id).value = Math.max(0, cur + Number(d)); render();
+}));
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+$("save").addEventListener("click", saveShift);
+$("reset").addEventListener("click", resetShift);
+// stop the mouse wheel changing a number you're typing in
+document.addEventListener("wheel", () => { const a = document.activeElement; if (a && a.type === "number") a.blur(); }, { passive: true });
+
+/* ---------- sign in ---------- */
+function loginMsg(text, kind = ""){ const m = $("loginMsg"); m.textContent = text; m.className = "form-msg " + kind; }
+function authError(err){
+  const c = err?.code || "";
+  if (["auth/invalid-credential","auth/wrong-password","auth/user-not-found","auth/invalid-login-credentials"].includes(c)) return "That email and password don't match an account.";
+  if (c === "auth/invalid-email") return "Check the email address.";
+  if (c === "auth/missing-password") return "Enter your password.";
+  if (c === "auth/too-many-requests") return "Too many attempts. Wait a few minutes and try again.";
+  if (c === "auth/network-request-failed") return "No connection. Check your internet and try again.";
+  return "Sign in failed. " + (err?.message || "");
+}
+function enterApp(){
+  $("loginView").hidden = true; $("appView").hidden = false;
+  $("whoName").textContent = profile.name;
+  $("whoRole").hidden = profile.role !== "admin";
+  $("previewBanner").hidden = !preview;
+  reports = [];
+  loadDraft(); showTab("shift"); render(); loadHistory();
+}
+function showLogin(){
+  $("appView").hidden = true; $("loginView").hidden = false;
+  reports = []; loginMsg("");
+}
+async function loadProfile(u){
+  try {
+    const s = await fb.fs.getDoc(fb.fs.doc(fb.db, "users", u.uid));
+    if (s.exists()){ const d = s.data(); return { name: d.name || u.email, role: d.role === "admin" ? "admin" : "staff" }; }
+  } catch (e) {}
+  return { name: (u.email || "Staff").split("@")[0], role: "staff" };
+}
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!fb) return;
+  const btn = $("loginBtn"); btn.disabled = true; loginMsg("Signing in…");
+  try {
+    await fb.a.signInWithEmailAndPassword(fb.auth, $("email").value.trim(), $("password").value);
+    $("password").value = "";
+  } catch (err) { loginMsg(authError(err), "bad"); }
+  finally { btn.disabled = false; }
+});
+$("forgot").addEventListener("click", async () => {
+  if (!fb) return;
+  const email = $("email").value.trim();
+  if (!email) return loginMsg("Type your email above, then press Forgot password.", "bad");
+  try { await fb.a.sendPasswordResetEmail(fb.auth, email); loginMsg("Reset link sent to " + email + ". Check your inbox.", "good"); }
+  catch (err) { loginMsg(authError(err), "bad"); }
+});
+$("signOut").addEventListener("click", async () => {
+  if (preview){ preview = false; user = null; profile = null; showLogin(); return; }
+  await fb.a.signOut(fb.auth);
+});
+$("previewBtn").addEventListener("click", () => {
+  preview = true; user = { uid: "preview", email: "" }; profile = { name: "Preview user", role: "admin" };
+  enterApp();
+});
+
+async function boot(){
+  if (!configured){
+    $("setupMsg").hidden = false; $("previewBtn").hidden = false;
+    $("loginForm").querySelectorAll("input,button").forEach(x => x.disabled = true);
+    return;
+  }
+  try {
+    const base = `https://www.gstatic.com/firebasejs/${FB_VERSION}/`;
+    const [appMod, a, fs] = await Promise.all([
+      import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")
+    ]);
+    const app = appMod.initializeApp(firebaseConfig);
+    fb = { auth: a.getAuth(app), db: fs.getFirestore(app), a, fs };
+    a.onAuthStateChanged(fb.auth, async u => {
+      if (u){ user = u; profile = await loadProfile(u); enterApp(); }
+      else { user = null; profile = null; if (!preview) showLogin(); }
+    });
+  } catch (err) {
+    loginMsg("Couldn't reach Firebase. Check your connection and the config in this file.", "bad");
+  }
+}
+boot();
+</script>
+</body>
+</html>
