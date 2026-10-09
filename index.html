@@ -635,7 +635,6 @@ select.unset{color:var(--ns-faint)}
 .rp-sub+.rp-chips{margin-top:8px}
 .rp-ghost{height:34px;padding:0 14px;border-radius:999px;border:1px dashed var(--ns-line-2);background:transparent;color:var(--ns-muted);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s}
 .rp-ghost:hover{border-style:solid;border-color:var(--ns-violet-line);color:#fff;background:var(--ns-violet-soft)}
-#rpQuick>.link{margin-top:10px}
 .rp-hint{margin:0;font-size:13.5px;color:var(--ns-faint)}
 .rp-roster{margin-top:18px;padding-top:14px;border-top:1px solid var(--ns-line)}
 .rp-roster summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;color:var(--ns-ink-2);list-style:none;margin-bottom:12px;width:max-content}
@@ -645,6 +644,70 @@ select.unset{color:var(--ns-faint)}
 .rp-foot{margin:12px 0 0;font-size:12.5px;color:var(--ns-faint)}
 .rp-head-btns{display:flex;gap:8px}
 .rp-empty{margin:0;padding:18px;border-radius:var(--ns-r-sm);border:1px dashed var(--ns-line-2);color:var(--ns-muted)}
+
+/* agency dots, type ahead and the driver list */
+.ag-dot{display:inline-block;width:7px;height:7px;flex:none;border-radius:50%;background:var(--ns-faint);margin-right:7px;vertical-align:1px}
+.rp-type{position:relative}
+.rp-suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;display:grid;gap:2px;padding:6px;border-radius:var(--ns-r);border:1px solid var(--ns-violet-line);background:rgba(22,16,46,.97);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 20px 40px -12px rgba(0,0,0,.7)}
+.rp-sug{display:flex;align-items:center;gap:0;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--ns-ink);font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.rp-sug span{flex:1}
+.rp-sug small{font-size:11px;font-weight:700;color:var(--ns-faint);letter-spacing:.04em}
+.rp-sug:hover,.rp-sug.active{background:var(--ns-violet-soft)}
+.rp-sug-new{display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--ns-line);margin-top:2px;font-size:13.5px;color:var(--ns-muted)}
+.rp-sug-new span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-suggest .rp-sug-new:first-child{border-top:0;margin-top:0}
+.rp-sug-new b{color:var(--ns-ink)}
+.rp-sug-new button{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--ns-line-2);background:var(--ns-surface);color:var(--ns-ink);font-size:12.5px;font-weight:700;cursor:pointer}
+.rp-sug-new button:hover{background:var(--ns-violet-soft);border-color:var(--ns-violet-line)}
+.rp-sug-note{margin:0;padding:10px 12px;font-size:13.5px;color:var(--ns-muted)}
+.rp-addrow.three{grid-template-columns:minmax(0,1fr) 110px auto}
+.rp-keys{display:inline-flex;gap:10px;margin-left:4px}
+.ag-key{display:inline-flex;align-items:center;font-size:12px;font-weight:600;color:var(--ns-muted)}
+.ag-key .ag-dot{margin-right:5px}
+.rp-search{margin-top:10px;height:40px}
+.rp-rlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;margin-top:10px;max-height:300px;overflow:auto;padding-right:2px}
+.rp-rrow{display:flex;align-items:center;gap:6px;min-height:42px;padding:0 6px 0 10px;border-radius:10px;border:1px solid var(--ns-line);background:rgba(255,255,255,.025)}
+.rp-rname-t{flex:1;min-width:0;font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-rrow select{width:auto;height:30px;padding:0 24px 0 8px;font-size:12px;font-weight:700;border-radius:8px;background-position:right 8px center;color:var(--ns-muted)}
+.rp-rrow select.unset{border-color:rgba(255,193,94,.6);color:var(--ns-warn)}
+.rp-rdel{width:28px;height:28px;flex:none;border:0;border-radius:8px;background:transparent;color:var(--ns-faint);cursor:pointer}
+.rp-rdel:hover{background:var(--ns-bad-soft);color:var(--ns-bad)}
+.rp-end{display:flex;justify-content:flex-end;margin-top:14px}
+.rp-display{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--ns-line-2);background:var(--ns-surface);color:var(--ns-ink-2);font-size:13px;font-weight:700;cursor:pointer}
+.rp-display svg.i{width:15px;height:15px}
+.rp-display:hover{color:#fff;border-color:var(--ns-violet-line);background:var(--ns-violet-soft)}
+
+/* display card for the group screenshot */
+.rp-show{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));overflow:auto;background:rgba(5,3,14,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.rp-show[hidden]{display:none}
+.rp-show-x{position:fixed;z-index:2;top:calc(14px + env(safe-area-inset-top));right:14px;background:rgba(22,16,46,.9)}
+.rp-show-hint{margin:0;font-size:12.5px;color:var(--ns-faint)}
+.rp-poster{position:relative;overflow:hidden;width:min(400px,100%);flex:none;padding:18px 16px 14px;border-radius:28px;border:1px solid rgba(196,181,253,.3);
+  background:radial-gradient(120% 60% at 100% 0%,rgba(139,92,246,.42),transparent 60%),radial-gradient(90% 50% at 0% 100%,rgba(76,40,170,.45),transparent 65%),linear-gradient(170deg,#1A1238,#0D0920 70%);
+  box-shadow:0 40px 90px -30px rgba(109,63,224,.75),inset 0 1px 0 rgba(255,255,255,.08)}
+.rp-p-glow{position:absolute;width:220px;height:220px;right:-70px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(196,181,253,.35),transparent 65%);pointer-events:none}
+.rp-p-head{position:relative;display:flex;align-items:center;justify-content:space-between}
+.rp-p-head .brand{font-size:14px}
+.rp-p-head .mark{width:24px;height:24px;border-radius:8px}
+.rp-p-date{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(160deg,var(--ns-violet-hi),var(--ns-violet-lo));box-shadow:0 0 18px rgba(139,92,246,.6);line-height:1}
+.rp-p-date b{font-size:20px;color:#fff}
+.rp-p-date span{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:2px}
+.rp-p-title{position:relative;margin:12px 0 12px}
+.rp-p-title span{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ns-violet-hi)}
+.rp-p-title h2{margin:2px 0 0;font-size:27px;line-height:1.1;font-weight:800;letter-spacing:-.03em;color:#fff}
+.rp-p-list{position:relative;list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.rp-p-list li{display:flex;align-items:center;gap:12px;padding:6px 12px 6px 7px;border-radius:15px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045)}
+.rp-p-num{width:32px;height:32px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(160deg,var(--ns-violet-hi),var(--ns-violet-lo));box-shadow:0 0 12px rgba(139,92,246,.5)}
+.rp-p-body{min-width:0;flex:1}
+.rp-p-body small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ns-muted)}
+.rp-p-names{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:1px}
+.rp-p-names span{display:inline-flex;align-items:center;font-size:15.5px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.rp-p-names em{font-style:normal;font-size:14px;color:var(--ns-faint)}
+.rp-p-list li.empty{opacity:.45}
+.rp-p-list li.empty .rp-p-num{background:rgba(255,255,255,.08);box-shadow:none;color:var(--ns-muted)}
+.rp-p-foot{position:relative;display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:600;color:var(--ns-muted)}
+.rp-p-key{display:inline-flex;gap:12px}
+.rp-p-key span{display:inline-flex;align-items:center}
 
 /* route rows */
 .rp-list{border:1px solid var(--ns-line);border-radius:var(--ns-r);overflow:hidden}
@@ -695,6 +758,9 @@ select.unset{color:var(--ns-faint)}
   .rp-mini b{font-size:26px}
   .rp-head-btns .btn{padding:0 10px}
   .rp-r-num b{font-size:21px}
+  .rp-rlist{grid-template-columns:1fr}
+  .rp-addrow.three{grid-template-columns:minmax(0,1fr) 96px}
+  .rp-addrow.three .btn{grid-column:1/-1}
 }
 </style>
 </head>
@@ -946,20 +1012,23 @@ select.unset{color:var(--ns-faint)}
 
         <section class="card">
           <div class="card-head"><h2><span class="rp-n">2</span>Working today</h2><span class="count" id="rpWorkCount">0</span></div>
-          <div class="rp-addrow">
-            <input id="rpWorkInput" list="rpRosterList" autocomplete="off" placeholder="Type a driver's name" aria-label="Driver working today">
-            <button class="btn secondary" id="rpWorkAdd" type="button">Add</button>
-          </div>
-          <datalist id="rpRosterList"></datalist>
-          <div class="rp-chips" id="rpWorking"></div>
-          <div id="rpQuick"></div>
-          <details class="rp-roster" id="rpRosterBox">
-            <summary>All drivers <span class="count" id="rpRosterCount">0</span></summary>
+          <div class="rp-type">
             <div class="rp-addrow">
-              <input id="rpRosterInput" autocomplete="off" placeholder="Add drivers, separate names with commas" aria-label="Add drivers">
+              <input id="rpWorkInput" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type a driver's name" aria-label="Driver working today" role="combobox" aria-controls="rpSuggest">
+              <button class="btn secondary" id="rpWorkAdd" type="button">Add</button>
+            </div>
+            <div class="rp-suggest" id="rpSuggest" role="listbox" hidden></div>
+          </div>
+          <div class="rp-chips" id="rpWorking"></div>
+          <details class="rp-roster" id="rpRosterBox">
+            <summary>All drivers <span class="count" id="rpRosterCount">0</span><span class="rp-keys" id="rpRosterKey"></span></summary>
+            <div class="rp-addrow three">
+              <input id="rpRosterInput" autocomplete="off" autocapitalize="words" placeholder="Driver name (or several, with commas)" aria-label="Add drivers">
+              <select id="rpRosterAgency" aria-label="Agency"></select>
               <button class="btn secondary" id="rpRosterAdd" type="button">Add</button>
             </div>
-            <div class="rp-chips" id="rpRoster"></div>
+            <input type="search" id="rpRosterSearch" class="rp-search" placeholder="Search drivers" aria-label="Search drivers" hidden>
+            <div class="rp-rlist" id="rpRoster"></div>
             <p class="rp-foot" id="rpRosterNote"></p>
           </details>
         </section>
@@ -975,11 +1044,17 @@ select.unset{color:var(--ns-faint)}
         </div>
         <div id="rpRouteNote"></div>
         <div class="rp-list" id="rpRoutes"></div>
+        <div class="rp-end"><button class="rp-display" id="rpDisplay" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Display for the group</button></div>
       </section>
     </main>
   </div>
 </div>
 
+<div class="rp-show" id="rpShow" hidden role="dialog" aria-label="Today's routes">
+  <button class="icon-btn rp-show-x" id="rpShowClose" type="button" aria-label="Close">✕</button>
+  <div class="rp-poster" id="rpPoster"></div>
+  <p class="rp-show-hint">Take a screenshot and send it to the group</p>
+</div>
 <div class="zoom" id="zoom" hidden role="dialog" aria-label="Photo"><figure><img id="zoomImg" alt=""><figcaption id="zoomCap"></figcaption></figure><button class="icon-btn" id="zoomClose" type="button" aria-label="Close">✕</button></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2303,14 +2378,21 @@ function rpStats(parsed, cfg){
 // The driver list is for the whole station: kept on this device, and in
 // Firebase once it's connected. Today's plan is kept on this device.
 const ROSTER_KEY = "driverRoster", DAY_KEY = "routeDay";
-let roster = [];
+const AGENCIES = (RPC && RPC.agencies) || [{ code: "UKED", colour: "#FF5A6E" }, { code: "INRW", colour: "#4DA3FF" }];
+let roster = [];                       // [{ name, agency }]
 let day = { parcelText: "", working: [], assign: {}, open: {} };
-let rpParsed = null, rpS = null, rpEditing = false;
+let rpParsed = null, rpS = null, rpEditing = false, sugIndex = 0;
 
 const tidyName = s => String(s || "").replace(/\s+/g, " ").trim();
 const sameName = (a, b) => a.toLowerCase() === b.toLowerCase();
-const sortNames = list => list.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+const byName = (a, b) => a.localeCompare(b, "en", { sensitivity: "base" });
+const sortNames = list => list.sort(byName);
+const sortRoster = () => roster.sort((a, b) => byName(a.name, b.name));
 const inList = (list, n) => list.some(x => sameName(x, n));
+const driverOf = n => roster.find(d => sameName(d.name, n));
+const agencyOf = n => (driverOf(n) || {}).agency || "";
+const colourOf = code => (AGENCIES.find(a => a.code === code) || {}).colour || "";
+const dot = n => { const a = agencyOf(n), c = colourOf(a); return `<i class="ag-dot" style="${c ? `background:${c};box-shadow:0 0 6px ${c}` : ""}" title="${esc(a || "No agency")}"></i>`; };
 const routeOf = n => { for (const k in day.assign) if (inList(day.assign[k], n)) return +k; return 0; };
 const freeToday = () => day.working.filter(n => !routeOf(n));
 function unassign(n){
@@ -2320,6 +2402,8 @@ function unassign(n){
   }
 }
 function assignTo(num, n){ unassign(n); (day.assign[num] ||= []).push(n); }
+// Older saves kept plain names. Turn them into { name, agency }.
+const toDriver = d => typeof d === "string" ? { name: tidyName(d), agency: "" } : { name: tidyName(d.name), agency: d.agency || "" };
 
 function rpCompute(){
   rpParsed = RPC && day.parcelText.trim() ? rpParseParcels(day.parcelText, RPC) : null;
@@ -2332,12 +2416,13 @@ function rpSaveRoster(){
   if (!fb || preview || !user) return;
   clearTimeout(rosterTimer);
   rosterTimer = setTimeout(async () => {
-    try { await fb.fs.setDoc(fb.fs.doc(fb.db, "station", "drivers"), { names: roster, updated: Date.now(), by: profile?.name || "" }); }
+    try { await fb.fs.setDoc(fb.fs.doc(fb.db, "station", "drivers"), { drivers: roster, updated: Date.now(), by: profile?.name || "" }); }
     catch (e) { if (!rosterWarned){ rosterWarned = true; toast("Driver list is only saved on this device. Add the drivers rule in Firebase.", "bad"); } }
   }, 800);
 }
 async function rpLoad(){
-  try { roster = JSON.parse(localStorage.getItem(ROSTER_KEY) || "[]"); } catch (e) { roster = []; }
+  try { roster = JSON.parse(localStorage.getItem(ROSTER_KEY) || "[]").map(toDriver).filter(d => d.name); } catch (e) { roster = []; }
+  sortRoster();
   day = { parcelText: "", working: [], assign: {}, open: {} };
   try { Object.assign(day, JSON.parse(localStorage.getItem(DAY_KEY) || "{}")); } catch (e) {}
   $("rpParcels").value = day.parcelText;
@@ -2345,8 +2430,11 @@ async function rpLoad(){
   if (fb && !preview && user){
     try {
       const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, "station", "drivers"));
-      if (snap.exists()){ roster = sortNames((snap.data().names || []).map(tidyName).filter(Boolean)); localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); }
-      else if (roster.length) rpSaveRoster();
+      if (snap.exists()){
+        const d = snap.data();
+        roster = (d.drivers || d.names || []).map(toDriver).filter(x => x.name); sortRoster();
+        localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
+      } else if (roster.length) rpSaveRoster();
     } catch (e) {}
   }
   if (tab === "routes") renderRoutes();
@@ -2363,12 +2451,11 @@ function rpSplit(x, n){
 }
 function renderRoutes(){
   if (!RPC){ $("rpRoutes").innerHTML = `<p class="rp-empty">routes-config.js wasn't found. Upload it to the same folder as index.html.</p>`; return; }
-  const onRoute = day.working.filter(n => routeOf(n)).length;
   $("rpTotParcels").textContent = rpS ? rpS.totalParcels : "–";
   $("rpTotDrops").textContent = rpS ? rpS.totalDrops : "–";
   $("rpTotWorking").textContent = day.working.length;
-  $("rpTotOn").textContent = onRoute;
-  rpRenderForecast(); rpRenderDrivers(); rpRenderList();
+  $("rpTotOn").textContent = day.working.filter(n => routeOf(n)).length;
+  rpRenderForecast(); rpRenderDrivers(); rpRenderRoster(); rpRenderList();
   updateTitle();
 }
 
@@ -2389,18 +2476,24 @@ function rpRenderForecast(){
 
 function rpRenderDrivers(){
   $("rpWorkCount").textContent = day.working.length;
-  $("rpRosterCount").textContent = roster.length;
-  $("rpRosterList").innerHTML = roster.filter(n => !inList(day.working, n)).map(n => `<option value="${esc(n)}">`).join("");
   $("rpWorking").innerHTML = day.working.length
     ? sortNames(day.working.slice()).map(n => { const r = routeOf(n);
-        return `<span class="rp-name ${r ? "on" : ""}">${esc(n)}${r ? `<small>R${r}</small>` : ""}<button type="button" data-unwork="${esc(n)}" aria-label="${esc(n)} isn't working">✕</button></span>`; }).join("")
-    : `<p class="rp-hint">Nobody added yet. Type a name above or tap one below.</p>`;
-  const rest = roster.filter(n => !inList(day.working, n));
-  $("rpQuick").innerHTML = rest.length
-    ? `<p class="rp-sub">Tap to add</p><div class="rp-chips">${rest.map(n => `<button class="rp-ghost" type="button" data-work="${esc(n)}">+ ${esc(n)}</button>`).join("")}</div>
-       ${rest.length > 1 ? `<button class="link" type="button" id="rpAllWork">Everyone's working</button>` : ""}`
-    : roster.length ? "" : `<p class="rp-hint">Add your drivers under All drivers so they show here to tap.</p>`;
-  $("rpRoster").innerHTML = roster.map(n => `<span class="rp-name plain">${esc(n)}<button type="button" data-unroster="${esc(n)}" aria-label="Remove ${esc(n)}">✕</button></span>`).join("") || `<p class="rp-hint">No drivers saved yet.</p>`;
+        return `<span class="rp-name ${r ? "on" : ""}">${dot(n)}${esc(n)}${r ? `<small>R${r}</small>` : ""}<button type="button" data-unwork="${esc(n)}" aria-label="${esc(n)} isn't working">✕</button></span>`; }).join("")
+    : `<p class="rp-hint">${roster.length ? "Start typing a name above. Drivers from All drivers will come up." : "Add your drivers under All drivers first, then type their names here."}</p>`;
+}
+
+// The full driver list: a searchable, scrolling list instead of a wall of names
+function rpRenderRoster(){
+  const counts = AGENCIES.map(a => `<span class="ag-key">${`<i class="ag-dot" style="background:${a.colour}"></i>`}${esc(a.code)} ${roster.filter(d => d.agency === a.code).length}</span>`).join("");
+  $("rpRosterCount").textContent = roster.length;
+  $("rpRosterKey").innerHTML = counts;
+  const q = tidyName($("rpRosterSearch").value).toLowerCase();
+  const list = roster.filter(d => !q || d.name.toLowerCase().includes(q));
+  $("rpRosterSearch").hidden = roster.length < 8;
+  $("rpRoster").innerHTML = list.length ? list.map(d => `<div class="rp-rrow">${dot(d.name)}<span class="rp-rname-t">${esc(d.name)}</span>
+      <select data-setag="${esc(d.name)}" aria-label="Agency for ${esc(d.name)}" class="${d.agency ? "" : "unset"}">${d.agency ? "" : `<option value="">Agency</option>`}${AGENCIES.map(a => `<option ${a.code === d.agency ? "selected" : ""}>${esc(a.code)}</option>`).join("")}</select>
+      <button class="rp-rdel" type="button" data-unroster="${esc(d.name)}" aria-label="Remove ${esc(d.name)}">✕</button></div>`).join("")
+    : `<p class="rp-hint">${roster.length ? "No drivers match." : "No drivers saved yet."}</p>`;
   $("rpRosterNote").textContent = fb && !preview ? "Shared with everyone through Firebase." : "Saved on this device for now. Once Firebase is connected, it's shared with everyone.";
 }
 
@@ -2420,9 +2513,9 @@ function rpRenderList(){
       <div class="rp-r-num"><b class="num">${rpS ? x.drops : "–"}</b><span>drops</span></div>
       <div class="rp-r-drv">
         <div class="rp-r-chips">
-          ${names.map(n => `<span class="rp-name on">${esc(n)}<button type="button" data-off="${esc(n)}" aria-label="Take ${esc(n)} off Route ${r.num}">✕</button></span>`).join("")}
+          ${names.map(n => `<span class="rp-name on">${dot(n)}${esc(n)}<button type="button" data-off="${esc(n)}" aria-label="Take ${esc(n)} off Route ${r.num}">✕</button></span>`).join("")}
           ${free.length ? `<select class="rp-add" data-addto="${r.num}" aria-label="Add a driver to Route ${r.num}">
-            <option value="">+ Add driver</option>${free.map(n => `<option>${esc(n)}</option>`).join("")}
+            <option value="">+ Add driver</option>${free.map(n => `<option value="${esc(n)}">${esc(n)}${agencyOf(n) ? " · " + esc(agencyOf(n)) : ""}</option>`).join("")}
           </select>
           <button class="rp-rand" type="button" data-rand="${r.num}" title="Add a random driver who's working today">
             <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Randomise</button>` : names.length ? "" : `<span class="rp-nodrv">No driver</span>`}
@@ -2434,19 +2527,81 @@ function rpRenderList(){
   }).join("");
 }
 
-/* ---------- actions ---------- */
-function rpAddWorking(text){
-  const names = String(text).split(/[,\n]+/).map(tidyName).filter(Boolean);
-  let newOnes = 0;
-  names.forEach(n => {
-    const known = roster.find(x => sameName(x, n));
-    if (!known){ roster.push(n); newOnes++; }
-    const name = known || n;
-    if (!inList(day.working, name)) day.working.push(name);
-  });
-  if (newOnes){ sortNames(roster); rpSaveRoster(); toast(`${plural(newOnes, "new driver", "new drivers")} added to All drivers`); }
-  return names.length;
+/* ---------- working today: type ahead from All drivers ---------- */
+function rpMatches(q){
+  q = q.toLowerCase();
+  const avail = roster.filter(d => !inList(day.working, d.name));
+  const starts = avail.filter(d => d.name.toLowerCase().startsWith(q));
+  const words = avail.filter(d => !starts.includes(d) && d.name.toLowerCase().split(" ").some(w => w.startsWith(q)));
+  return starts.concat(words).slice(0, 6);
 }
+function rpRenderSuggest(){
+  const box = $("rpSuggest"), q = tidyName($("rpWorkInput").value);
+  if (!q){ box.hidden = true; return; }
+  const m = rpMatches(q);
+  const exact = roster.some(d => sameName(d.name, q));
+  const already = inList(day.working, q);
+  sugIndex = Math.min(sugIndex, Math.max(m.length - 1, 0));
+  box.innerHTML = m.map((d, i) => `<button type="button" role="option" class="rp-sug ${i === sugIndex ? "active" : ""}" data-sug="${esc(d.name)}">${dot(d.name)}<span>${esc(d.name)}</span><small>${esc(d.agency || "")}</small></button>`).join("")
+    + (already ? `<p class="rp-sug-note">${esc(q)} is already working today</p>`
+      : !exact && !m.length ? `<div class="rp-sug-new"><span>New driver <b>${esc(q)}</b></span>${AGENCIES.map(a => `<button type="button" data-newag="${esc(a.code)}"><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</button>`).join("")}</div>` : "");
+  box.hidden = false;
+}
+function rpPickWorking(name){
+  if (!inList(day.working, name)) day.working.push(name);
+  $("rpWorkInput").value = ""; sugIndex = 0; $("rpSuggest").hidden = true;
+  rpChanged(); $("rpWorkInput").focus();
+}
+function rpWorkEnter(){
+  const q = tidyName($("rpWorkInput").value);
+  if (!q) return toast("Start typing a driver's name", "bad");
+  const m = rpMatches(q);
+  if (m.length) return rpPickWorking(m[sugIndex] ? m[sugIndex].name : m[0].name);
+  if (inList(day.working, q)) return toast(`${q} is already working today`);
+  rpRenderSuggest(); toast(`Pick ${AGENCIES.map(a => a.code).join(" or ")} to add ${q} as a new driver`, "bad");
+}
+$("rpWorkInput").addEventListener("input", () => { sugIndex = 0; rpRenderSuggest(); });
+$("rpWorkInput").addEventListener("focus", rpRenderSuggest);
+$("rpWorkInput").addEventListener("blur", () => setTimeout(() => { $("rpSuggest").hidden = true; }, 150));
+$("rpWorkInput").addEventListener("keydown", e => {
+  const n = $("rpSuggest").querySelectorAll("[data-sug]").length;
+  if (e.key === "ArrowDown" && n){ e.preventDefault(); sugIndex = (sugIndex + 1) % n; rpRenderSuggest(); }
+  else if (e.key === "ArrowUp" && n){ e.preventDefault(); sugIndex = (sugIndex - 1 + n) % n; rpRenderSuggest(); }
+  else if (e.key === "Enter"){ e.preventDefault(); rpWorkEnter(); }
+  else if (e.key === "Escape"){ $("rpSuggest").hidden = true; }
+});
+$("rpWorkAdd").addEventListener("click", rpWorkEnter);
+$("rpSuggest").addEventListener("pointerdown", e => e.preventDefault());   // keeps the keyboard open
+$("rpSuggest").addEventListener("click", e => {
+  const s = e.target.closest("[data-sug]"), a = e.target.closest("[data-newag]");
+  if (s) rpPickWorking(s.dataset.sug);
+  else if (a){
+    const name = tidyName($("rpWorkInput").value);
+    if (!name) return;
+    roster.push({ name, agency: a.dataset.newag }); sortRoster(); rpSaveRoster();
+    toast(`${name} added to All drivers`);
+    rpPickWorking(name);
+  }
+});
+
+/* ---------- all drivers ---------- */
+function rpRosterFromInput(){
+  const names = $("rpRosterInput").value.split(/[,\n]+/).map(tidyName).filter(Boolean);
+  const agency = $("rpRosterAgency").value;
+  if (!names.length) return toast("Type a driver's name", "bad");
+  if (!agency) return toast(`Choose ${AGENCIES.map(a => a.code).join(" or ")}`, "bad");
+  let added = 0;
+  names.forEach(n => { const d = driverOf(n); if (d) d.agency = agency; else { roster.push({ name: n, agency }); added++; } });
+  sortRoster(); rpSaveRoster();
+  $("rpRosterInput").value = ""; $("rpRosterInput").focus(); renderRoutes();
+  toast(added ? `${plural(added, "driver", "drivers")} added` : "Already on the list. Agency updated.");
+}
+$("rpRosterAgency").innerHTML = `<option value="">Agency</option>` + AGENCIES.map(a => `<option>${esc(a.code)}</option>`).join("");
+$("rpRosterAdd").addEventListener("click", rpRosterFromInput);
+$("rpRosterInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); rpRosterFromInput(); } });
+$("rpRosterSearch").addEventListener("input", rpRenderRoster);
+
+/* ---------- actions ---------- */
 $("rpProcess").addEventListener("click", () => {
   const t = $("rpParcels").value;
   if (!t.trim()) return toast("Paste the forecast first", "bad");
@@ -2458,30 +2613,15 @@ $("rpProcess").addEventListener("click", () => {
 });
 $("rpReplace").addEventListener("click", () => { rpEditing = true; $("rpParcels").value = ""; renderRoutes(); $("rpParcels").focus(); });
 $("rpCancel").addEventListener("click", () => { rpEditing = false; $("rpParcels").value = day.parcelText; renderRoutes(); });
-function rpWorkFromInput(){
-  const v = $("rpWorkInput").value;
-  if (!tidyName(v)) return toast("Type a driver's name", "bad");
-  rpAddWorking(v); $("rpWorkInput").value = ""; $("rpWorkInput").focus(); rpChanged();
-}
-$("rpWorkAdd").addEventListener("click", rpWorkFromInput);
-$("rpWorkInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); rpWorkFromInput(); } });
-function rpRosterFromInput(){
-  const names = $("rpRosterInput").value.split(/[,\n]+/).map(tidyName).filter(Boolean);
-  if (!names.length) return toast("Type a driver's name", "bad");
-  let added = 0;
-  names.forEach(n => { if (!inList(roster, n)){ roster.push(n); added++; } });
-  sortNames(roster); rpSaveRoster();
-  $("rpRosterInput").value = ""; renderRoutes();
-  toast(added ? `${plural(added, "driver", "drivers")} added` : "Already on the list");
-}
-$("rpRosterAdd").addEventListener("click", rpRosterFromInput);
-$("rpRosterInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); rpRosterFromInput(); } });
 $("routesView").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const d = b.dataset;
-  if (d.work){ if (!inList(day.working, d.work)) day.working.push(d.work); rpChanged(); }
-  else if (d.unwork){ day.working = day.working.filter(n => !sameName(n, d.unwork)); unassign(d.unwork); rpChanged(); }
-  else if (d.unroster){ roster = roster.filter(n => !sameName(n, d.unroster)); rpSaveRoster(); renderRoutes(); }
+  if (d.unwork){ day.working = day.working.filter(n => !sameName(n, d.unwork)); unassign(d.unwork); rpChanged(); }
+  else if (d.unroster){
+    if (!confirm(`Remove ${d.unroster} from All drivers?\n\nThey won't come up when you type names any more. You can add them back later.`)) return;
+    roster = roster.filter(x => !sameName(x.name, d.unroster)); rpSaveRoster(); renderRoutes();
+    toast(`${d.unroster} removed`);
+  }
   else if (d.off){ unassign(d.off); rpChanged(); }
   else if (d.pc){ if (day.open[d.pc]) delete day.open[d.pc]; else day.open[d.pc] = true; rpChanged(); }
   else if (d.rand){
@@ -2491,32 +2631,65 @@ $("routesView").addEventListener("click", e => {
     const pick = free[u[0] % free.length];
     assignTo(+d.rand, pick); rpChanged(); toast(`${pick} added to Route ${d.rand}`);
   }
-  else if (b.id === "rpAllWork"){ roster.forEach(n => { if (!inList(day.working, n)) day.working.push(n); }); rpChanged(); }
 });
 $("routesView").addEventListener("change", e => {
-  const s = e.target.closest("[data-addto]");
+  const s = e.target.closest("[data-addto]"), a = e.target.closest("[data-setag]");
   if (s && s.value){ assignTo(+s.dataset.addto, s.value); rpChanged(); }
+  else if (a){ const d = driverOf(a.dataset.setag); if (d){ d.agency = a.value; rpSaveRoster(); renderRoutes(); } }
 });
+
+// Plain text for WhatsApp: one route per line with a gap between, names only
+function rpPlanText(){
+  const lines = [`Routes for ${prettyDate(today(), { weekday: "long", day: "numeric", month: "long" })}`];
+  RPC.routes.forEach(r => { const names = day.assign[r.num] || []; if (names.length) lines.push("", `Route ${r.num}. ${names.join(", ")}`); });
+  return lines.join("\n");
+}
 $("rpCopy").addEventListener("click", async () => {
-  if (!rpS && !Object.keys(day.assign).length) return toast("Nothing to copy yet", "bad");
-  const lines = [`Routes, ${prettyDate(today(), { weekday: "long", day: "numeric", month: "long" })}`, ""];
-  RPC.routes.forEach(r => {
-    const x = rpS ? rpS.routes.find(y => y.num === r.num) : null, names = day.assign[r.num] || [];
-    lines.push(`Route ${r.num} ${r.name}${x ? ` (${x.parcels} parcels, ${x.drops} drops)` : ""}: ${names.length ? names.join(", ") : "no driver"}`);
-  });
-  const spare = freeToday();
-  if (spare.length) lines.push("", "Not on a route: " + sortNames(spare).join(", "));
-  toast(await copyText(lines.join("\n")) ? "Plan copied. Paste it into WhatsApp" : "Couldn't copy. Your browser blocked it");
+  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
+  toast(await copyText(rpPlanText()) ? "Plan copied. Paste it into WhatsApp" : "Couldn't copy. Your browser blocked it");
 });
 $("rpNewDay").addEventListener("click", () => {
   if (!confirm("Start a new day? This clears the forecast, who's working and the routes. Your saved drivers stay.")) return;
   day = { parcelText: "", working: [], assign: {}, open: {} };
   $("rpParcels").value = ""; rpEditing = false; rpCompute(); rpChanged();
 });
+
+/* ---------- display card to screenshot for the group ---------- */
+function rpShowCard(){
+  const total = day.working.filter(n => routeOf(n)).length;
+  const d = new Date(today() + "T12:00:00");
+  $("rpPoster").innerHTML = `
+    <div class="rp-p-glow" aria-hidden="true"></div>
+    <header class="rp-p-head">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><span class="brand-t">Shift Report<small class="credit">By Cameron Gill</small></span></div>
+      <div class="rp-p-date"><b>${d.toLocaleDateString("en-GB", { day: "numeric" })}</b><span>${d.toLocaleDateString("en-GB", { month: "short" })}</span></div>
+    </header>
+    <div class="rp-p-title"><span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span><h2>Today's routes</h2></div>
+    <ol class="rp-p-list">${RPC.routes.map(r => {
+      const names = day.assign[r.num] || [];
+      return `<li class="${names.length ? "" : "empty"}"><span class="rp-p-num">${r.num}</span>
+        <div class="rp-p-body"><small>${esc(r.name)}</small>
+          <div class="rp-p-names">${names.length ? names.map(n => `<span>${dot(n)}${esc(n)}</span>`).join("") : `<em>No driver</em>`}</div></div></li>`;
+    }).join("")}</ol>
+    <footer class="rp-p-foot"><span>${plural(total, "driver", "drivers")} out today</span>
+      <span class="rp-p-key">${AGENCIES.map(a => `<span><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</span>`).join("")}</span></footer>`;
+  $("rpShow").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function rpHideCard(){ $("rpShow").hidden = true; document.body.style.overflow = ""; }
+$("rpDisplay").addEventListener("click", () => {
+  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
+  rpShowCard();
+});
+$("rpShowClose").addEventListener("click", rpHideCard);
+$("rpShow").addEventListener("click", e => { if (e.target.id === "rpShow") rpHideCard(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("rpShow").hidden) rpHideCard(); });
+
 // Read-only view of the routes, used for automated checks
 window.routePlanCheck = () => ({
   routes: rpS ? rpS.routes.map(x => ({ num: x.num, parcels: x.parcels, drops: x.drops })) : [],
-  assign: JSON.parse(JSON.stringify(day.assign)), working: day.working.slice(), roster: roster.slice()
+  assign: JSON.parse(JSON.stringify(day.assign)), working: day.working.slice(),
+  roster: roster.map(d => d.name), rosterFull: JSON.parse(JSON.stringify(roster)), text: rpPlanText()
 });
 
 async function boot(){
