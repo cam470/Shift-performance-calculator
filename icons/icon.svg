@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="32%" cy="22%" r="90%">
+      <stop offset="0" stop-color="#4A2614"/>
+      <stop offset=".45" stop-color="#22120A"/>
+      <stop offset="1" stop-color="#0E0805"/>
+    </radialGradient>
+    <radialGradient id="ember" cx="78%" cy="92%" r="60%">
+      <stop offset="0" stop-color="#FF6A1F" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#FF6A1F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFC08A"/>
+      <stop offset=".45" stop-color="#FF7A2E"/>
+      <stop offset="1" stop-color="#E04E12"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".16"/>
+      <stop offset=".5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="16"/></filter>
+    <clipPath id="tile"><rect width="512" height="512" rx="116"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <rect width="512" height="512" fill="url(#ember)"/>
+    <!-- the route: depot at the top, customer at the bottom -->
+    <path d="M350 150H214a53 53 0 0 0 0 106h84a53 53 0 0 1 0 106H162" fill="none" stroke="#FF6A1F" stroke-width="54" stroke-linecap="round" stroke-linejoin="round" opacity=".75" filter="url(#glow)"/>
+    <path d="M350 150H214a53 53 0 0 0 0 106h84a53 53 0 0 1 0 106H162" fill="none" stroke="url(#road)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M330 150H214a53 53 0 0 0 0 106h84a53 53 0 0 1 0 106H182" fill="none" stroke="#5A260C" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="16 20"/>
+    <circle cx="350" cy="150" r="31" fill="#1C0F08" stroke="#FFE4D1" stroke-width="10"/>
+    <circle cx="162" cy="362" r="40" fill="#FF6A1F" opacity=".7" filter="url(#glow)"/>
+    <circle cx="162" cy="362" r="29" fill="#FFF4EC"/>
+    <circle cx="162" cy="362" r="11" fill="#FF6A1F"/>
+    <rect width="512" height="256" fill="url(#sheen)"/>
+    <rect x="1.5" y="1.5" width="509" height="509" rx="114.5" fill="none" stroke="#FFE4D1" stroke-opacity=".14" stroke-width="3"/>
+  </g>
+</svg>
