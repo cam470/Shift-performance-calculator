@@ -2391,7 +2391,7 @@ function trImage(img){
     <span>${esc(o.caption || "Image to be added")}</span><small>${file ? "Photo to be added: " + esc(file) : "Photo to be added"}</small></div>`;
   if (!o.src) return ph;
   // If the photo hasn't been uploaded yet, the placeholder shows instead
-  return `<figure class="tr-img"><img src="${esc(o.src)}" alt="${esc(o.caption || "")}" loading="lazy" onload="if(this.naturalWidth>this.naturalHeight*2.2)this.parentNode.classList.add('wide')" onerror="this.parentNode.classList.add('missing')">${ph}${o.caption ? `<figcaption>${esc(o.caption)}</figcaption>` : ""}</figure>`;
+  return `<figure class="tr-img"><img src="${esc(o.src)}" alt="${esc(o.caption || "")}" loading="lazy" onload="if(this.naturalWidth>this.naturalHeight*2.2)this.parentNode.classList.add('wide')" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src=this.getAttribute('src').split('?')[0]+'?r='+Date.now();}else{this.parentNode.classList.add('missing')}">${ph}${o.caption ? `<figcaption>${esc(o.caption)}</figcaption>` : ""}</figure>`;
 }
 
 function trStep(m, s, k, current){

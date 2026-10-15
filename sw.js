@@ -4,13 +4,13 @@
    How it works:
    - App files (this site): try the network first so updates show straight
      away, and fall back to the saved copy when there's no signal.
-   - Training photos: use the saved copy first, they rarely change.
+   - Training photos: always loaded straight from the site.
    - Firebase and font files from Google: saved the first time they load,
      so the app can still start without signal.
    - Anything else (Firebase sign in and database calls) is left alone.
 
    When you change the list below, bump VERSION so phones pick it up. */
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = "shift-report-" + VERSION;
 const APP_SHELL = [
   "./",
@@ -69,7 +69,8 @@ self.addEventListener("fetch", event => {
   const url = new URL(req.url);
 
   if (url.origin === self.location.origin){
-    if (url.pathname.includes("/training-images/")) return event.respondWith(cacheFirst(req));
+    // Training photos load straight from the site, so a photo is never stuck as "missing".
+    if (url.pathname.includes("/training-images/")) return;
     return event.respondWith(networkFirst(req));
   }
   // Firebase code and Google fonts never change at the same address, so keep them.
