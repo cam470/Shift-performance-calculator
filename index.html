@@ -1158,9 +1158,116 @@ input:focus,select:focus,textarea:focus{border-color:rgba(var(--accent-rgb),.8)!
 @media (prefers-reduced-transparency:reduce){
   .card,.side,.nav,.actionbar,.tr-results{background:rgba(22,22,46,.96)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 }
+
+/* =====================================================================
+   v7 Living glass
+   Calmer colours, softer light, and motion that answers your hand:
+   light follows the pointer across the glass, the tab pill flows like
+   liquid between tabs, numbers count, and the planets drift.
+   Everything here switches off when the phone asks for reduced motion.
+   ===================================================================== */
+:root{
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-spring:cubic-bezier(.34,1.45,.55,1);
+  --glass:linear-gradient(150deg,rgba(255,255,255,.115),rgba(255,255,255,.045) 45%,rgba(255,255,255,.03));
+  --glass-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04),0 30px 60px -32px rgba(0,0,12,.85);
+  --rim:linear-gradient(140deg,rgba(255,255,255,.5),rgba(255,255,255,.08) 26%,rgba(255,255,255,0) 50%,rgba(255,255,255,.05) 76%,rgba(255,255,255,.26));
+}
+body{background:#04041A}
+body::before{display:none!important}
+
+/* ---------- the scene behind the glass ---------- */
+.scene{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+  background:radial-gradient(70vmax 60vmax at 35% 35%,rgba(110,80,255,.14),transparent 70%),linear-gradient(165deg,#0A0822,#04041A 55%,#060A26)}
+.scene .pw{position:absolute;inset:0;will-change:transform;transform:translate3d(calc(var(--px,0) * -14px),calc(var(--py,0) * -10px + var(--sy,0) * -40px),0)}
+.scene .pw.far{transform:translate3d(calc(var(--px,0) * 8px),calc(var(--py,0) * 6px + var(--sy,0) * -18px),0)}
+.planet{position:absolute;border-radius:50%;transition:background-color 1s var(--ease-out),border-color 1s var(--ease-out),box-shadow 1s var(--ease-out)}
+.planet.p1{width:110vmax;height:110vmax;right:-60vmax;top:-78vmax;
+  background:radial-gradient(circle closest-side,#08061E 0 80%,rgba(var(--accent-rgb),.16) 92%,rgba(var(--accent-rgb),.42) 99%);
+  border:1.5px solid rgba(var(--accent-rgb),.7);
+  box-shadow:0 0 60px 4px rgba(var(--accent-rgb),.22),inset 0 0 50px rgba(var(--accent-rgb),.2)}
+.planet.p2{width:124vmax;height:124vmax;left:-76vmax;bottom:-100vmax;
+  background:radial-gradient(circle closest-side at 50% 50%,#0B103F 0 70%,#121C78 88%,rgba(70,95,255,.55) 99%);
+  border:1.5px solid rgba(150,170,255,.62);
+  box-shadow:0 0 70px 6px rgba(90,110,255,.2),inset 0 0 60px rgba(110,130,255,.24)}
+.planet.p3{width:26vmax;height:26vmax;left:58%;top:62%;background:radial-gradient(circle,rgba(var(--accent-rgb),.16),transparent 70%);border:0;filter:blur(10px)}
+@media (min-width:861px) and (prefers-reduced-motion:no-preference){
+  .planet.p1{animation:drift1 46s ease-in-out infinite alternate}
+  .planet.p2{animation:drift2 58s ease-in-out infinite alternate}
+  .planet.p3{animation:drift3 34s ease-in-out infinite alternate}
+}
+@keyframes drift1{to{transform:translate(-2.5vmax,1.8vmax) rotate(6deg)}}
+@keyframes drift2{to{transform:translate(2vmax,-1.6vmax) rotate(-5deg)}}
+@keyframes drift3{to{transform:translate(-8vmax,-6vmax) scale(1.25)}}
+
+/* ---------- calmer glass ---------- */
+.card{isolation:isolate}
+.card.hero{background:linear-gradient(150deg,rgba(var(--accent-rgb),.24),rgba(var(--accent-rgb),.07) 45%,rgba(255,255,255,.035));box-shadow:var(--glass-shadow),0 30px 70px -36px rgba(var(--accent-rgb),.45)}
+.btn.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.16),0 10px 24px -12px rgba(var(--accent-rgb),.75)}
+.tab[aria-selected=true] svg.i{filter:none}
+.g-val,.ring-val{filter:drop-shadow(0 0 5px currentColor)}
+
+/* light that follows your pointer or finger across the glass */
+.card::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .5s var(--ease-out);
+  background:radial-gradient(520px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.11),rgba(255,255,255,.03) 35%,transparent 60%)}
+.card.lit::before{opacity:1}
+.card.lit::after{background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.75),rgba(255,255,255,.12) 45%,rgba(255,255,255,.04) 70%),var(--rim)}
+
+/* ---------- motion ---------- */
+@keyframes rise{from{opacity:0;transform:translate3d(0,16px,0) scale(.985)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.enter{animation:rise .6s var(--ease-out) both;animation-delay:var(--d,0ms)}
+.pagehead h1,.pagehead p{animation:fade .45s var(--ease-out) both}
+.btn,.icon-btn,.tab,.rp-display,.rp-rand,.stepper button,.seg button,.tr-res,.tr-card{transition:transform .18s var(--ease-out),background-color .25s,border-color .25s,box-shadow .25s,color .2s,opacity .2s}
+.btn:active,.icon-btn:active,.rp-display:active,.rp-rand:active,.stepper button:active,.seg button:active{transform:scale(.95)}
+.tab:active{transform:scale(.94)}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover,.rp-display:hover{transform:translateY(-1px)}
+  .btn.primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 16px 30px -12px rgba(var(--accent-rgb),.9)}
+}
+/* cards that tilt gently towards the pointer */
+.tilt{transition:transform .5s var(--ease-out);transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0)}
+.tilt.tilting{transition:transform .12s linear}
+/* the glass pill that flows between tabs */
+@media (min-width:861px){ .nav{position:relative} }
+.nav .tab{z-index:1}
+.glider{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:16px;opacity:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.07));border:1px solid rgba(255,255,255,.24);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 26px -12px rgba(0,0,10,.8),0 0 30px -8px rgba(var(--accent-rgb),.75);
+  transition:box-shadow .6s var(--ease-out)}
+.glider.on{opacity:1}
+.glider::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;background:var(--rim);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.nav.glide .tab[aria-selected=true]{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.nav.glide .tab[aria-selected=true]::after{display:none}
+.nav.glide .tab svg.i{transition:color .4s var(--ease-out),transform .4s var(--ease-spring)}
+.nav.glide .tab[aria-selected=true] svg.i{transform:scale(1.08)}
+@media (max-width:860px){ .glider{border-radius:999px} }
+/* ticks, toasts, open steps */
+.check input:checked+span::before,.tick input:checked{animation:pop .35s var(--ease-spring)}
+.toast{transform:translate3d(0,18px,0) scale(.96);transition:opacity .3s var(--ease-out),transform .45s var(--ease-spring)}
+.toast.show{transform:none}
+details[open]>:not(summary){animation:rise .4s var(--ease-out) both}
+.tr-results:not([hidden]){animation:rise .3s var(--ease-out) both}
+.rp-show:not([hidden]){animation:fade .3s var(--ease-out) both}
+.rp-show:not([hidden]) .rp-poster{animation:rise .55s var(--ease-spring) both}
+.rp-p-tile{animation:rise .5s var(--ease-out) both}
+.num-tick{display:inline-block}
+
+@media (prefers-reduced-motion:reduce){
+  .enter,.pagehead h1,.pagehead p,details[open]>:not(summary),.rp-p-tile,.rp-show,.rp-poster,.tr-results{animation:none!important}
+  .tilt{transform:none!important}
+  .scene .pw{transform:none!important}
+  .card::before{display:none}
+}
 </style>
 </head>
 <body data-tab="shift">
+<div class="scene" aria-hidden="true">
+  <div class="pw far"><i class="planet p2"></i></div>
+  <div class="pw"><i class="planet p1"></i><i class="planet p3"></i></div>
+</div>
 
 <!-- Sign in -->
 <section id="loginView" class="login" hidden>
@@ -1888,6 +1995,7 @@ function showTab(t){
   if (t === "routes") renderRoutes();
   if (t === "account") renderAccount();
   window.scrollTo(0, 0);
+  motion.view(t); motion.glide();
 }
 
 /* ---------- draft kept on this device ---------- */
@@ -2315,6 +2423,132 @@ $("previewBtn").addEventListener("click", () => {
 });
 
 /* =====================================================================
+   MOTION
+   Small, quick animations that make the glass feel alive. All of it
+   is skipped when the device asks for reduced motion.
+   ===================================================================== */
+const motion = (() => {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
+  const calm = () => reduce.matches;
+  const root = document.documentElement;
+
+  // Cards rise into place one after another
+  function stagger(container, sel = ".card, .kpi, .rp-route, .tr-card, .op, .step"){
+    if (calm() || !container) return;
+    const items = [...container.querySelectorAll(sel)].filter(el => !el.closest(".card .card") && el.offsetParent !== null).slice(0, 18);
+    items.forEach((el, k) => {
+      el.classList.remove("enter"); void el.offsetWidth;
+      el.style.setProperty("--d", Math.min(k * 45, 500) + "ms");
+      el.classList.add("enter");
+      el.addEventListener("animationend", () => el.classList.remove("enter"), { once: true });
+    });
+  }
+  function view(t){
+    const map = { shift: "shiftView", history: "historyView", training: "trainingView", ops: "opsView", routes: "routesView", account: "accountView" };
+    const v = document.getElementById(map[t]); if (!v) return;
+    const head = document.querySelector(".pagehead-inner");
+    if (head && !calm()){ head.querySelectorAll("h1, p").forEach(el => { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }); }
+    stagger(v, ":scope > .card, :scope > section, :scope > .row > .card, :scope > .row > section, :scope > div > .card, .tr-card, .rp-hero, .kpi");
+  }
+
+  // The glass pill flows from the old tab to the new one like a drop of liquid
+  let glider, lastRect = null;
+  function glide(){
+    const nav = document.querySelector(".nav"); if (!nav) return;
+    if (!glider){ glider = document.createElement("span"); glider.className = "glider"; glider.setAttribute("aria-hidden", "true"); nav.prepend(glider); nav.classList.add("glide"); }
+    const cur = nav.querySelector(".tab[aria-selected=true]");
+    if (!cur){ glider.classList.remove("on"); lastRect = null; return; }
+    const r = { x: cur.offsetLeft, y: cur.offsetTop, w: cur.offsetWidth, h: cur.offsetHeight };
+    const to = `translate(${r.x}px,${r.y}px)`;
+    glider.style.width = r.w + "px"; glider.style.height = r.h + "px"; glider.style.transform = to;
+    if (lastRect && !calm() && glider.animate && (lastRect.x !== r.x || lastRect.y !== r.y)){
+      const a = lastRect, x0 = Math.min(a.x, r.x), y0 = Math.min(a.y, r.y);
+      const horiz = Math.abs(a.x - r.x) >= Math.abs(a.y - r.y);
+      const mid = horiz
+        ? { transform: `translate(${x0 + (Math.max(a.x + a.w, r.x + r.w) - x0) * .08}px,${r.y + r.h * .06}px)`, width: (Math.max(a.x + a.w, r.x + r.w) - x0) * .84 + "px", height: r.h * .88 + "px" }
+        : { transform: `translate(${r.x + r.w * .03}px,${y0 + (Math.max(a.y + a.h, r.y + r.h) - y0) * .08}px)`, width: r.w * .94 + "px", height: (Math.max(a.y + a.h, r.y + r.h) - y0) * .84 + "px" };
+      glider.animate([
+        { transform: `translate(${a.x}px,${a.y}px)`, width: a.w + "px", height: a.h + "px" },
+        Object.assign({ offset: .45 }, mid),
+        { transform: to, width: r.w + "px", height: r.h + "px" }
+      ], { duration: 560, easing: "cubic-bezier(.34,1.3,.55,1)" });
+    }
+    glider.classList.add("on");
+    lastRect = r;
+  }
+  window.addEventListener("resize", () => { lastRect = null; glide(); });
+
+  // Light follows the pointer, or your finger, across the glass
+  let litCard = null, raf = 0, lastEv = null;
+  function paint(){
+    raf = 0; const e = lastEv; if (!e) return;
+    const card = e.target.closest && e.target.closest(".card");
+    if (card !== litCard){ if (litCard) litCard.classList.remove("lit"); litCard = card; if (card) card.classList.add("lit"); }
+    if (card){ const b = card.getBoundingClientRect(); card.style.setProperty("--mx", (e.clientX - b.left) + "px"); card.style.setProperty("--my", (e.clientY - b.top) + "px"); }
+    // the planets lean away from the pointer a little
+    if (fine.matches && !calm()){ root.style.setProperty("--px", (e.clientX / innerWidth - .5).toFixed(3)); root.style.setProperty("--py", (e.clientY / innerHeight - .5).toFixed(3)); }
+  }
+  document.addEventListener("pointermove", e => { lastEv = e; if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+  document.addEventListener("pointerdown", e => { lastEv = e; paint(); }, { passive: true });
+  document.addEventListener("pointerleave", () => { if (litCard) litCard.classList.remove("lit"); litCard = null; });
+  document.addEventListener("pointerup", e => { if (e.pointerType !== "mouse" && litCard){ const c = litCard; setTimeout(() => c.classList.remove("lit"), 500); litCard = null; } });
+
+  // Scrolling moves the planets slower than the page, for depth
+  let sraf = 0;
+  window.addEventListener("scroll", () => { if (sraf || calm()) return; sraf = requestAnimationFrame(() => { sraf = 0; root.style.setProperty("--sy", Math.min(scrollY / 600, 4).toFixed(3)); }); }, { passive: true });
+
+  // Small cards tilt towards the pointer on computers
+  const TILT = ".tr-card, .rp-route, .kpi, .h-stat, .rp-big, .rp-mini";
+  let tiltEl = null;
+  document.addEventListener("pointermove", e => {
+    if (!fine.matches || calm()) return;
+    const el = e.target.closest && e.target.closest(TILT);
+    if (tiltEl && tiltEl !== el){ tiltEl.classList.remove("tilting"); tiltEl.style.setProperty("--rx", "0deg"); tiltEl.style.setProperty("--ry", "0deg"); }
+    tiltEl = el; if (!el) return;
+    el.classList.add("tilt", "tilting");
+    const b = el.getBoundingClientRect(), dx = (e.clientX - b.left) / b.width - .5, dy = (e.clientY - b.top) / b.height - .5;
+    el.style.setProperty("--ry", (dx * 5).toFixed(2) + "deg"); el.style.setProperty("--rx", (-dy * 5).toFixed(2) + "deg");
+  }, { passive: true });
+
+  // Numbers count up or down to their new value
+  const fmtInfo = t => {
+    const m = String(t).trim().match(/^([+\-−]?)([\d,]*\.?\d+)(%?)$/); if (!m) return null;
+    const raw = m[2].replace(/,/g, ""), dec = (raw.split(".")[1] || "").length;
+    return { v: (m[1] === "-" || m[1] === "−" ? -1 : 1) * parseFloat(raw), dec, commas: m[2].includes(","), plus: m[1] === "+", unicode: m[1] === "−" || !m[1], pct: m[3] };
+  };
+  const fmt = (v, f) => {
+    const a = Math.abs(v), r = f.commas ? a.toLocaleString("en-GB", { minimumFractionDigits: f.dec, maximumFractionDigits: f.dec }) : a.toFixed(f.dec);
+    const sign = v < 0 && Number(r.replace(/,/g, "")) !== 0 ? "−" : (f.plus && v > 0 ? "+" : "");
+    return sign + r + f.pct;
+  };
+  function countTo(el, text){
+    const to = fmtInfo(text), from = fmtInfo(el.__shown ?? "");
+    el.__target = text;
+    if (calm() || !to || !from || to.v === from.v){ el.__shown = text; return; }
+    const t0 = performance.now(), dur = 520;
+    const step = now => {
+      if (el.__target !== text) return;
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      const out = k < 1 ? fmt(from.v + (to.v - from.v) * e, to) : text;
+      el.__writing = out; el.textContent = out;
+      if (k < 1) requestAnimationFrame(step); else el.__shown = text;
+    };
+    requestAnimationFrame(step);
+  }
+  const COUNT = "#volVar, #pprVar, #drvVar, #ftdsPct, #rpTotParcels, #rpTotDrops, #rpTotWorking, #rpTotOn, .band-stats b, .h-stat b";
+  const mo = new MutationObserver(list => {
+    const seen = new Set();
+    list.forEach(m => { const el = m.target.nodeType === 3 ? m.target.parentElement : m.target; if (el && el.matches && el.matches(COUNT)) seen.add(el); });
+    seen.forEach(el => { const t = el.textContent; if (t === el.__writing) return; countTo(el, t); });
+  });
+  function watchNumbers(){ document.querySelectorAll(COUNT).forEach(el => { if (el.__watched) return; el.__watched = true; el.__shown = el.textContent; mo.observe(el, { childList: true, characterData: true, subtree: true }); }); }
+  watchNumbers();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { lastRect = null; glide(); });
+  return { stagger, view, glide, watchNumbers };
+})();
+
+/* =====================================================================
    ACCOUNT
    Change password, sign out, and for admins: staff accounts.
    ===================================================================== */
@@ -2717,6 +2951,7 @@ function renderTraining(){
   else if (m) root.innerHTML = trModule(m);
   else { trView = "home"; root.innerHTML = trHome(); }
   updateTitle();
+  if (!trFocus) motion.stagger(root);
   if (trFocus){
     const el = document.getElementById("step-" + trFocus);
     if (el){ el.open = true; el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); }
