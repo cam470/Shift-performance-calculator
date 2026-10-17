@@ -942,12 +942,95 @@ body[data-tab="account"]{--accent-rgb:255,106,31;--accent-hi:#FFB98F;--accent-ba
 body{transition:none}
 
 /* the framework accent follows the tab too */
+body{--ns-glow:0 10px 30px -8px rgba(var(--accent-rgb),.7)}
 body[data-tab="shift"]{--ns-accent:#FF6A1F;--ns-accent-hi:#FFB98F;--ns-accent-lo:#E2541A;--ns-accent-soft:rgba(255,106,31,.09);--ns-accent-line:rgba(255,106,31,.42);--ns-violet:#FF6A1F;--ns-violet-hi:#FFB98F;--ns-violet-lo:#E2541A;--ns-violet-soft:rgba(255,106,31,.09);--ns-violet-line:rgba(255,106,31,.42)}
 body[data-tab="routes"]{--ns-accent:#2EC4B0;--ns-accent-hi:#8FE8DC;--ns-accent-lo:#14978A;--ns-accent-soft:rgba(46,196,176,.09);--ns-accent-line:rgba(46,196,176,.42);--ns-violet:#2EC4B0;--ns-violet-hi:#8FE8DC;--ns-violet-lo:#14978A;--ns-violet-soft:rgba(46,196,176,.09);--ns-violet-line:rgba(46,196,176,.42)}
 body[data-tab="training"]{--ns-accent:#4F8BFF;--ns-accent-hi:#A9C8FF;--ns-accent-lo:#2E63D6;--ns-accent-soft:rgba(79,139,255,.09);--ns-accent-line:rgba(79,139,255,.42);--ns-violet:#4F8BFF;--ns-violet-hi:#A9C8FF;--ns-violet-lo:#2E63D6;--ns-violet-soft:rgba(79,139,255,.09);--ns-violet-line:rgba(79,139,255,.42)}
 body[data-tab="ops"]{--ns-accent:#FFC21A;--ns-accent-hi:#FFE27A;--ns-accent-lo:#D99A00;--ns-accent-soft:rgba(255,194,26,.09);--ns-accent-line:rgba(255,194,26,.42);--ns-violet:#FFC21A;--ns-violet-hi:#FFE27A;--ns-violet-lo:#D99A00;--ns-violet-soft:rgba(255,194,26,.09);--ns-violet-line:rgba(255,194,26,.42)}
 body[data-tab="history"]{--ns-accent:#A56BFF;--ns-accent-hi:#D9B8FF;--ns-accent-lo:#7B43D6;--ns-accent-soft:rgba(165,107,255,.09);--ns-accent-line:rgba(165,107,255,.42);--ns-violet:#A56BFF;--ns-violet-hi:#D9B8FF;--ns-violet-lo:#7B43D6;--ns-violet-soft:rgba(165,107,255,.09);--ns-violet-line:rgba(165,107,255,.42)}
 body[data-tab="account"]{--ns-accent:#FF6A1F;--ns-accent-hi:#FFB98F;--ns-accent-lo:#E2541A;--ns-accent-soft:rgba(255,106,31,.09);--ns-accent-line:rgba(255,106,31,.42);--ns-violet:#FF6A1F;--ns-violet-hi:#FFB98F;--ns-violet-lo:#E2541A;--ns-violet-soft:rgba(255,106,31,.09);--ns-violet-line:rgba(255,106,31,.42)}
+
+/* =====================================================================
+   v5: route cards in a grid, the group display card, training search
+   ===================================================================== */
+/* Routes tab: each route is its own glass card, laid out in a grid */
+.rp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;border:0;border-radius:0;overflow:visible}
+.rp-route{grid-template-columns:1fr 1fr;grid-template-areas:"name name" "p d" "drv drv";gap:12px;align-items:start;align-content:start;padding:16px;
+  border:1px solid var(--ns-line);border-radius:22px;background:linear-gradient(180deg,rgba(255,236,224,.065),rgba(255,236,224,.02));
+  box-shadow:inset 0 1px 0 rgba(255,240,230,.08),0 18px 36px -26px rgba(0,0,0,.9)}
+.rp-route:first-child{border-top:1px solid var(--ns-line)}
+.rp-route:hover{background:linear-gradient(180deg,rgba(255,236,224,.085),rgba(255,236,224,.03))}
+.rp-route.has{border-color:rgba(var(--accent-rgb),.38)}
+.rp-route.has::before{left:22px;right:22px;top:-1px;bottom:auto;width:auto;height:3px;border-radius:0 0 3px 3px}
+.rp-r-name{grid-area:name}
+.rp-route>.rp-r-num:nth-child(2){grid-area:p}
+.rp-route>.rp-r-num:nth-child(3){grid-area:d}
+.rp-r-num{padding:10px 12px;border-radius:14px;border:1px solid var(--ns-line);background:rgba(14,9,6,.35);text-align:left}
+.rp-r-num b{font-size:26px}
+.rp-r-drv{grid-area:drv}
+.rp-pcs{grid-column:1/-1}
+.rp-badge{border-radius:12px}
+
+/* the card you screenshot for the group */
+.rp-poster{width:min(560px,100%);padding:20px 18px 16px}
+.rp-p-stats{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.rp-p-stats div{padding:10px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05)}
+.rp-p-stats b{display:block;font-size:24px;font-weight:800;line-height:1.05;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums}
+.rp-p-stats span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ns-muted)}
+.rp-p-grid{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rp-p-tile{display:flex;flex-direction:column;gap:6px;min-width:0;padding:11px 11px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.rp-p-tile.zero{opacity:.45}
+.rp-p-th{display:flex;align-items:center;gap:7px;min-width:0}
+.rp-p-th .rp-p-num{width:26px;height:26px;border-radius:9px;font-size:13px}
+.rp-p-th small{min-width:0;font-size:11.5px;font-weight:700;line-height:1.2;color:var(--ns-ink-2)}
+.rp-p-n b{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums}
+.rp-p-n span{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--ns-muted)}
+.rp-p-drv{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid rgba(255,255,255,.08)}
+.rp-p-drv span{display:flex;align-items:flex-start;min-width:0;font-size:12.5px;font-weight:700;line-height:1.25;color:#fff;overflow-wrap:anywhere}
+.rp-p-drv span .ag-dot{margin-top:4px}
+.rp-p-drv em{font-style:normal;font-size:12px;color:var(--ns-faint)}
+.rp-p-note{position:relative;margin:10px 0 0;font-size:12px;color:var(--ns-warn)}
+@media (max-width:380px){ .rp-p-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+/* phones: two route cards side by side */
+@media (max-width:600px){
+  .rp-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .rp-route{padding:12px;gap:8px;border-radius:18px}
+  .rp-r-name{gap:9px}
+  .rp-r-name b{font-size:14.5px;line-height:1.2}
+  .rp-badge{width:30px;height:30px;font-size:14px;border-radius:10px}
+  .rp-r-num{padding:8px 9px;border-radius:12px}
+  .rp-r-num b{font-size:20px}
+  .rp-r-num span{font-size:11px}
+  .rp-r-chips{gap:6px}
+  .rp-r-chips .rp-name{max-width:100%;height:auto;min-height:32px;padding:3px 4px 3px 10px;font-size:13px;white-space:normal;line-height:1.2}
+  .rp-add,.rp-rand{width:100%;justify-content:center;font-size:12.5px;height:34px}
+  .rp-split{font-size:11.5px}
+  .rp-route.has::before{left:16px;right:16px}
+}
+@media (max-width:340px){ .rp-list{grid-template-columns:1fr} }
+
+/* training search */
+.tr-search{position:relative;margin:0 0 20px}
+.tr-search-box{position:relative}
+.tr-search-box svg.i{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--ns-muted);pointer-events:none}
+.tr-search input{height:52px;padding-left:46px;padding-right:44px;border-radius:999px;font-size:16px;
+  background:rgba(255,236,224,.06);border-color:rgba(255,228,212,.14);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.tr-search input:focus{border-color:var(--ns-violet-hi);box-shadow:0 0 0 4px rgba(var(--accent-rgb),.2)}
+.tr-search input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.tr-search-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ns-muted);font-size:16px;cursor:pointer}
+.tr-results{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:20;max-height:min(60vh,520px);overflow:auto;padding:8px;border-radius:22px;
+  border:1px solid rgba(255,228,212,.16);background:rgba(30,19,13,.97);box-shadow:0 30px 60px -20px rgba(0,0,0,.9)}
+.tr-res{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;width:100%;padding:11px 12px;border:0;border-radius:16px;background:transparent;color:var(--ns-ink);text-align:left;cursor:pointer}
+.tr-res:hover,.tr-res.sel{background:rgba(var(--accent-rgb),.12)}
+.tr-res-n{grid-row:span 3;align-self:start;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;
+  background:linear-gradient(160deg,var(--ns-violet-hi),var(--ns-violet-lo));box-shadow:0 0 12px rgba(var(--accent-rgb),.45)}
+.tr-res-n.term{font-size:16px}
+.tr-res small{font-size:12px;font-weight:600;color:var(--ns-muted)}
+.tr-res b{font-size:15.5px;letter-spacing:-.01em}
+.tr-res p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ns-ink-2)}
+.tr-res mark{background:rgba(var(--accent-rgb),.28);color:#fff;border-radius:4px;padding:0 2px}
+.tr-none{margin:0;padding:14px;font-size:14px;color:var(--ns-muted)}
 </style>
 </head>
 <body data-tab="shift">
@@ -1215,6 +1298,14 @@ body[data-tab="account"]{--ns-accent:#FF6A1F;--ns-accent-hi:#FFB98F;--ns-accent-
 
     <!-- Training -->
     <main id="trainingView" class="content" hidden>
+      <div class="tr-search" id="trSearch">
+        <div class="tr-search-box">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="trQ" placeholder="Search training, for example pickup label" autocomplete="off" aria-label="Search training" aria-controls="trResults">
+          <button class="tr-search-x" id="trQx" type="button" aria-label="Clear search" hidden>✕</button>
+        </div>
+        <div class="tr-results" id="trResults" role="listbox" hidden></div>
+      </div>
       <div id="trainingRoot"></div>
     </main>
 
@@ -2541,6 +2632,102 @@ document.addEventListener("input", e => {
   card.querySelector(".gloss-none").hidden = shownN > 0;
 });
 
+/* ---------- training search ---------- */
+const SEARCH_STOP = new Set("a an the to do does i im how what whats is are for of in on my can you it and or with where when who which why should do".split(" "));
+const normS = x => String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+let trIndex = null, trHits = [], trSel = 0;
+function buildTrIndex(){
+  const out = [];
+  T.modules.forEach((m, i) => {
+    const num = m.num ?? i + 1;
+    if (m.kind !== "glossary" && m.kind !== "checklist"){
+      (m.steps || []).forEach(st => {
+        const lines = [].concat(st.when || [], st.text || [], st.how || [], st.listTitle || [], st.list || [], st.tip || [], st.important || [], st.example || [],
+          (st.images || []).map(im => im && im.caption || ""));
+        out.push({ kind: "step", ref: m.id + "/" + st.id, num, module: m.title, title: st.title, lines: lines.filter(Boolean).map(String),
+          hayT: normS(st.title), hay: normS(st.title + " " + m.title + " " + lines.join(" ")) });
+      });
+    }
+  });
+  const terms = T.modules.find(m => m.kind === "glossary");
+  (T.glossary || []).forEach(g => {
+    const lines = [].concat(g.def || [], g.points || [], g.note || [], g.example || []);
+    out.push({ kind: "term", ref: terms ? terms.id : "", term: g.term, num: "Aa", module: "Key terms", title: g.term + (g.full ? " (" + g.full + ")" : ""),
+      lines: lines.map(String), hayT: normS(g.term + " " + (g.full || "")), hay: normS(g.term + " " + (g.full || "") + " " + lines.join(" ")) });
+  });
+  return out;
+}
+function trSearch(q){
+  if (!trIndex) trIndex = buildTrIndex();
+  let words = normS(q).split(" ").filter(Boolean);
+  const kept = words.filter(w => !SEARCH_STOP.has(w));
+  if (kept.length) words = kept;
+  if (!words.length) return [];
+  const n = words.length, joined = words.join("");
+  const cover = hay => {
+    const flat = hay.replace(/ /g, ""), c = words.map(w => hay.includes(w));
+    for (let k = 0; k < n - 1; k++) if (flat.includes(words[k] + words[k + 1])) c[k] = c[k + 1] = true;
+    return { n: c.filter(Boolean).length, phrase: n > 1 && flat.includes(joined) };
+  };
+  return trIndex.map(e => {
+    const a = cover(e.hay); if (!a.n) return null;
+    const t = cover(e.hayT);
+    const whole = words.filter(w => (" " + e.hayT + " ").includes(" " + w + " ")).length / n * .4;
+    const score = a.n / n + (a.phrase ? .6 : 0) + t.n / n * .8 + (t.phrase ? .6 : 0) + whole + (e.kind === "term" ? .05 : 0);
+    return a.n / n >= (n <= 2 ? 1 : .67) ? { e, score } : null;
+  }).filter(Boolean).sort((x, y) => y.score - x.score).slice(0, 8).map(x => x.e);
+}
+function trMark(text, q){
+  const ws = normS(q).split(" ").filter(w => w.length > 1 && !SEARCH_STOP.has(w));
+  if (!ws.length) return esc(text);
+  const alts = ws.slice();
+  for (let k = 0; k < ws.length - 1; k++) alts.push(ws[k] + ws[k + 1], ws[k] + " " + ws[k + 1]);
+  alts.sort((a, b) => b.length - a.length);
+  // one pass, longest match first, so "pickup" lights up as one word
+  return esc(text).replace(new RegExp("(" + alts.join("|") + ")", "ig"), "<mark>$1</mark>");
+}
+function trSnippet(e, q){
+  const ws = normS(q).split(" ").filter(w => !SEARCH_STOP.has(w));
+  let best = e.lines[0] || "", bestN = -1;
+  e.lines.forEach(l => { const L = normS(l), f = L.replace(/ /g, ""); const k = ws.filter(w => L.includes(w)).length + (f.includes(ws.join("")) ? 2 : 0); if (k > bestN){ bestN = k; best = l; } });
+  return best.length > 150 ? best.slice(0, 147) + "…" : best;
+}
+function renderTrResults(){
+  const q = $("trQ").value.trim(), box = $("trResults");
+  $("trQx").hidden = !q;
+  if (q.length < 2){ box.hidden = true; return; }
+  trHits = trSearch(q); trSel = 0;
+  box.innerHTML = trHits.length ? trHits.map((e, k) => `<button class="tr-res ${k === 0 ? "sel" : ""}" type="button" role="option" data-hit="${k}">
+      <span class="tr-res-n ${e.kind === "term" ? "term" : ""}">${e.kind === "term" ? "Aa" : esc(String(e.num).padStart(2, "0"))}</span>
+      <small>${e.kind === "term" ? "Key term" : "Module " + esc(String(e.num)) + " · " + esc(e.module)}</small>
+      <b>${trMark(e.title, q)}</b>
+      <p>${trMark(trSnippet(e, q), q)}</p></button>`).join("")
+    : `<p class="tr-none">Nothing found for “${esc(q)}”. Try fewer or different words.</p>`;
+  box.hidden = false;
+}
+function openTrHit(e){
+  $("trQ").value = ""; $("trQx").hidden = true; $("trResults").hidden = true; $("trQ").blur();
+  if (e.kind === "term"){
+    if (!e.ref) return;
+    trGo("m:" + e.ref);
+    const g = document.querySelector("#trainingRoot .gloss-search");
+    if (g){ g.value = e.term; g.dispatchEvent(new Event("input", { bubbles: true })); g.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  } else openLearn(e.ref);
+}
+$("trQ").addEventListener("input", renderTrResults);
+$("trQ").addEventListener("focus", renderTrResults);
+$("trQ").addEventListener("keydown", e => {
+  if ($("trResults").hidden || !trHits.length) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp"){
+    e.preventDefault(); trSel = (trSel + (e.key === "ArrowDown" ? 1 : trHits.length - 1)) % trHits.length;
+    document.querySelectorAll("#trResults .tr-res").forEach((b, k) => b.classList.toggle("sel", k === trSel));
+  } else if (e.key === "Enter"){ e.preventDefault(); openTrHit(trHits[trSel]); }
+  else if (e.key === "Escape"){ $("trResults").hidden = true; }
+});
+$("trResults").addEventListener("click", e => { const b = e.target.closest("[data-hit]"); if (b) openTrHit(trHits[+b.dataset.hit]); });
+$("trQx").addEventListener("click", () => { $("trQ").value = ""; renderTrResults(); $("trQ").focus(); });
+document.addEventListener("click", e => { if (!e.target.closest("#trSearch")) $("trResults").hidden = true; });
+
 /* =====================================================================
    LIVE OPS
    Kept on this device, one record per shift. A new date or AM/PM on
@@ -3085,8 +3272,10 @@ $("rpNewDay").addEventListener("click", () => {
 
 /* ---------- display card to screenshot for the group ---------- */
 function rpShowCard(){
-  const total = day.working.filter(n => routeOf(n)).length;
+  const anyDrivers = RPC.routes.some(r => (day.assign[r.num] || []).length);
+  const out = day.working.filter(n => routeOf(n)).length;
   const d = new Date(today() + "T12:00:00");
+  const stat = (v, label) => `<div><b>${v}</b><span>${label}</span></div>`;
   $("rpPoster").innerHTML = `
     <div class="rp-p-glow" aria-hidden="true"></div>
     <header class="rp-p-head">
@@ -3094,20 +3283,26 @@ function rpShowCard(){
       <div class="rp-p-date"><b>${d.toLocaleDateString("en-GB", { day: "numeric" })}</b><span>${d.toLocaleDateString("en-GB", { month: "short" })}</span></div>
     </header>
     <div class="rp-p-title"><span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span><h2>Today's routes</h2></div>
-    <ol class="rp-p-list">${RPC.routes.map(r => {
+    <div class="rp-p-stats">${stat(rpS ? rpS.totalParcels : "–", "Parcels")}${stat(rpS ? rpS.totalDrops : "–", "Drops")}${stat(anyDrivers ? out : RPC.routes.length, anyDrivers ? "Drivers" : "Routes")}</div>
+    <div class="rp-p-grid">${RPC.routes.map(r => {
+      const x = rpS ? rpS.routes.find(y => y.num === r.num) : null;
       const names = day.assign[r.num] || [];
-      return `<li class="${names.length ? "" : "empty"}"><span class="rp-p-num">${r.num}</span>
-        <div class="rp-p-body"><small>${esc(r.name)}</small>
-          <div class="rp-p-names">${names.length ? names.map(n => `<span>${dot(n)}${esc(n)}</span>`).join("") : `<em>No driver</em>`}</div></div></li>`;
-    }).join("")}</ol>
-    <footer class="rp-p-foot"><span>${plural(total, "driver", "drivers")} out today</span>
-      <span class="rp-p-key">${AGENCIES.map(a => `<span><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</span>`).join("")}</span></footer>`;
+      const zero = rpS && x && !x.parcels && !names.length;
+      return `<div class="rp-p-tile ${zero ? "zero" : ""}">
+        <div class="rp-p-th"><span class="rp-p-num">${r.num}</span><small>${esc(r.name)}</small></div>
+        <div class="rp-p-n"><b>${x ? x.parcels : "–"}</b><span>${x ? plural(x.drops, "drop", "drops") : "parcels"}</span></div>
+        ${anyDrivers ? `<div class="rp-p-drv">${names.length ? names.map(n => `<span>${dot(n)}${esc(n)}</span>`).join("") : `<em>No driver</em>`}</div>` : ""}
+      </div>`;
+    }).join("")}</div>
+    ${rpS && rpS.unassigned.parcels ? `<p class="rp-p-note">${plural(rpS.unassigned.parcels, "parcel isn't", "parcels aren't")} on a route yet</p>` : ""}
+    <footer class="rp-p-foot"><span>${rpS ? "Parcels and drops from today's forecast" : "Load a forecast to show parcel counts"}</span>
+      ${anyDrivers ? `<span class="rp-p-key">${AGENCIES.map(a => `<span><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</span>`).join("")}</span>` : ""}</footer>`;
   $("rpShow").hidden = false;
   document.body.style.overflow = "hidden";
 }
 function rpHideCard(){ $("rpShow").hidden = true; document.body.style.overflow = ""; }
 $("rpDisplay").addEventListener("click", () => {
-  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
+  if (!RPC) return toast("routes-config.js wasn't found", "bad");
   rpShowCard();
 });
 $("rpShowClose").addEventListener("click", rpHideCard);
