@@ -537,7 +537,6 @@ select.unset{color:var(--ns-faint)}
 .trend-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .trend h3{font-size:14px;color:var(--ns-ink-2)}
 .trend h3 span{margin-left:4px;color:var(--ns-faint);font-weight:500}
-#trendChart svg{display:block;width:100%;height:auto;overflow:visible}
 /* form guide: the last 7 shifts as results, oldest on the left */
 .form-guide{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:8px 0 0;padding:0;list-style:none}
 .fg{
