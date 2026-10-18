@@ -158,7 +158,6 @@
   --ns-side-w:248px;
   --ns-content-w:1200px;
   --ns-dock-h:64px;         /* phone tab bar, without the safe area */
-  --ns-actionbar-h:62px;    /* phone Save bar */
 }
 
 /* ---------- light theme ----------
@@ -1259,27 +1258,19 @@ html.theme-fade,html.theme-fade *,html.theme-fade *::before,html.theme-fade *::a
   .tab[aria-selected=true]::before{display:block;left:50%;right:auto;top:1px;bottom:auto;width:54px;height:30px;transform:translateX(-50%);border-radius:var(--ns-pill);background:var(--ns-accent-soft);box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
   
 
-  /* page title scrolls with the page; Save and Reset sit above the tab bar */
+  /* page title scrolls with the page */
   .pagehead{position:static;background:transparent;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
   .pagehead-inner{min-height:0;padding:18px max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
   .pagehead h1{font-size:24px}
   .pagehead p{font-size:13.5px}
-  .actionbar{
-    position:fixed;left:0;right:0;bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom));z-index:30;
-    padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));
-    border-top:1px solid var(--ns-line);
-    background:var(--ns-glass-bar);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  }
-  .actionbar .btn{flex:1 1 0;min-width:0;padding:0 10px;white-space:normal;line-height:1.15;text-align:center}
   /* Save takes the room; Reset steps back to a quiet text button so it
      isn't hit by mistake */
   
   
   .draft{display:none}
 
-  /* Lite: only Clear here, so it sits in the page header, not a fixed bar */
-  .actionbar{position:static;padding:0;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-  .actionbar .btn{flex:none;padding:0 16px}
+  /* Lite: only Clear here, so it stays in the page header, not a fixed bar */
+  .actionbar .btn{padding:0 16px}
   #shiftView{padding-bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 32px)}
   body[data-tab=shift] .toast{bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 12px)}
   .privacy-note{display:block}
@@ -1287,9 +1278,7 @@ html.theme-fade,html.theme-fade *,html.theme-fade *::before,html.theme-fade *::a
   /* FTDS: the steppers people press all shift come before the gauge */
   .band-inputs{order:-1;align-items:end}
   .content{padding:16px max(16px,env(safe-area-inset-right)) calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 32px) max(16px,env(safe-area-inset-left))}
-  #shiftView{padding-bottom:calc(var(--ns-dock-h) + var(--ns-actionbar-h) + env(safe-area-inset-bottom) + 32px)}
   .toast{left:16px;right:16px;max-width:none;bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 12px)}
-  body[data-tab=shift] .toast{bottom:calc(var(--ns-dock-h) + var(--ns-actionbar-h) + env(safe-area-inset-bottom) + 12px)}
 
   /* history rows become small cards */
   
