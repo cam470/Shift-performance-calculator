@@ -464,7 +464,6 @@ let configured = false;
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const FIELDS = ["date","pv","av","pd","ad","ftdsVol","rej","red","varReason","keyRisk"];
-const MAX_NOTES = 60;
 const has = x => Number.isFinite(x);
 const val = id => { const v = $(id).value; if (v === "") return NaN; const x = Number(v); return has(x) && x >= 0 ? x : NaN; };
 const fmtInt = x => has(x) ? Math.round(x).toLocaleString("en-GB") : "–";
@@ -484,10 +483,12 @@ function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset(
 function prettyDate(iso, opts){ if (!iso) return ""; const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", opts); }
 const toDate = ts => !ts ? null : ts.toDate ? ts.toDate() : new Date(ts);
 const JDW_RE = /^JDW\d{12}$/;
-const jdwState = v => !v.trim() ? "empty" : JDW_RE.test(v.trim()) ? "ok" : "bad";
-const blankNote = () => ({ jdw: "", reason: "", damagedBy: [], other: "" });
+// One note holds one or more JDW numbers (pasted or typed) that share a reason
+const blankNote = () => ({ text: "", reason: "", damagedBy: [], other: "" });
+const JDW_EXAMPLE = "JDW200673847264";
+// every JDW-like word in what was pasted: spaces, commas or new lines between them
+const jdwList = text => (String(text || "").toUpperCase().match(/[A-Z0-9]+/g) || []);
 const reasonDone = x => !!x.reason && (x.reason !== DAMAGED || (x.damagedBy || []).length > 0) && (x.reason !== "Other" || !!(x.other || "").trim());
-const isDone = x => jdwState(x.jdw) === "ok" && reasonDone(x);
 function listJoin(a){ return a.length > 1 ? a.slice(0, -1).join(", ") + " and " + a[a.length - 1] : a.join(""); }
 function reasonText(x){
   if (!x.reason) return "";
@@ -635,10 +636,17 @@ function render(){
   saveDraft();
 }
 
-/* ---------- notes ---------- */
+/* ---------- notes ----------
+   Each note is one reason with one or more JDW numbers. Staff paste a
+   list (from a message or a spreadsheet) and pick the reason once. Every
+   JDW stands for one redelivery or rejection, so the panel compares how
+   many are entered with the count in FTDS live. Saved reports still keep
+   one line per JDW, so History reads them as before. */
 const jdwPrefixOk = v => { v = v.trim(); return "JDW".startsWith(v.slice(0, 3)) && /^\d{0,12}$/.test(v.slice(3)); };
 function normNote(t, x){
   x = { ...blankNote(), ...(x || {}) };
+  if (typeof x.jdw === "string" && !x.text) x.text = x.jdw;   // drafts from before notes held a list
+  delete x.jdw;
   if (!Array.isArray(x.damagedBy)) x.damagedBy = [];
   const list = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
   if (x.reason && !list.includes(x.reason)){        // older drafts had typed reasons
@@ -646,20 +654,35 @@ function normNote(t, x){
   }
   return x;
 }
-function noteState(el, item, typing = false){
-  const st = jdwState(item.jdw);
-  // while typing, only go red once it can't become a valid JDW
-  const bad = st === "bad" && (!typing || !jdwPrefixOk(item.jdw));
-  el.classList.toggle("done", isDone(item));
-  el.classList.toggle("invalid", bad);
-  el.querySelector("[data-k=jdw]").classList.toggle("invalid", bad);
+// what a panel adds up to: every JDW entered, which are wrong or repeated, how many are finished
+function tally(t){
+  const seen = new Map(), all = [];
+  notes[t].forEach((x, i) => jdwList(x.text).forEach(j => { all.push({ j, i }); seen.set(j, (seen.get(j) || 0) + 1); }));
+  // a JDW pasted twice is one parcel, so repeats count once
+  const done = new Set(all.filter(({ j, i }) => JDW_RE.test(j) && reasonDone(notes[t][i])).map(({ j }) => j)).size;
+  const bad = all.filter(({ j }) => !JDW_RE.test(j)).length;
+  const dups = [...seen].filter(([, n]) => n > 1).map(([j]) => j);
+  return { entered: seen.size, done, bad, dups };
+}
+function noteState(t, el, item, typing = false){
+  const list = jdwList(item.text), dups = new Set(tally(t).dups);
+  // while typing, the last JDW only goes red once it can't become valid
+  const isBad = (j, k) => !JDW_RE.test(j) && !(typing && k === list.length - 1 && jdwPrefixOk(j));
+  const anyBad = list.some(isBad);
+  el.classList.toggle("done", list.length > 0 && !anyBad && list.every(j => JDW_RE.test(j)) && reasonDone(item));
+  el.classList.toggle("invalid", anyBad);
+  el.querySelector("[data-k=text]").classList.toggle("invalid", anyBad);
   el.querySelector("select").classList.toggle("unset", !item.reason);
+  el.querySelector(".jdw-chips").innerHTML = list.length
+    ? `<span class="jdw-n">${list.length} JDW${list.length > 1 ? "s" : ""}</span>` + list.map((j, k) =>
+        `<span class="jdw-chip${isBad(j, k) ? " bad" : dups.has(j) ? " dup" : ""}">${esc(j)}${dups.has(j) && !isBad(j, k) ? " <small>twice</small>" : ""}</span>`).join("")
+    : "";
   const dmg = el.querySelector(".damage"), oth = el.querySelector(".other");
   if (dmg) dmg.hidden = item.reason !== DAMAGED;
   if (oth) oth.hidden = item.reason !== "Other";
   el.classList.toggle("need-damage", item.reason === DAMAGED && !item.damagedBy.length);
 }
-function noteHTML(t, x, i){
+function noteHTML(t, x, i, many){
   const reasons = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
   const opts = reasons.map(r => `<option value="${esc(r)}"${r === x.reason ? " selected" : ""}>${esc(r)}</option>`).join("");
   const damage = reasons.includes(DAMAGED) ? `
@@ -671,43 +694,69 @@ function noteHTML(t, x, i){
     <label class="f other" hidden><span>Other reason</span><input data-k="other" value="${esc(x.other)}" autocomplete="off" placeholder="Type the reason"></label>` : "";
   return `<div class="note" data-i="${i}">
     <span class="note-n num">${i + 1}</span>
-    <label class="f"><span>JDW</span><input class="jdw" data-k="jdw" value="${esc(x.jdw)}" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="JDW and 12 numbers"><em class="hint">Must be JDW and 12 numbers</em></label>
-    <label class="f"><span>Reason</span><select data-k="reason"><option value="">Choose a reason</option>${opts}</select></label>
+    <label class="f jdw-f"><span>JDW numbers <span class="sub">Paste one or more</span></span><textarea class="jdw" data-k="text" rows="2" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${JDW_EXAMPLE}">${esc(x.text)}</textarea><em class="hint">Each must be JDW and 12 numbers, like ${JDW_EXAMPLE}</em></label>
+    <label class="f"><span>Reason <span class="sub">For all of these</span></span><select data-k="reason"><option value="">Choose a reason</option>${opts}</select></label>
+    <div class="jdw-chips" aria-live="polite"></div>
     ${damage}${other}
+    ${many ? `<button class="link quiet note-del" type="button" data-del="${i}">Remove this note</button>` : ""}
   </div>`;
+}
+function renderNotes(t){
+  const box = $(t + "Notes"), word = t === "red" ? "redeliveries" : "rejections";
+  if (!notes[t].length) notes[t].push(blankNote());
+  notes[t] = notes[t].map(x => normNote(t, x));
+  const many = notes[t].length > 1;
+  box.innerHTML = notes[t].map((x, i) => noteHTML(t, x, i, many)).join("")
+    + `<button class="btn secondary sm note-add" type="button" data-add><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add JDWs with another reason</button>`
+    + `<p class="note-sum" aria-live="polite"></p>`;
+  box.querySelectorAll(".note").forEach(el => noteState(t, el, notes[t][+el.dataset.i]));
+  box.dataset.word = word;
 }
 function syncNotes(t, raw){
   raw = Math.floor(raw) || 0;
   if (raw === shown[t]) return;
-  shown[t] = raw;
-  const count = Math.min(raw, MAX_NOTES);
-  while (notes[t].length < count) notes[t].push(blankNote());
-  notes[t] = notes[t].map(x => normNote(t, x));
+  const was = shown[t]; shown[t] = raw;
   const box = $(t + "Notes");
-  if (!count){
+  if (!raw){
     box.innerHTML = t === "red"
-      ? `<p class="empty-notes">No redeliveries. Press + on Redeliveries in FTDS live and a note appears here for each one.</p>`
-      : `<p class="empty-notes">No rejections. Press + on Rejected parcels in FTDS live and a note appears here for each one.</p>`;
+      ? `<p class="empty-notes">No redeliveries. Press + on Redeliveries in FTDS live, then paste the JDW numbers here.</p>`
+      : `<p class="empty-notes">No rejections. Press + on Rejected parcels in FTDS live, then paste the JDW numbers here.</p>`;
     return;
   }
-  box.innerHTML = notes[t].slice(0, count).map((x, i) => noteHTML(t, x, i)).join("")
-    + (raw > MAX_NOTES ? `<p class="warnline">Showing the first ${MAX_NOTES}. Check the count is right.</p>` : "");
-  box.querySelectorAll(".note").forEach(el => noteState(el, notes[t][+el.dataset.i]));
+  // keep what's typed: only draw the notes when they aren't on screen yet
+  if (was <= 0 || !box.querySelector(".note")) renderNotes(t);
 }
 function updateNoteCounts(){
   ["red","rej"].forEach(t => {
-    const n = Math.max(0, Math.min(shown[t], MAX_NOTES));
-    const done = notes[t].slice(0, n).filter(isDone).length;
+    const n = Math.max(0, shown[t]), k = tally(t), done = Math.min(k.done, n);
     const el = $(t + "Count");
     el.textContent = n ? `${done} of ${n} done` : "None";
-    el.classList.toggle("done", n > 0 && done === n);
+    const complete = n > 0 && done === n && k.entered === n && !k.bad && !k.dups.length;
+    el.classList.toggle("done", complete);
     $(t + "Bar").style.width = n ? (done / n * 100) + "%" : "0%";
-    $(t + "Panel").classList.toggle("complete", n > 0 && done === n);
+    $(t + "Panel").classList.toggle("complete", complete);
+    const sum = $(t + "Notes").querySelector(".note-sum");
+    if (!sum) return;
+    const label = t === "red" ? "Redeliveries" : "Rejected parcels";
+    if (k.entered > n){
+      sum.className = "note-sum warn";
+      sum.innerHTML = `${k.entered} JDW numbers entered, but ${label} is ${n}. <button class="link" type="button" data-setcount="${k.entered}">Change ${label} to ${k.entered}</button>`;
+    } else if (k.entered < n){
+      sum.className = "note-sum";
+      sum.textContent = `${n - k.entered} more JDW number${n - k.entered > 1 ? "s" : ""} to add.`;
+    } else {
+      sum.className = "note-sum"; sum.textContent = "";
+    }
+    if (k.dups.length){
+      sum.className = "note-sum warn";
+      sum.insertAdjacentHTML("afterbegin", `${k.dups.map(esc).join(", ")} ${k.dups.length > 1 ? "are" : "is"} entered twice, so ${k.dups.length > 1 ? "they count" : "it counts"} once. `);
+    }
   });
 }
 ["red","rej"].forEach(t => {
   const box = $(t + "Notes");
   const itemOf = el => { const note = el.closest(".note"); return [note, notes[t][+note.dataset.i]]; };
+  const refresh = (typing) => box.querySelectorAll(".note").forEach(el => noteState(t, el, notes[t][+el.dataset.i], typing && el.contains(document.activeElement)));
   const update = (el, typing) => {
     const [note, item] = itemOf(el);
     if (el.dataset.dmg){
@@ -715,26 +764,40 @@ function updateNoteCounts(){
       el.checked ? set.add(el.dataset.dmg) : set.delete(el.dataset.dmg);
       item.damagedBy = DAMAGE_SOURCES.filter(d => set.has(d));
     } else {
-      if (el.dataset.k === "jdw"){
-        const pos = el.selectionStart, v = el.value.toUpperCase().replace(/\s+/g, "");
-        if (v !== el.value){ el.value = v; try { el.setSelectionRange(pos, pos); } catch (_) {} }
+      if (el.dataset.k === "text"){
+        const a = el.selectionStart, b = el.selectionEnd, v = el.value.toUpperCase();
+        if (v !== el.value){ el.value = v; try { el.setSelectionRange(a, b); } catch (_) {} }
       }
       item[el.dataset.k] = el.value;
     }
-    noteState(note, item, typing); updateNoteCounts(); saveDraft();
+    // repeats can sit in another note, so check every note in this panel
+    if (el.dataset.k === "text") refresh(typing); else noteState(t, note, item, typing);
+    updateNoteCounts(); saveDraft();
     if (el.tagName === "SELECT" && item.reason === "Other") note.querySelector("[data-k=other]")?.focus();
   };
   box.addEventListener("input", e => {
     const el = e.target;
-    if (el.tagName === "INPUT" && el.type !== "checkbox" && el.dataset.k) update(el, true);
+    if ((el.tagName === "INPUT" || el.tagName === "TEXTAREA") && el.type !== "checkbox" && el.dataset.k) update(el, true);
   });
   box.addEventListener("change", e => {
     const el = e.target;
     if (el.tagName === "SELECT" || el.type === "checkbox") update(el, false);
   });
   box.addEventListener("focusout", e => {
-    if (e.target.dataset.k !== "jdw") return;
-    const [note, item] = itemOf(e.target); noteState(note, item);
+    if (e.target.dataset.k !== "text") return;
+    refresh(false);
+  });
+  box.addEventListener("click", e => {
+    const add = e.target.closest("[data-add]"), del = e.target.closest("[data-del]"), set = e.target.closest("[data-setcount]");
+    if (add){
+      notes[t].push(blankNote()); renderNotes(t); updateNoteCounts(); saveDraft();
+      box.querySelector(`.note[data-i="${notes[t].length - 1}"] textarea`)?.focus();
+    } else if (del){
+      notes[t].splice(+del.dataset.del, 1); renderNotes(t); updateNoteCounts(); saveDraft();
+    } else if (set){
+      // the count in FTDS live follows the JDW numbers only when asked
+      $(t).value = set.dataset.setcount; render();
+    }
   });
 });
 
@@ -814,7 +877,7 @@ function loadDraft(){
     if (!$("date").value) $("date").value = today();
     volLinked = !$("ftdsVol").value || $("ftdsVol").value === $("av").value;
     if (d.shift) setShift(d.shift);
-    if (d.notes){ notes.red = d.notes.red || []; notes.rej = d.notes.rej || []; }
+    if (d.notes){ notes.red = (d.notes.red || []).map(x => normNote("red", x)); notes.rej = (d.notes.rej || []).map(x => normNote("rej", x)); }
   } catch (e) {}
 }
 
@@ -853,18 +916,28 @@ async function saveShift(){
   if (!date) return toast("Add the shift date before saving", "bad");
   if (!has(c.av)) return toast("Add the actual volume before saving", "bad");
   if (!has(c.fv)) return toast("Add the volume in FTDS live before saving", "bad");
-  const clean = x => ({
-    jdw: x.jdw.trim(), reason: x.reason,
-    damagedBy: x.reason === DAMAGED ? x.damagedBy.slice() : [],
-    other: x.reason === "Other" ? (x.other || "").trim() : "",
-    text: reasonText(x)
-  });
-  const rn = notes.red.slice(0, Math.min(shown.red, MAX_NOTES)).map(clean);
-  const jn = notes.rej.slice(0, Math.min(shown.rej, MAX_NOTES)).map(clean);
-  const missing = [...rn, ...jn].filter(x => !x.jdw || !reasonDone(x)).length;
-  if (missing && !confirm(`${missing} note${missing > 1 ? "s aren't" : " isn't"} finished. Each one needs a JDW and a reason${jn.some(x => x.reason === DAMAGED) ? ", and damaged parcels need who damaged them" : ""}. Save anyway?`)) return;
-  const badJdw = [...rn, ...jn].filter(x => jdwState(x.jdw) === "bad").length;
-  if (badJdw && !confirm(`${badJdw} JDW number${badJdw > 1 ? "s aren't" : " isn't"} in the right format (JDW and 12 numbers). Save anyway?`)) return;
+  // one saved line per JDW, each carrying its note's reason (the shape History reads)
+  const lines = x => {
+    const r = {
+      reason: x.reason,
+      damagedBy: x.reason === DAMAGED ? x.damagedBy.slice() : [],
+      other: x.reason === "Other" ? (x.other || "").trim() : "",
+      text: reasonText(x)
+    };
+    const list = jdwList(x.text);
+    return list.length ? list.map(jdw => ({ jdw, ...r })) : x.reason ? [{ jdw: "", ...r }] : [];
+  };
+  const once = a => { const seen = new Set(); return a.filter(x => !x.jdw || (!seen.has(x.jdw) && seen.add(x.jdw))); };
+  const rn = shown.red > 0 ? once(notes.red.flatMap(lines)) : [];
+  const jn = shown.rej > 0 ? once(notes.rej.flatMap(lines)) : [];
+  const finished = a => a.filter(x => JDW_RE.test(x.jdw) && reasonDone(x)).length;
+  const missing = Math.max(0, c.red - finished(rn)) + Math.max(0, c.rej - finished(jn));
+  if (missing && !confirm(`${missing} redeliver${missing > 1 ? "ies or rejections don't" : "y or rejection doesn't"} have a JDW and a reason yet${jn.some(x => x.reason === DAMAGED) ? ", and damaged parcels need who damaged them" : ""}. Save anyway?`)) return;
+  const extra = (rn.filter(x => x.jdw).length > c.red ? `${rn.filter(x => x.jdw).length} redelivery JDW numbers for ${c.red} redeliveries` : "")
+    || (jn.filter(x => x.jdw).length > c.rej ? `${jn.filter(x => x.jdw).length} rejection JDW numbers for ${c.rej} rejected parcels` : "");
+  if (extra && !confirm(`There are ${extra}. Save anyway?`)) return;
+  const badJdw = [...rn, ...jn].filter(x => x.jdw && !JDW_RE.test(x.jdw)).length;
+  if (badJdw && !confirm(`${badJdw} JDW number${badJdw > 1 ? "s aren't" : " isn't"} in the right format (JDW and 12 numbers, like ${JDW_EXAMPLE}). Save anyway?`)) return;
   const dup = reports.find(r => r.date === date && r.shift === shift);
   if (dup && !confirm(`A ${shift} report for ${prettyDate(date, { day: "numeric", month: "short" })} was already saved by ${dup.submittedBy}. Save another one?`)) return;
 
