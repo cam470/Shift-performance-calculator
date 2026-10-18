@@ -2055,7 +2055,7 @@ function rpStats(parsed, cfg){
 // The driver list is for the whole station: kept on this device, and in
 // Firebase once it's connected. Today's plan is kept on this device.
 const ROSTER_KEY = "driverRoster", DAY_KEY = "routeDay";
-const AGENCIES = (RPC && RPC.agencies) || [{ code: "UKED", colour: "#FF5A6E" }, { code: "INRW", colour: "#4DA3FF" }];
+const AGENCIES = (RPC && RPC.agencies) || [{ code: "UKED", colour: "#A98BFF" }, { code: "INRW", colour: "#4DA3FF" }];
 let roster = [];                       // [{ name, agency }]
 let day = { parcelText: "", working: [], assign: {}, open: {} };
 let rpParsed = null, rpS = null, rpEditing = false, sugIndex = 0;
