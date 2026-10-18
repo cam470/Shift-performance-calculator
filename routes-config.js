@@ -10,7 +10,7 @@
 window.ROUTE_PLANNING = {
   // Driver agencies and the colour of the small dot shown next to names
   agencies: [
-    { code: "UKED", colour: "#FF5A6E" },
+    { code: "UKED", colour: "#A98BFF" },
     { code: "INRW", colour: "#4DA3FF" }
   ],
 

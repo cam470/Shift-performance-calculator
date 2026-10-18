@@ -18,10 +18,15 @@
    DESIGN RULES
      - Surfaces are solid. The only blur is on the sticky page header and
        the phone bars, where content scrolls underneath.
-     - Orange is for actions and "you are here". Green, amber and red are
-       only for status, and always come with words or an icon too.
+     - Orange is for actions and "you are here" only: the main button,
+       the selected tab, the current step, keyboard focus. Labels, counts
+       and decoration stay neutral.
+     - Green, amber and red are only for status, and always come with
+       words or an icon too.
+     - Violet is for categories (PM shift, a driver agency), so a label
+       never reads as an action or a status.
      - State is shown with a thin coloured rail on the edge of a card
-       (the current step, an open issue, a route with drivers), not glow.
+       (the current step, an open issue), not glow.
      - Radii follow depth: cards 16, panels inside cards 12, controls 10,
        small things 8, chips are pills.
 
@@ -34,7 +39,7 @@
      .stepper              minus, number, plus
      .check                tick pill: <label class="check"><input type="checkbox"><span>Text</span></label>
      .tick                 checkbox row used in Live ops
-     .chip                 small pill. Add .violet (accent, old name kept)
+     .chip                 small pill. Add .violet (emphasised neutral, old name kept)
                            .good .bad .warn .am .pm
      .count                counter pill. Add .done
      .bar > i              progress bar. Set the width on the <i>
@@ -85,6 +90,9 @@
   --ns-warn:#F2B544; --ns-warn-text:#F8D79A; --ns-warn-soft:rgba(242,181,68,.12);  --ns-warn-line:rgba(242,181,68,.42);
   --ns-info:#6FA8FF; --ns-info-text:#B5D0FF; --ns-info-soft:rgba(111,168,255,.12); --ns-info-line:rgba(111,168,255,.40);
   --ns-on-status:#0D1410;            /* text on a green, amber or red fill */
+
+  /* category: labels such as PM and driver agencies */
+  --ns-cat:#A98BFF; --ns-cat-text:#CDBDFF; --ns-cat-soft:rgba(169,139,255,.12); --ns-cat-line:rgba(169,139,255,.40);
 
   /* type */
   --ns-font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -276,7 +284,8 @@ select.unset{color:var(--ns-faint)}
   border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);
   font-size:12px;font-weight:600;color:var(--ns-ink-2);white-space:nowrap;
 }
-.chip.violet,.chip.pm{background:var(--ns-accent-soft);border-color:var(--ns-accent-line);color:var(--ns-accent-text)}
+.chip.violet{background:var(--ns-surface-3);border-color:var(--ns-line-3);color:var(--ns-ink)}
+.chip.pm{background:var(--ns-cat-soft);border-color:var(--ns-cat-line);color:var(--ns-cat-text)}
 .chip.am{background:var(--ns-info-soft);border-color:var(--ns-info-line);color:var(--ns-info-text)}
 .chip.warn{background:var(--ns-warn-soft);border-color:var(--ns-warn-line);color:var(--ns-warn-text)}
 .chip.good{background:var(--ns-good-soft);border-color:var(--ns-good-line);color:var(--ns-good-text)}
@@ -521,7 +530,7 @@ select.unset{color:var(--ns-faint)}
 .slots-head b{color:var(--ns-ink);font-weight:600}
 .slots{display:flex;flex-wrap:wrap;gap:5px;min-height:14px}
 .slot{width:20px;height:8px;border-radius:var(--ns-pill);background:rgba(255,255,255,.1)}
-.slot.used{background:var(--ns-accent)}
+.slot.used{background:var(--ns-ink-2)}
 .band[data-state=warn] .slot.used{background:var(--ns-warn)}
 .slot.over{background:var(--ns-bad)}
 .slot-more,.slot-note{align-self:center;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
@@ -629,7 +638,7 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .d-notes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
 .d-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:n}
 .d-list li{display:grid;grid-template-columns:22px 160px minmax(0,1fr);gap:10px;align-items:baseline;padding:10px 12px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-surface);font-size:14px}
-.d-list li::before{counter-increment:n;content:counter(n);font-weight:700;font-variant-numeric:tabular-nums;color:var(--ns-accent-text)}
+.d-list li::before{counter-increment:n;content:counter(n);font-weight:700;font-variant-numeric:tabular-nums;color:var(--ns-muted)}
 .d-list b{font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .d-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:18px;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
 
@@ -988,7 +997,7 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .rp-mini b{display:block;margin-top:8px;font-size:28px;font-weight:600;line-height:1;letter-spacing:-.03em}
 .rp-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--ns-gap);margin-bottom:var(--ns-gap);align-items:start}
 /* step numbers 1, 2, 3 in the card titles */
-.rp-n{width:24px;height:24px;flex:none;display:inline-grid;place-items:center;margin-right:10px;vertical-align:1px;border-radius:7px;font-size:var(--ns-fs-sm);font-weight:700;color:var(--ns-accent-text);background:var(--ns-accent-soft)}
+.rp-n{width:24px;height:24px;flex:none;display:inline-grid;place-items:center;margin-right:10px;vertical-align:1px;border-radius:7px;font-size:var(--ns-fs-sm);font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
 .rp-paste{min-height:150px;font:500 13.5px/1.55 var(--ns-mono)}
 .rp-actions{display:flex;align-items:center;gap:14px;margin-top:12px}
 .rp-ok{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--ns-r-md);border:1px solid var(--ns-good-line);background:var(--ns-good-soft)}
@@ -1007,8 +1016,8 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .rp-addrow.three{grid-template-columns:minmax(0,1fr) 110px auto}
 .rp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .rp-name{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 4px 0 12px;border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);font-size:14px;font-weight:600;white-space:nowrap}
-.rp-name.on{border-color:var(--ns-accent-line);background:var(--ns-accent-soft)}
-.rp-name small{font-size:11px;font-weight:700;color:var(--ns-accent-text)}
+.rp-name.on{border-color:var(--ns-line-3);background:var(--ns-surface-3)}
+.rp-name small{font-size:11px;font-weight:700;color:var(--ns-good-text)}
 .rp-name button{width:28px;height:28px;flex:none;border:0;border-radius:50%;background:rgba(255,255,255,.06);color:var(--ns-ink-2);font-size:12px;cursor:pointer}
 .rp-name button:hover{background:var(--ns-bad-soft);color:var(--ns-bad-text)}
 /* small dot in the agency's colour (the colour comes from routes-config.js) */
@@ -1047,7 +1056,7 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .rp-rdel:hover{background:var(--ns-bad-soft);color:var(--ns-bad-text)}
 .rp-foot{margin:12px 0 0;font-size:12.5px;color:var(--ns-faint)}
 
-/* route cards. A rail across the top means the route has a driver. */
+/* route cards. A green route number means the route has a driver. */
 .rp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .rp-route{
   position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"name name" "p d" "drv drv";
@@ -1055,14 +1064,16 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
   border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2);
   transition:border-color .15s;
 }
-.rp-route.has{border-color:var(--ns-accent-line);box-shadow:inset 0 3px 0 var(--ns-accent)}
+.rp-route.has{border-color:var(--ns-line-2)}
+.rp-route.has .rp-badge{color:var(--ns-good-text);background:var(--ns-good-soft)}
 .rp-route.zero{opacity:.55}
 .rp-r-name{grid-area:name;display:flex;align-items:center;gap:12px;min-width:0}
 .rp-r-name>div{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
 .rp-r-name b{font-size:16px;font-weight:600;letter-spacing:-.01em}
 .rp-r-name small{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-faint)}
-.rp-badge{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:var(--ns-r-sm);font-style:normal;font-size:15px;font-weight:700;color:var(--ns-accent-text);background:var(--ns-accent-soft)}
-.rp-pcbtn{display:inline-flex;align-items:center;gap:2px;margin-top:2px;padding:0;border:0;background:none;color:var(--ns-accent-text);font-size:12.5px;font-weight:600;cursor:pointer}
+.rp-badge{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:var(--ns-r-sm);font-style:normal;font-size:15px;font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
+.rp-pcbtn{display:inline-flex;align-items:center;gap:2px;margin-top:2px;padding:0;border:0;background:none;color:var(--ns-muted);font-size:12.5px;font-weight:600;cursor:pointer;transition:color .15s}
+.rp-pcbtn:hover,.rp-pcbtn[aria-expanded=true]{color:var(--ns-ink)}
 .rp-pcbtn svg.i{width:14px;height:14px;transition:transform .2s}
 .rp-pcbtn[aria-expanded=true] svg.i{transform:rotate(180deg)}
 .rp-route>.rp-r-num:nth-child(2){grid-area:p}
@@ -1072,16 +1083,16 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .rp-r-num span{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
 .rp-r-drv{grid-area:drv;min-width:0}
 .rp-r-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.rp-add{width:auto;height:36px;padding:0 32px 0 12px;border-style:dashed;border-color:var(--ns-accent-line);background-position:right 12px center;font-size:13.5px;font-weight:600;color:var(--ns-accent-text)}
+.rp-add{width:auto;height:36px;padding:0 32px 0 12px;border-style:dashed;border-color:var(--ns-line-3);background-position:right 12px center;font-size:13.5px;font-weight:600;color:var(--ns-ink-2)}
 .rp-add:disabled{opacity:.5;cursor:not-allowed;color:var(--ns-muted)}
 .rp-rand{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-3);color:var(--ns-ink);font-size:13.5px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
-.rp-rand svg.i{width:15px;height:15px;color:var(--ns-accent-text)}
-.rp-rand:hover{border-color:var(--ns-accent-line)}
+.rp-rand svg.i{width:15px;height:15px;color:var(--ns-muted)}
+.rp-rand:hover{border-color:var(--ns-line-3)}
 .rp-rand:disabled{opacity:.4;cursor:not-allowed}
 .rp-split{margin:8px 0 0;font-size:12.5px;font-weight:500;color:var(--ns-muted)}
 .rp-pcs{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;max-height:260px;padding-top:4px;overflow:auto}
 .rp-pcs span{display:flex;justify-content:space-between;padding:6px 10px;border-radius:var(--ns-r-sm);border:1px solid var(--ns-line);background:var(--ns-bg-2);font-size:var(--ns-fs-sm);font-weight:600}
-.rp-pcs i{font-style:normal;font-size:var(--ns-fs-xs);font-weight:700;color:var(--ns-accent-text)}
+.rp-pcs i{font-style:normal;font-size:var(--ns-fs-xs);font-weight:700;color:var(--ns-muted)}
 .rp-end{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;margin-top:14px}
 .rp-recorded{margin-right:auto;font-size:12.5px;font-weight:600;color:var(--ns-good)}
 /* Record routes (primary) and Display for the group (secondary) */
@@ -1216,7 +1227,14 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
     background:rgba(15,18,25,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   }
   .actionbar .btn{flex:1 1 0;min-width:0;padding:0 10px;white-space:normal;line-height:1.15;text-align:center}
+  /* Save takes the room; Reset steps back to a quiet text button so it
+     isn't hit by mistake */
+  .actionbar #reset{flex:none;padding:0 8px;white-space:nowrap;border-color:transparent;background:transparent;color:var(--ns-muted);font-size:13px;font-weight:500}
+  .actionbar #reset:active{color:var(--ns-ink)}
   .draft{display:none}
+
+  /* FTDS: the steppers people press all shift come before the gauge */
+  .band-inputs{order:-1;align-items:end}
   .content{padding:16px max(16px,env(safe-area-inset-right)) calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 32px) max(16px,env(safe-area-inset-left))}
   #shiftView{padding-bottom:calc(var(--ns-dock-h) + var(--ns-actionbar-h) + env(safe-area-inset-bottom) + 32px)}
   .toast{left:16px;right:16px;max-width:none;bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 12px)}
@@ -1256,7 +1274,9 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
   .notes2{grid-template-columns:1fr}
   .band{padding:20px 16px}
   .band-grid{grid-template-columns:1fr;gap:20px}
-  .band-inputs{grid-template-columns:1fr}
+  /* Volume and Rejected side by side, Redeliveries full width under them */
+  .band-inputs{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 12px;align-items:end}
+  .band-inputs>.f:last-child{grid-column:1/-1}
   .band-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ftds-pct{font-size:44px}
 
@@ -1335,6 +1355,7 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 /* ---------- 350 and below: very narrow phones ---------- */
 @media (max-width:350px){
   .tab{font-size:10px}
+  .band-inputs{grid-template-columns:1fr}
   .side .brand{gap:8px;font-size:15px}
   .me-text b{max-width:20vw}
   .matrix{grid-template-columns:56px minmax(0,1fr) minmax(0,1fr)}
