@@ -662,10 +662,39 @@ select.unset{color:var(--ns-faint)}
 .note.done .note-n{color:var(--ns-on-status);background:var(--ns-good)}
 .note.invalid{border-color:var(--ns-bad-line);box-shadow:inset 3px 0 0 var(--ns-bad)}
 .note.invalid .note-n{color:var(--ns-bad-text);background:var(--ns-bad-soft)}
-input.jdw{font-weight:600;letter-spacing:.03em;font-variant-numeric:tabular-nums}
-input.jdw::placeholder{letter-spacing:0;font-weight:500}
-input.jdw.invalid{border-color:var(--ns-bad);background:var(--ns-bad-soft);color:var(--ns-bad-text)}
-input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
+/* JDW numbers: a box that takes one or many, and grows with what's pasted */
+textarea.jdw{
+  min-height:64px;max-height:220px;field-sizing:content;resize:vertical;
+  font-weight:600;letter-spacing:.03em;font-variant-numeric:tabular-nums;line-height:1.5;
+}
+textarea.jdw::placeholder{letter-spacing:.03em;font-weight:500}
+textarea.jdw.invalid{border-color:var(--ns-bad)}   /* the wrong JDW itself is marked in the chips below */
+textarea.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
+.note .f .sub{margin-left:4px;font-weight:500;color:var(--ns-faint)}
+/* what the box read: one chip per JDW, wrong ones in red, repeats in amber */
+.jdw-chips{grid-column:2;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.jdw-chips:empty{display:none}
+.jdw-n{margin-right:2px;font-size:var(--ns-fs-xs);font-weight:700;color:var(--ns-muted)}
+.jdw-chip{
+  display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;border-radius:var(--ns-pill);
+  border:1px solid var(--ns-line-2);background:var(--ns-surface);
+  font-size:12.5px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--ns-ink-2);
+  animation:ns-fade var(--ns-dur-2) ease;
+}
+.jdw-chip.bad{border-color:var(--ns-bad-line);background:var(--ns-bad-soft);color:var(--ns-bad-text)}
+.jdw-chip.dup{border-color:var(--ns-warn-line);background:var(--ns-warn-soft);color:var(--ns-warn-text)}
+.jdw-chip small{font-size:11px;font-weight:600}
+.note-del{grid-column:2;justify-self:start;font-size:var(--ns-fs-sm)}
+/* narrow panel: what the box read sits right under it, before the reason */
+.note>.jdw-f{order:1}
+.jdw-chips{order:2}
+.note>.f:not(.jdw-f),.note>.damage{order:3}
+.note-del{order:4}
+.note-add{margin-top:12px}
+.note-sum{margin:10px 0 0;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
+.note-sum:empty{display:none}
+.note-sum.warn{color:var(--ns-warn-text)}
+.note-sum .link{padding:0;font-size:inherit}
 .hint{display:none;font-style:normal;font-size:var(--ns-fs-xs);font-weight:600;color:var(--ns-bad-text)}
 .note.invalid .hint{display:block}
 .damage{padding:12px;border-radius:var(--ns-r);border:1px solid var(--ns-warn-line);background:var(--ns-warn-soft)}
@@ -679,7 +708,8 @@ input.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 @container (min-width:470px){
   .note{grid-template-columns:32px minmax(196px,1fr) minmax(0,1.1fr)}
   .note>.f{grid-column:auto}
-  .note>.damage,.note>.other{grid-column:2/-1}
+  .note>.damage,.note>.other,.jdw-chips,.note-del{grid-column:2/-1}
+  .note>.jdw-f,.jdw-chips,.note>.f:not(.jdw-f),.note>.damage,.note-del{order:0}
 }
 
 /* ---------------------------------------------------------------------
