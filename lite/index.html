@@ -1,0 +1,1440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16141A">
+<meta name="author" content="Cameron Gill">
+<title>Shift Report Lite</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shift Lite">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- Privacy: the browser may only load this app's own files and may not
+     connect to any other server. Nothing typed here can be sent anywhere. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<!-- Nightshift UI framework. Keep nightshift.css and the fonts folder next to this file. -->
+<link rel="stylesheet" href="nightshift.css">
+<!-- Training text lives in training-content.js. Keep it in the same folder. -->
+<script src="training-content.js"></script>
+<!-- Route names and postcodes live in routes-config.js. Keep it in the same folder. -->
+<script src="routes-config.js"></script>
+<script>
+  /* Theme: Light, Dark or Auto (Auto follows the phone or computer).
+     Chosen before the page draws so it never flashes the wrong colours.
+     The switch in the sidebar changes it; see THEME further down. */
+  (function(){
+    var pref = "auto";
+    try { pref = localStorage.getItem("theme") || "auto"; } catch (e) {}
+    var light = pref === "light" || (pref === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches);
+    document.documentElement.dataset.theme = light ? "light" : "dark";
+    document.documentElement.dataset.themePref = pref;
+  })();
+</script>
+<style>
+  /* Everything else is in nightshift.css. This only paints the page in
+     the right theme before that file arrives, and styles the "didn't
+     load" message even if nightshift.css is missing. */
+  html{background:#111013;color-scheme:dark}
+  html[data-theme=light]{background:#F2F1F4;color-scheme:light}
+  .load-fail{margin:40px auto;max-width:420px;padding:20px;text-align:center;font:15px/1.5 system-ui,sans-serif;color:#F4F2F5;background:#1B1920;border:1px solid #403A49;border-radius:12px}
+</style>
+</head>
+<body data-tab="shift">
+<!-- App -->
+<div id="appView" class="app">
+  <aside class="side">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><span class="brand-t">Shift Report Lite<small class="credit">By Cameron Gill</small></span></div>
+    <nav class="nav" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" type="button" data-tab="shift" aria-selected="true">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg>This shift</button>
+      <button class="tab" role="tab" type="button" data-tab="routes" aria-selected="false">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg>Routes</button>
+      <button class="tab" role="tab" type="button" data-tab="training" aria-selected="false">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-4.5L21 9l-9 4.5z"/><path d="M7 11.2V15c0 1.4 2.2 3 5 3s5-1.6 5-3v-3.8M21 9v5"/></svg>Training</button>
+</nav>
+    <button class="btn secondary sm install-btn" id="installBtn" type="button" hidden><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Install app</button>
+    <div class="seg theme-seg" role="radiogroup" aria-label="Theme">
+      <button type="button" role="radio" data-theme-pick="light" aria-checked="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6L6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>Light</button>
+      <button type="button" role="radio" data-theme-pick="dark" aria-checked="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Dark</button>
+      <button type="button" role="radio" data-theme-pick="auto" aria-checked="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" style="fill:currentColor"/></svg>Auto</button>
+    </div>
+    <button class="icon-btn theme-cycle" id="themeCycle" type="button" aria-label="Change theme"></button>
+  </aside>
+
+  <div class="main">
+    <header class="pagehead">
+      <div class="pagehead-inner">
+        <div><h1 id="pageTitle">PM shift</h1><p id="pageSub"></p></div>
+        <div class="actionbar" id="actionbar">
+          <span class="draft">Nothing you type leaves this device</span>
+          <button class="btn secondary" id="clear" type="button">Clear</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- This shift -->
+    <main id="shiftView" class="content">
+      <div class="row">
+        <section class="card setup-card">
+          <div class="card-head">
+            <h2>Shift setup</h2>
+            <div class="setup-ctl">
+              <label><span class="sr">Date</span><input type="date" id="date"></label>
+              <div class="seg" role="radiogroup" aria-label="Shift">
+                <button type="button" role="radio" data-shift="AM">AM</button>
+                <button type="button" role="radio" data-shift="PM">PM</button>
+              </div>
+            </div>
+          </div>
+          <div class="matrix">
+            <span></span><span class="mx-h">Planned</span><span class="mx-h">Actual</span>
+            <span class="mx-r">Volume</span>
+            <input type="number" id="pv" min="0" inputmode="numeric" aria-label="Planned volume">
+            <input type="number" id="av" min="0" inputmode="numeric" aria-label="Actual volume">
+            <span class="mx-r">Drivers</span>
+            <input type="number" id="pd" min="0" inputmode="numeric" aria-label="Planned drivers">
+            <input type="number" id="ad" min="0" inputmode="numeric" aria-label="Actual drivers">
+          </div>
+        </section>
+
+        <section class="card results-card">
+          <div class="card-head"><h2>Shift results</h2>
+            <button class="btn secondary sm" id="copySummary" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy summary</button>
+          </div>
+          <div class="kpis">
+            <div class="kpi" id="k_vol">
+              <div class="kpi-name">Volume vs plan</div>
+              <div class="kpi-var num" id="volVar">–</div>
+              <div class="kpi-hint" id="bufHint"></div>
+              <div class="kpi-pa"><span>Planned<b id="volP">–</b><i class="pa-bar"><i id="volPB"></i></i></span><span>Actual<b id="volA">–</b><i class="pa-bar"><i id="volAB"></i></i></span></div>
+            </div>
+            <div class="kpi" id="k_ppr">
+              <div class="kpi-name">PPR vs plan</div>
+              <div class="kpi-var num" id="pprVar">–</div>
+              <div class="kpi-pa"><span>Planned<b id="pprP">–</b><i class="pa-bar"><i id="pprPB"></i></i></span><span>Actual<b id="pprA">–</b><i class="pa-bar"><i id="pprAB"></i></i></span></div>
+            </div>
+            <div class="kpi" id="k_drv">
+              <div class="kpi-name">Drivers vs plan</div>
+              <div class="kpi-var num" id="drvVar">–</div>
+              <div class="kpi-pa"><span>Planned<b id="drvP">–</b><i class="pa-bar"><i id="drvPB"></i></i></span><span>Actual<b id="drvA">–</b><i class="pa-bar"><i id="drvAB"></i></i></span></div>
+            </div>
+          </div>
+          <p class="summary" id="summaryLine"></p>
+          <div class="notes2">
+            <label class="f">Variance and reason<textarea id="varReason" placeholder="Why the shift was over or under plan"></textarea></label>
+            <label class="f">Key risk and action<textarea id="keyRisk" placeholder="Anything that could go wrong, and what you're doing about it"></textarea></label>
+          </div>
+        </section>
+      </div>
+
+      <section class="card hero band" id="ftdsBand" data-state="idle">
+        <div class="band-head"><h2><span class="glow-dot" aria-hidden="true"></span>FTDS live</h2><span class="chip violet">Target 98%</span></div>
+        <div class="band-grid">
+          <div class="band-inputs">
+            <label class="f"><span>Volume<span class="sub" id="ftdsVolHint">Copied from actual volume</span></span><input type="number" id="ftdsVol" min="0" inputmode="numeric"></label>
+            <div class="f"><label for="rej">Rejected parcels <span class="sub">Recorded only, not counted in FTDS</span></label>
+              <div class="stepper">
+                <button type="button" data-step="rej:-1" aria-label="One less rejected">−</button>
+                <input type="number" id="rej" min="0" inputmode="numeric" placeholder="0">
+                <button type="button" data-step="rej:1" aria-label="One more rejected">+</button>
+              </div>
+            </div>
+            <div class="f"><label for="red">Redeliveries <span class="sub">Each one counts against FTDS</span></label>
+              <div class="stepper">
+                <button type="button" data-step="red:-1" aria-label="One less redelivery">−</button>
+                <input type="number" id="red" min="0" inputmode="numeric" placeholder="0">
+                <button type="button" data-step="red:1" aria-label="One more redelivery">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="gauge">
+            <svg viewBox="0 0 200 116" aria-hidden="true">
+              <path class="g-track" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/>
+              <path class="g-val" id="gaugeVal" d="M14 100 A86 86 0 0 1 186 100" pathLength="100" style="stroke-dasharray:0 100"/>
+              <line class="g-tick" x1="122.6" y1="30.5" x2="131.5" y2="3.2"/>
+              <g class="g-knob" id="gaugeKnob"><circle cx="14" cy="100" r="7"/></g>
+              <text class="g-txt" x="14" y="116" text-anchor="middle">95%</text>
+              <text class="g-txt" x="186" y="116" text-anchor="middle">100%</text>
+              <text class="g-txt" x="140" y="0" text-anchor="start">98%</text>
+            </svg>
+            <div class="g-center"><div class="ftds-pct num" id="ftdsPct">–</div><div class="g-label">First time delivery success</div></div>
+          </div>
+
+          <div class="band-main">
+            <p class="status" id="ftdsStatus">Enter the volume to start</p>
+            <div class="slots-head"><span>Redelivery allowance at 98%</span><b id="slotsText"></b></div>
+            <div class="slots" id="slots"></div>
+          </div>
+        </div>
+        <div class="band-stats">
+          <div><span>First time deliveries</span><b id="sFirst">–</b></div>
+          <div><span>Max redeliveries at 98%</span><b id="sMax">–</b></div>
+          <div><span>Further allowed</span><b id="sFurther">–</b></div>
+          <div><span>Bridge to 100%</span><b id="sBridge">–</b></div>
+          <div><span>Margin vs 98%</span><b id="sMargin">–</b></div>
+          <div><span>Parcels delivered</span><b id="sDelivered">–</b><small>Doesn't affect FTDS</small></div>
+        </div>
+      </section>
+      <p class="privacy-note">Works offline. Nothing you type leaves this device, and it clears when the app is closed.</p>
+    </main>
+
+    <!-- Training -->
+    <main id="trainingView" class="content" hidden>
+      <div class="tr-search" id="trSearch">
+        <div class="tr-search-box">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="trQ" placeholder="Search training, for example pickup label" autocomplete="off" aria-label="Search training" aria-controls="trResults">
+          <button class="tr-search-x" id="trQx" type="button" aria-label="Clear search" hidden>✕</button>
+        </div>
+        <div class="tr-results" id="trResults" role="listbox" hidden></div>
+      </div>
+      <div id="trainingRoot"></div>
+    </main>
+
+    <!-- Routes -->
+    <main id="routesView" class="content" hidden>
+      <section class="card hero rp-hero" aria-live="polite">
+        <div class="rp-big"><span>Parcels</span><b class="num" id="rpTotParcels">–</b></div>
+        <div class="rp-big"><span>Drops</span><b class="num" id="rpTotDrops">–</b></div>
+        <div class="rp-mini"><span>Working today</span><b class="num" id="rpTotWorking">0</b></div>
+        <div class="rp-mini"><span>On a route</span><b class="num" id="rpTotOn">0</b></div>
+      </section>
+
+      <div class="rp-top">
+        <section class="card">
+          <div class="card-head"><h2><span class="rp-n">1</span>Forecast</h2><button class="link" id="rpReplace" type="button" hidden>Replace</button></div>
+          <div id="rpLoaded" hidden></div>
+          <div id="rpInput">
+            <textarea id="rpParcels" class="rp-paste" spellcheck="false" autocomplete="off" placeholder="Paste the forecast here&#10;&#10;B5&#9;B5 1AA&#9;JDW000000000001&#9;1&#10;B70&#9;B70 1AA&#9;JDW000000000002&#9;1"></textarea>
+            <div class="rp-actions"><button class="btn primary" id="rpProcess" type="button">Load forecast</button><button class="link quiet" id="rpCancel" type="button" hidden>Cancel</button></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2><span class="rp-n">2</span>Working today</h2><span class="count" id="rpWorkCount">0</span></div>
+          <div class="rp-type">
+            <div class="rp-addrow">
+              <input id="rpWorkInput" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type a driver's name" aria-label="Driver working today" role="combobox" aria-controls="rpSuggest">
+              <button class="btn secondary" id="rpWorkAdd" type="button">Add</button>
+            </div>
+            <div class="rp-suggest" id="rpSuggest" role="listbox" hidden></div>
+          </div>
+          <div class="rp-chips" id="rpWorking"></div>
+          <details class="rp-roster" id="rpRosterBox">
+            <summary>All drivers <span class="count" id="rpRosterCount">0</span><span class="rp-keys" id="rpRosterKey"></span></summary>
+            <div class="rp-addrow three">
+              <input id="rpRosterInput" autocomplete="off" autocapitalize="words" placeholder="Driver name (or several, with commas)" aria-label="Add drivers">
+              <select id="rpRosterAgency" aria-label="Agency"></select>
+              <button class="btn secondary" id="rpRosterAdd" type="button">Add</button>
+            </div>
+            <input type="search" id="rpRosterSearch" class="rp-search" placeholder="Search drivers" aria-label="Search drivers" hidden>
+            <div class="rp-rlist" id="rpRoster"></div>
+            <p class="rp-foot" id="rpRosterNote"></p>
+          </details>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="card-head">
+          <h2><span class="rp-n">3</span>Routes</h2>
+          <div class="rp-head-btns">
+            <button class="btn secondary sm" id="rpCopy" type="button">Copy plan</button>
+            <button class="btn secondary sm" id="rpNewDay" type="button">New day</button>
+          </div>
+        </div>
+        <div id="rpRouteNote"></div>
+        <div class="rp-list" id="rpRoutes"></div>
+        <div class="rp-end"><button class="rp-display rec" id="rpDisplay" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Display for the group</button></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="rp-show" id="rpShow" hidden role="dialog" aria-label="Today's routes">
+  <button class="icon-btn rp-show-x" id="rpShowClose" type="button" aria-label="Close">✕</button>
+  <div class="rp-poster" id="rpPoster"></div>
+  <p class="rp-show-hint">Take a screenshot and send it to the group</p>
+</div>
+<div class="zoom" id="zoom" hidden role="dialog" aria-label="Photo"><figure><img id="zoomImg" alt=""><figcaption id="zoomCap"></figcaption></figure><button class="icon-btn" id="zoomClose" type="button" aria-label="Close">✕</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // If the app hasn't appeared after a few seconds, show a message instead of a blank page.
+  setTimeout(function () {
+    if (!document.body.dataset.ready && !document.querySelector(".load-fail")) {
+      document.body.insertAdjacentHTML("afterbegin", '<p class="load-fail">The app didn\'t load properly. Try refreshing the page.</p>');
+    }
+  }, 5000);
+</script>
+<script type="module">
+/* =====================================================================
+   SHIFT REPORT LITE
+   A calculator only. No sign in, no saving, no logging, and no connection
+   to any server: the Content-Security-Policy in <head> blocks that too.
+   The only things kept on the device are the theme choice and training
+   progress. Everything else clears when the app is closed.
+   ===================================================================== */
+
+/* Volume buffer. A difference between planned and actual volume
+   up to this many parcels, over or under, shows green. More shows red. */
+const VOLUME_BUFFER = 100;
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const FIELDS = ["date","pv","av","pd","ad","ftdsVol","rej","red","varReason","keyRisk"];
+const has = x => Number.isFinite(x);
+const val = id => { const v = $(id).value; if (v === "") return NaN; const x = Number(v); return has(x) && x >= 0 ? x : NaN; };
+const fmtInt = x => has(x) ? Math.round(x).toLocaleString("en-GB") : "–";
+const fmt1 = x => has(x) ? x.toFixed(1) : "–";
+function signed(x, d = 0){
+  if (!has(x)) return "–";
+  const r = Number(x.toFixed(d));
+  if (r === 0) return (0).toFixed(d);
+  return (r > 0 ? "+" : "−") + Math.abs(r).toFixed(d);
+}
+const toneOf = x => !has(x) ? "" : x > 0 ? "good" : x < 0 ? "bad" : "flat";
+const volTone = x => !has(x) ? "" : Math.abs(x) <= VOLUME_BUFFER ? "good" : "bad";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function prettyDate(iso, opts){ if (!iso) return ""; const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", opts); }
+// restart a one-off CSS animation (the class names one in nightshift.css)
+function replay(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+let toastTimer;
+function toast(msg, kind = ""){
+  const t = $("toast"); t.textContent = msg; t.className = "toast show " + kind;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = "toast", 3200);
+}
+
+/* ---------- state ---------- */
+let shift = "PM", tab = "shift";
+// FTDS volume copies actual volume until someone types a different number in it.
+// Clearing it starts the copying again.
+let volLinked = true;
+
+/* ---------- calculations ---------- */
+function compute(){
+  const pv = val("pv"), av = val("av"), pd = val("pd"), ad = val("ad"), fv = val("ftdsVol");
+  const rej = has(val("rej")) ? val("rej") : 0;
+  const red = has(val("red")) ? val("red") : 0;
+  const planPpr = has(pv) && pd > 0 ? pv / pd : NaN;
+  const actualPpr = has(av) && ad > 0 ? av / ad : NaN;
+  const volVar = has(pv) && has(av) ? av - pv : NaN;
+  const pprVar = has(planPpr) && has(actualPpr) ? actualPpr - planPpr : NaN;
+  const drvVar = has(pd) && has(ad) ? ad - pd : NaN;
+  // Rejected parcels are recorded only. They don't change FTDS or the allowance.
+  const eligible = has(fv) ? fv : NaN;
+  const firstTime = has(eligible) ? Math.max(0, eligible - red) : NaN;
+  const ftds = eligible > 0 ? firstTime / eligible * 100 : NaN;
+  const max98 = eligible > 0 ? Math.floor(eligible * 0.02 + 1e-9) : NaN;
+  const further = has(max98) ? Math.max(0, max98 - red) : NaN;
+  // Parcels delivered takes off redeliveries and rejections. Shown only, not used in FTDS.
+  const delivered = has(fv) ? Math.max(0, fv - red - rej) : NaN;
+  return { pv, av, pd, ad, fv, rej, red, planPpr, actualPpr, volVar, pprVar, drvVar,
+           eligible, firstTime, ftds, max98, further, delivered,
+           bridge: has(ftds) ? 100 - ftds : NaN, margin: has(ftds) ? ftds - 98 : NaN };
+}
+
+function summaryText(c){
+  const part = (name, v, d) => {
+    if (!has(v)) return null;
+    const r = Number(v.toFixed(d));
+    return r === 0 ? `${name} on plan` : `${name} ${Math.abs(r).toFixed(d)} ${r > 0 ? "above" : "below"} plan`;
+  };
+  let vol = part("Volume", c.volVar, 0);
+  if (vol && Math.round(c.volVar) !== 0) vol += Math.abs(c.volVar) <= VOLUME_BUFFER ? `, within the ${VOLUME_BUFFER} buffer` : `, outside the ${VOLUME_BUFFER} buffer`;
+  const parts = [vol, part("PPR", c.pprVar, 1), part("Drivers", c.drvVar, 0)].filter(Boolean);
+  return parts.length ? parts.join(". ") + "." : "Enter planned and actual figures to see how the shift is tracking.";
+}
+
+/* ---------- render this shift ---------- */
+function setBars(key, p, a){
+  const top = Math.max(has(p) ? p : 0, has(a) ? a : 0);
+  $(key + "PB").style.width = top && has(p) ? (p / top * 100) + "%" : "0%";
+  $(key + "AB").style.width = top && has(a) ? (a / top * 100) + "%" : "0%";
+}
+function setKpi(key, v, p, a, d, tone = toneOf(v)){
+  $(key + "Var").textContent = signed(v, d);
+  $(key + "Var").className = "kpi-var num " + tone;
+  $(key + "P").textContent = p; $(key + "A").textContent = a;
+  $("k_" + key).dataset.tone = tone;
+}
+
+let slotsShown = 0;   // how many slots were filled last time, so new ones can pop in
+function renderSlots(max, used){
+  const box = $("slots");
+  const before = slotsShown; slotsShown = has(max) ? used : 0;
+  if (!has(max)){ box.innerHTML = ""; $("slotsText").textContent = ""; return; }
+  if (max === 0 && used === 0){
+    box.innerHTML = `<span class="slot-note">Under 50 parcels, so any redelivery drops you below 98%</span>`;
+    $("slotsText").textContent = "0 allowed"; return;
+  }
+  const total = Math.max(max, used), cap = 120;
+  let html = "";
+  for (let i = 0; i < Math.min(total, cap); i++){
+    html += `<i class="slot ${i < used ? (i < max ? "used" : "over") : ""}${i >= before && i < used ? " new" : ""}"></i>`;
+  }
+  if (total > cap) html += `<span class="slot-more">+${total - cap}</span>`;
+  box.innerHTML = html;
+  $("slotsText").textContent = `${Math.min(used, max)} of ${max} used` + (used > max ? `, ${used - max} over` : "");
+}
+
+function syncVolLink(){
+  if (volLinked && $("ftdsVol").value !== $("av").value) $("ftdsVol").value = $("av").value;
+  $("ftdsVolHint").textContent = volLinked ? "Copied from actual volume" : "Typed in. Clear it to copy actual volume again";
+}
+function render(){
+  syncVolLink();
+  const c = compute();
+  setKpi("vol", c.volVar, fmtInt(c.pv), fmtInt(c.av), 0, volTone(c.volVar));
+  setKpi("ppr", c.pprVar, fmt1(c.planPpr), fmt1(c.actualPpr), 1);
+  setKpi("drv", c.drvVar, fmtInt(c.pd), fmtInt(c.ad), 0);
+  setBars("vol", c.pv, c.av); setBars("ppr", c.planPpr, c.actualPpr); setBars("drv", c.pd, c.ad);
+  $("summaryLine").textContent = summaryText(c);
+
+  const band = $("ftdsBand"), wasState = band.dataset.state, wasStatus = $("ftdsStatus").textContent;
+  if (!has(c.ftds)){
+    band.dataset.state = "idle";
+    $("ftdsPct").textContent = "–";
+    $("ftdsStatus").textContent = has(c.fv) ? "Volume is zero" : "Enter the volume to start";
+  } else {
+    const state = c.ftds < 98 ? "bad" : c.further <= 1 ? "warn" : "good";
+    band.dataset.state = state;
+    $("ftdsPct").textContent = c.ftds.toFixed(2) + "%";
+    $("ftdsStatus").textContent =
+      state === "bad"  ? `Below target by ${(98 - c.ftds).toFixed(2)}%` :
+      state === "warn" ? (c.further === 0 ? "On target. No more redeliveries allowed" : "On target. Only 1 more redelivery allowed") :
+                         `On target with ${c.further} redeliveries to spare`;
+  }
+  if (band.dataset.state !== wasState && wasState !== "idle" && band.dataset.state !== "idle") replay(band, "pinged");
+  if ($("ftdsStatus").textContent !== wasStatus) replay($("ftdsStatus"), "fresh");
+  renderSlots(c.max98, c.red);
+  // gauge arc runs from 95% to 100%, and the knob rides the tip of the
+  // arc. Skipped if the page has no gauge.
+  const g = document.getElementById("gaugeVal"), knob = document.getElementById("gaugeKnob");
+  const frac = has(c.ftds) ? Math.min(1, Math.max(0, (c.ftds - 95) / 5)) : 0;
+  if (g) g.style.strokeDasharray = `${frac * 100} 100`;
+  if (knob) knob.style.transform = `rotate(${frac * 180}deg)`;
+  $("sFirst").textContent = fmtInt(c.firstTime);
+  $("sDelivered").textContent = fmtInt(c.delivered);
+  $("sMax").textContent = fmtInt(c.max98);
+  $("sFurther").textContent = fmtInt(c.further);
+  $("sBridge").textContent = has(c.bridge) ? c.bridge.toFixed(2) + "%" : "–";
+  $("sMargin").textContent = has(c.margin) ? signed(c.margin, 2) + "%" : "–";
+
+  updateTitle();
+}
+
+/* ---------- shift, title, tabs ---------- */
+function setShift(s){
+  shift = s;
+  document.querySelectorAll("[data-shift]").forEach(b => b.setAttribute("aria-checked", b.dataset.shift === s));
+}
+function updateTitle(){
+  if (tab === "shift"){
+    $("pageTitle").textContent = shift + " shift";
+    $("pageSub").textContent = prettyDate($("date").value, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) || "Pick a date";
+  } else if (tab === "training"){
+    $("pageTitle").textContent = "Training";
+    const o = T && T.modules ? overall() : null;
+    const m = o && trView.startsWith("m:") ? modById(trView.slice(2)) : null;
+    $("pageSub").textContent = !o ? "" : m ? `Module ${T.modules.indexOf(m) + 1} of ${T.modules.length}` : `${o.done} of ${o.total} modules completed`;
+  } else if (tab === "routes"){
+    $("pageTitle").textContent = "Routes";
+    $("pageSub").textContent = prettyDate(today(), { weekday: "long", day: "numeric", month: "long" });
+  }
+}
+function showTab(t){
+  tab = t; document.body.dataset.tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  $("shiftView").hidden = t !== "shift";
+  $("actionbar").hidden = t !== "shift";
+  $("trainingView").hidden = t !== "training";
+  $("routesView").hidden = t !== "routes";
+  updateTitle();
+  if (t === "training") renderTraining();
+  if (t === "routes") renderRoutes();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- clear ----------
+   Nothing is saved, so Clear just empties the shift for the next one. */
+function clearForm(){
+  FIELDS.forEach(f => $(f).value = "");
+  $("date").value = today();
+  volLinked = true;
+  setShift(new Date().getHours() < 12 ? "AM" : "PM");
+}
+function clearShift(){
+  if (!confirm("Clear this shift and start again?")) return;
+  clearForm(); render();
+  toast("Cleared");
+}
+
+/* ---------- copy summary ---------- */
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  // older browsers
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+  ta.remove(); return ok;
+}
+function summaryForCopy(){
+  const c = compute();
+  const num = s => s === "–" ? "Not entered" : s.replace("−", "-");
+  const date = prettyDate($("date").value, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return [
+    `${date ? date + ", " : ""}${shift} shift`,
+    "",
+    `Planned Volume: ${num(fmtInt(c.pv))}`,
+    `Actual Volume: ${num(fmtInt(c.av))}`,
+    `Volume Variance: ${num(signed(c.volVar, 0))}`,
+    "",
+    `Planned PPR: ${num(fmt1(c.planPpr))}`,
+    `Actual PPR: ${num(fmt1(c.actualPpr))}`,
+    `PPR Variance: ${num(signed(c.pprVar, 1))}`,
+    "",
+    `Planned drivers: ${num(fmtInt(c.pd))}`,
+    `Actual drivers: ${num(fmtInt(c.ad))}`,
+    `Driver Variance: ${num(signed(c.drvVar, 0))}`,
+    "",
+    "Variance + Reason",
+    $("varReason").value.trim(),
+    "",
+    "Key Risk/ Action",
+    $("keyRisk").value.trim()
+  ].join("\n").trimEnd();
+}
+let copyTimer;
+$("copySummary").addEventListener("click", async () => {
+  const c = compute();
+  if (![c.pv, c.av, c.pd, c.ad].some(has)) return toast("Enter the shift figures first", "bad");
+  const btn = $("copySummary");
+  if (await copyText(summaryForCopy())){
+    toast("Summary copied. Paste it into WhatsApp or email");
+    btn.lastChild.textContent = "Copied";
+    clearTimeout(copyTimer); copyTimer = setTimeout(() => btn.lastChild.textContent = "Copy summary", 2000);
+  } else toast("Couldn't copy. Your browser blocked it", "bad");
+});
+
+/* ---------- wiring ---------- */
+$("bufHint").textContent = `±${VOLUME_BUFFER} is fine`;
+$("ftdsVol").addEventListener("input", () => {
+  const v = $("ftdsVol").value;
+  volLinked = v === "" || v === $("av").value;
+});
+FIELDS.forEach(f => $(f).addEventListener("input", render));
+document.querySelectorAll("[data-shift]").forEach(b => b.addEventListener("click", () => { setShift(b.dataset.shift); render(); }));
+document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => {
+  const [id, d] = b.dataset.step.split(":");
+  const cur = has(val(id)) ? val(id) : 0;
+  $(id).value = Math.max(0, cur + Number(d)); render();
+}));
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+$("clear").addEventListener("click", clearShift);
+// stop the mouse wheel changing a number you're typing in
+document.addEventListener("wheel", () => { const a = document.activeElement; if (a && a.type === "number") a.blur(); }, { passive: true });
+
+/* =====================================================================
+   THEME
+   Light, Dark or Auto. Auto follows the phone or computer and changes
+   with it. The choice is remembered on this device. The little script
+   in <head> applies it before the page draws; this wires up the switch.
+   ===================================================================== */
+const theme = (() => {
+  const root = document.documentElement, KEY = "theme", ORDER = ["light", "dark", "auto"];
+  const sysLight = window.matchMedia("(prefers-color-scheme: light)");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const LABEL = { light: "Light", dark: "Dark", auto: "Auto (follows this device)" };
+  const ICON = {};
+  document.querySelectorAll("[data-theme-pick]").forEach(b => { ICON[b.dataset.themePick] = b.querySelector("svg").outerHTML; });
+  let pref = ORDER.includes(root.dataset.themePref) ? root.dataset.themePref : "auto";
+  const resolve = p => p === "auto" ? (sysLight.matches ? "light" : "dark") : p;
+
+  function paint(){
+    const t = resolve(pref);
+    root.dataset.theme = t; root.dataset.themePref = pref;
+    if (meta) meta.content = t === "light" ? "#FBFAFC" : "#16141A";
+    const seg = document.querySelector(".theme-seg");
+    if (seg) seg.style.setProperty("--i", ORDER.indexOf(pref));
+    document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-checked", b.dataset.themePick === pref));
+    const cyc = $("themeCycle");
+    if (cyc){ cyc.innerHTML = ICON[pref] || ""; cyc.setAttribute("aria-label", `Theme: ${LABEL[pref]}. Tap to change`); cyc.title = `Theme: ${LABEL[pref]}`; }
+  }
+  // cross-fade between themes; instant when the device asks for less motion
+  function apply(){
+    const changes = resolve(pref) !== root.dataset.theme;
+    if (!changes || reduce.matches){ paint(); return; }
+    if (document.startViewTransition){ document.startViewTransition(paint); return; }
+    root.classList.add("theme-fade"); paint();
+    setTimeout(() => root.classList.remove("theme-fade"), 300);
+  }
+  function set(p){
+    pref = p;
+    try { localStorage.setItem(KEY, p); } catch (e) {}
+    apply();
+  }
+  document.querySelectorAll("[data-theme-pick]").forEach(b => b.addEventListener("click", () => set(b.dataset.themePick)));
+  $("themeCycle").addEventListener("click", () => set(ORDER[(ORDER.indexOf(pref) + 1) % ORDER.length]));
+  sysLight.addEventListener("change", () => { if (pref === "auto") apply(); });
+  paint();
+  return { set };
+})();
+
+/* =====================================================================
+   MOTION
+   Kept small on purpose. The key numbers count to their new value so
+   you can see what changed. Skipped when the device asks for reduced
+   motion.
+   ===================================================================== */
+const motion = (() => {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const calm = () => reduce.matches;
+
+  // Numbers count up or down to their new value
+  const fmtInfo = t => {
+    const m = String(t).trim().match(/^([+\-−]?)([\d,]*\.?\d+)(%?)$/); if (!m) return null;
+    const raw = m[2].replace(/,/g, ""), dec = (raw.split(".")[1] || "").length;
+    return { v: (m[1] === "-" || m[1] === "−" ? -1 : 1) * parseFloat(raw), dec, commas: m[2].includes(","), plus: m[1] === "+", unicode: m[1] === "−" || !m[1], pct: m[3] };
+  };
+  const fmt = (v, f) => {
+    const a = Math.abs(v), r = f.commas ? a.toLocaleString("en-GB", { minimumFractionDigits: f.dec, maximumFractionDigits: f.dec }) : a.toFixed(f.dec);
+    const sign = v < 0 && Number(r.replace(/,/g, "")) !== 0 ? "−" : (f.plus && v > 0 ? "+" : "");
+    return sign + r + f.pct;
+  };
+  function countTo(el, text){
+    const to = fmtInfo(text), from = fmtInfo(el.__shown ?? "");
+    el.__target = text;
+    if (calm() || !to || !from || to.v === from.v){ el.__shown = text; return; }
+    const t0 = performance.now(), dur = 520;
+    const step = now => {
+      if (el.__target !== text) return;
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      const out = k < 1 ? fmt(from.v + (to.v - from.v) * e, to) : text;
+      el.__writing = out; el.textContent = out;
+      if (k < 1) requestAnimationFrame(step); else el.__shown = text;
+    };
+    requestAnimationFrame(step);
+  }
+  const COUNT = "#volVar, #pprVar, #drvVar, #ftdsPct, #rpTotParcels, #rpTotDrops, #rpTotWorking, #rpTotOn, .band-stats b, .h-stat b";
+  const mo = new MutationObserver(list => {
+    const seen = new Set();
+    list.forEach(m => { const el = m.target.nodeType === 3 ? m.target.parentElement : m.target; if (el && el.matches && el.matches(COUNT)) seen.add(el); });
+    seen.forEach(el => { const t = el.textContent; if (t === el.__writing) return; countTo(el, t); });
+  });
+  function watchNumbers(){ document.querySelectorAll(COUNT).forEach(el => { if (el.__watched) return; el.__watched = true; el.__shown = el.textContent; mo.observe(el, { childList: true, characterData: true, subtree: true }); }); }
+  watchNumbers();
+  return { watchNumbers };
+})();
+
+/* ---------- install on phones ---------- */
+let installEvent = null;
+const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); installEvent = e;
+  $("installBtn").hidden = false;
+});
+async function runInstall(){
+  if (!installEvent) return toast("Use your browser's menu: Add to Home Screen");
+  installEvent.prompt();
+  try { await installEvent.userChoice; } catch (e) {}
+  installEvent = null; $("installBtn").hidden = true;
+}
+$("installBtn").addEventListener("click", runInstall);
+window.addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast("Shift Report Lite is on your home screen"); });
+if ("serviceWorker" in navigator && location.protocol !== "file:"){
+  const reg = () => navigator.serviceWorker.register("sw.js").catch(() => {});
+  if (document.readyState === "complete") reg(); else window.addEventListener("load", reg);
+}
+
+/* =====================================================================
+   TRAINING
+   The words come from training-content.js. This part only draws them
+   and remembers progress.
+   ===================================================================== */
+const T = window.TRAINING || null;
+let tr = { steps: {}, modDone: {}, doneAt: null, updated: 0 };
+let trView = "home";      // home, welcome, summary or m:<module id>
+let trFocus = null;       // a step to open and highlight
+const TYPE = {
+  task:      { chip: "", check: "Task completed" },
+  learn:     { chip: '<span class="chip">Learn</span>', check: "I understand this" },
+  active:    { chip: '<span class="chip good"><i class="pulse"></i>Active</span>', check: "I understand this responsibility" },
+  recurring: { chip: '<span class="chip violet">↻ Repeats</span>', check: "I know how to do this" },
+  when:      { chip: '<span class="chip warn">When needed</span>', check: "I know what to do" }
+};
+const sk = (m, s) => m.id + ":" + s.id;
+const modById = id => T.modules.find(m => m.id === id);
+const fmtLongDate = t => new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+function modStats(m){
+  const req = m.steps.filter(s => !s.optional);
+  const done = req.filter(s => tr.steps[sk(m, s)]).length;
+  return { done, total: req.length,
+           pct: req.length ? Math.round(done / req.length * 100) : 100,
+           complete: done === req.length,
+           started: m.steps.some(s => tr.steps[sk(m, s)]) };
+}
+function overall(){
+  const total = T.modules.length;
+  const done = T.modules.filter(m => modStats(m).complete).length;
+  return { total, done, pct: Math.round(done / total * 100),
+           current: T.modules.find(m => !modStats(m).complete) || null,
+           started: Object.keys(tr.steps).length > 0, complete: done === total };
+}
+function syncCompletion(){
+  const now = new Date().toISOString();
+  T.modules.forEach(m => {
+    if (modStats(m).complete){ if (!tr.modDone[m.id]) tr.modDone[m.id] = now; }
+    else delete tr.modDone[m.id];
+  });
+  const all = T.modules.every(m => modStats(m).complete);
+  if (all && !tr.doneAt) tr.doneAt = now;
+  if (!all) tr.doneAt = null;
+}
+
+/* ---------- saving progress: on this device only ---------- */
+const TR_KEY = "trainingProgress";
+function trSave(){
+  tr.updated = Date.now();
+  try { localStorage.setItem(TR_KEY, JSON.stringify(tr)); } catch (e) {}
+}
+function trLoad(){
+  tr = { steps: {}, modDone: {}, doneAt: null, updated: 0 };
+  try { Object.assign(tr, JSON.parse(localStorage.getItem(TR_KEY) || "{}")); } catch (e) {}
+  if (tab === "training") renderTraining();
+}
+
+/* ---------- drawing ---------- */
+const statusChip = st => st.complete ? '<span class="chip good">✓ Completed</span>'
+  : st.started ? '<span class="chip violet">◐ In progress</span>' : '<span class="chip">○ Not started</span>';
+
+function ring(pct){
+  const r = 52, c = 2 * Math.PI * r;
+  return `<svg viewBox="0 0 120 120" aria-hidden="true">
+    <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--ns-accent-text)"/><stop offset="1" style="stop-color:var(--ns-accent)"/></linearGradient></defs>
+    <circle class="ring-track" cx="60" cy="60" r="${r}"/>
+    <circle class="ring-val" cx="60" cy="60" r="${r}" stroke-dasharray="${(pct / 100 * c).toFixed(1)} ${c.toFixed(1)}" ${pct ? "" : 'opacity="0"'}/></svg>`;
+}
+
+// A strip with one segment per module, in order. Filled = completed,
+// tall = the one marked current, tinted = started. Each segment opens its module.
+function trStrip(curId){
+  return T.modules.map((x, j) => {
+    const st = modStats(x), state = st.complete ? "completed" : st.started ? "in progress" : "not started";
+    const cls = [x.id === curId ? "cur" : "", st.complete ? "done" : st.started ? "part" : ""].filter(Boolean).join(" ");
+    return `<button type="button" data-tr="m:${x.id}" class="${cls}" ${x.id === curId ? 'aria-current="step" ' : ""}aria-label="Module ${j + 1}, ${esc(x.title)}, ${state}" title="${j + 1}. ${esc(x.title)}"></button>`;
+  }).join("");
+}
+
+function trHome(){
+  const o = overall();
+  let hero;
+  if (o.complete){
+    hero = `<span class="chip good">✓ Training complete</span>
+      <h2>All ${o.total} modules completed</h2>
+      <p>${tr.doneAt ? "Completed on " + fmtLongDate(tr.doneAt) + ". " : ""}Open any module again whenever you need a reminder.</p>
+      <button class="btn primary" type="button" data-tr="summary">View summary</button>`;
+  } else if (o.started){
+    const i = T.modules.indexOf(o.current);
+    hero = `<span class="chip violet">Your training</span>
+      <h2>Module ${i + 1} of ${o.total}</h2>
+      <p>Up next: ${esc(o.current.title)}</p>
+      <button class="btn primary" type="button" data-tr="m:${o.current.id}">Continue training →</button>`;
+  } else {
+    hero = `<span class="chip violet">New starter training</span>
+      <h2>New to the station?</h2>
+      <p>${T.title ? esc(T.title) + " training. " : ""}Work through ${o.total} short modules in order, from opening the warehouse to the end of the shift. Your progress is saved as you go.</p>
+      <button class="btn primary" type="button" data-tr="welcome">Start training →</button>`;
+  }
+  const left = o.total - o.done - (o.current ? 1 : 0);
+  const key = [`<span><i class="done"></i>Completed ${o.done}</span>`,
+    o.current ? `<span><i class="cur"></i>Up next: Module ${T.modules.indexOf(o.current) + 1}</span>` : "",
+    left > 0 ? `<span><i></i>Still to do ${left}</span>` : ""].join("");
+  return `<section class="card hero tr-hero" data-state="${o.complete ? "done" : o.started ? "progress" : "new"}">
+      <div class="tr-hero-main">${hero}</div>
+      <div class="tr-ring"><div class="ring-box">${ring(o.pct)}<div class="ring-txt"><b class="num">${o.pct}%</b><span>complete</span></div></div>
+        <p>${o.done} of ${o.total} modules completed</p></div>
+      <div class="tr-overview">
+        <div class="tr-strip" role="group" aria-label="All modules">${trStrip(o.current ? o.current.id : "")}</div>
+        <p class="tr-key">${key}</p>
+      </div>
+    </section>
+    <div class="tr-section-head"><h2>Modules</h2><span>Open any module to review it</span></div>
+    <div class="tr-grid">${T.modules.map((m, i) => {
+      const st = modStats(m), next = m === o.current;
+      const chip = next && !st.started ? '<span class="chip violet">Up next</span>' : statusChip(st);
+      return `<button class="card tr-card" type="button" data-tr="m:${m.id}" data-state="${st.complete ? "done" : st.started ? "progress" : "new"}"${next ? ' data-next="true"' : ""}>
+        <span class="tr-card-top"><span class="tr-num num" aria-hidden="true">${String(m.num ?? i + 1).padStart(2, "0")}</span>${chip}</span>
+        <span class="tr-card-title">${esc(m.title)}</span>
+        <span class="tr-card-desc">${esc(m.desc || "")}</span>
+        <span class="bar"><i style="width:${st.pct}%"></i></span>
+        <span class="tr-card-foot"><span>${st.done}/${st.total} tasks completed</span><span class="num">${st.pct}%</span></span>
+      </button>`; }).join("")}</div>`;
+}
+
+function trWelcome(){
+  const w = T.welcome || {}, first = T.modules[0];
+  return `<div class="tr-top"><button class="link" type="button" data-tr="home">← All modules</button></div>
+    <section class="card hero tr-welcome">
+      <span class="chip violet">Start here</span>
+      <h2 class="tr-title">${esc(w.title || "Welcome")}</h2>
+      ${(w.text || []).map(p => `<p>${esc(p)}</p>`).join("")}
+      <h3>How the steps work</h3>
+      <div class="legend">
+        <div><span class="chip">Task</span><p>Something you do. Tick it once it's done.</p></div>
+        <div>${TYPE.learn.chip}<p>Something to understand. Tick it once you've got it.</p></div>
+        <div>${TYPE.active.chip}<p>An ongoing job you keep doing for the whole shift.</p></div>
+        <div>${TYPE.recurring.chip}<p>A job that comes round again, like the hourly update.</p></div>
+        <div>${TYPE.when.chip}<p>Only needed when something happens, like a route falling behind.</p></div>
+      </div>
+      ${w.objectives?.length ? `<details class="objectives"><summary>By the end you'll know how to… <span>${w.objectives.length} things</span></summary>
+        <ol>${w.objectives.map(o => `<li>${esc(o)}</li>`).join("")}</ol></details>` : ""}
+      <button class="btn primary" type="button" data-tr="m:${first.id}">Begin Module 1 →</button>
+    </section>`;
+}
+
+function trImage(img){
+  const o = typeof img === "string" ? { caption: img } : (img || {});
+  const file = o.src ? o.src.split("/").pop() : "";
+  const ph = `<div class="ph"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>
+    <span>${esc(o.caption || "Image to be added")}</span><small>${file ? "Photo to be added: " + esc(file) : "Photo to be added"}</small></div>`;
+  if (!o.src) return ph;
+  // If the photo hasn't been uploaded yet, the placeholder shows instead
+  return `<figure class="tr-img"><img src="${esc(o.src)}" alt="${esc(o.caption || "")}" loading="lazy" onload="if(this.naturalWidth>this.naturalHeight*2.2)this.parentNode.classList.add('wide')" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src=this.getAttribute('src').split('?')[0]+'?r='+Date.now();}else{this.parentNode.classList.add('missing')}">${ph}${o.caption ? `<figcaption>${esc(o.caption)}</figcaption>` : ""}</figure>`;
+}
+
+function trStep(m, s, k, current){
+  const key = sk(m, s), done = !!tr.steps[key], t = TYPE[s.type] || TYPE.task;
+  const banner = s.type === "active"
+      ? `<div class="banner active"><i class="pulse"></i><span><b>Active task.</b> ${esc(s.freq || "Throughout the shift")}. This is an ongoing responsibility, so it stays on the Live ops tab for the whole shift.</span></div>`
+    : s.type === "recurring"
+      ? `<div class="banner recurring"><span class="b-ic">↻</span><span><b>Repeats.</b> ${esc(s.every || "Throughout the shift")}.</span></div>`
+    : s.type === "when"
+      ? `<div class="banner when"><span class="b-ic">!</span><span><b>Trigger:</b> ${esc(s.when || "Only when something happens")}.</span></div>`
+    : "";
+  const paras = [].concat(s.text || []).map(p => `<p>${esc(p)}</p>`).join("");
+  const facts = Array.isArray(s.facts) && s.facts.length ? `<div class="facts">${s.facts.map(([a, b]) => `<div><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join("")}</div>` : "";
+  const how = Array.isArray(s.how) && s.how.length ? `<ol class="how">${s.how.map(h => `<li>${esc(h)}</li>`).join("")}</ol>` : "";
+  const list = Array.isArray(s.list) && s.list.length ? `<div class="blist">${s.listTitle ? `<p class="blist-t">${esc(s.listTitle)}</p>` : ""}<ul>${s.list.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>` : "";
+  const scenario = Array.isArray(s.scenario) && s.scenario.length ? `<div class="scenario"><p class="scenario-t">Example</p><ul>${s.scenario.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>` : "";
+  const todo = !paras && !how && !list ? `<p class="todo">Instructions will be added.</p>` : "";
+  const imgs = [].concat(s.images || [], s.image ? [s.image] : []);
+  const chips = (current && !done ? '<span class="chip violet">Up next</span>' : "") + t.chip + (s.optional ? '<span class="chip">Optional</span>' : "");
+  return `<details class="step ${done ? "done" : ""}" id="step-${esc(key)}" ${current ? "open" : ""} data-state="${done ? "done" : current ? "current" : "todo"}">
+    <summary><span class="step-n">${done ? "✓" : k + 1}</span>
+      <span class="step-h"><b>${esc(s.title)}</b>${chips ? `<span class="step-chips">${chips}</span>` : ""}</span>
+      <svg class="i step-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+    <div class="step-body">${banner}${paras}${facts}${how}${list}${todo}${scenario}
+      ${s.important ? `<p class="important"><b>Important.</b> ${esc(s.important)}</p>` : ""}${s.tip ? `<p class="tip"><b>Tip.</b> ${esc(s.tip)}</p>` : ""}
+      ${s.example ? `<div class="example">${esc(s.example)}</div>` : ""}
+      ${imgs.length ? `<div class="imgs">${imgs.map(trImage).join("")}</div>` : ""}
+      <label class="check step-check"><input type="checkbox" data-trstep="${esc(key)}" ${done ? "checked" : ""}><span>${t.check}</span></label>
+    </div></details>`;
+}
+
+function trGlossary(){
+  const g = (T.glossary || []).slice().sort((x, y) => x.term.localeCompare(y.term, "en", { sensitivity: "base", numeric: true }));
+  return `<section class="card gloss">
+    <div class="card-head"><h2>Glossary</h2><span class="count">${g.length} terms</span></div>
+    <input type="search" class="gloss-search" placeholder="Search terms" aria-label="Search terms">
+    <dl>${g.map(x => {
+      const words = [x.term, x.full, x.def, x.example, x.note].concat(x.points || []).filter(Boolean).join(" ").toLowerCase();
+      return `<div class="g" data-term="${esc(words)}"><dt>${esc(x.term)}${x.full ? `<small>${esc(x.full)}</small>` : ""}</dt>
+        <dd>${x.def ? `<p>${esc(x.def)}</p>` : `<p class="tbd">Definition to be added</p>`}
+          ${x.points?.length ? `<ul>${x.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
+          ${x.example ? `<p class="g-ex"><b>Example.</b> ${esc(x.example)}</p>` : ""}
+          ${x.note ? `<p class="g-note">${esc(x.note)}</p>` : ""}</dd></div>`; }).join("")}</dl>
+    <p class="empty gloss-none" hidden>No terms match.</p>
+  </section>`;
+}
+function trChecklistPreview(){
+  return `<section class="card chk-preview">
+    <div class="card-head"><h2>The daily checklist</h2></div>
+    <div class="chk-cols">${(T.checklist || []).map(sec => `<div class="${sec.active ? "is-active" : ""}"><h3>${sec.active ? '<i class="pulse"></i>' : ""}${esc(sec.section)}</h3>
+      ${sec.active ? `<p class="chk-note">Tracked in Active tasks for the whole shift, not ticked off.</p>` : ""}
+      <ul>${sec.items.map(it => `<li>${it.recurring ? "↻ " : ""}${esc(it.text)}</li>`).join("")}</ul></div>`).join("")}</div>
+  </section>`;
+}
+
+function trModule(m){
+  const i = T.modules.indexOf(m), st = modStats(m), prev = T.modules[i - 1], next = T.modules[i + 1];
+  const strip = trStrip(m.id);
+  return `<div class="tr-top">
+      <button class="link" type="button" data-tr="home">← All modules</button>
+      <div class="tr-strip" role="group" aria-label="Your training">${strip}</div>
+    </div>
+    <section class="card tr-mhead">
+      <div class="chips"><span class="chip violet">Module ${i + 1} of ${T.modules.length}</span>${statusChip(st)}</div>
+      <h2 class="tr-title">${esc(m.title)}</h2>
+      <p>${esc(m.desc || "")}</p>
+      <div class="tr-prog"><div class="bar"><i style="width:${st.pct}%"></i></div><span>${st.done} of ${st.total} done · ${st.pct}%</span></div>
+    </section>
+    ${m.kind === "glossary" ? trGlossary() : ""}${m.kind === "checklist" ? trChecklistPreview() : ""}
+    <div class="tr-steps">${m.steps.map((s, k) => trStep(m, s, k, s === m.steps.find(x => !tr.steps[sk(m, x)]))).join("")}</div>
+    ${st.complete ? `<div class="tr-donebar"><span class="tr-done-ic">✓</span><div><b>Module complete</b><span>${tr.modDone[m.id] ? "Completed on " + fmtLongDate(tr.modDone[m.id]) : ""}</span></div></div>` : ""}
+    <div class="tr-nav">
+      <button class="btn secondary" type="button" data-tr="${prev ? "m:" + prev.id : "welcome"}">← ${prev ? "Previous" : "Welcome"}</button>
+      ${next ? `<button class="btn ${st.complete ? "primary" : "secondary"}" type="button" data-tr="m:${next.id}">Next module →</button>`
+             : `<button class="btn primary" type="button" data-tr="summary">Finish training →</button>`}
+    </div>`;
+}
+
+function trSummary(){
+  const o = overall();
+  return `<div class="tr-top"><button class="link" type="button" data-tr="home">← All modules</button></div>
+    <section class="card hero tr-summary">
+      <div class="tr-sum-head">
+        <span class="tr-orb ${o.complete ? "done" : ""}">${o.complete ? "✓" : o.pct + "%"}</span>
+        <div><h2 class="tr-title">${o.complete ? "Training complete" : "Your training so far"}</h2>
+          <p>${o.complete ? `You completed all ${o.total} modules${tr.doneAt ? " on " + fmtLongDate(tr.doneAt) : ""}.`
+                          : `${o.done} of ${o.total} modules completed. Pick up where you left off below.`}</p></div>
+      </div>
+      <ol class="sum-list">${T.modules.map(m => { const st = modStats(m);
+        return `<li class="${st.complete ? "done" : ""}"><span class="sum-ic">${st.complete ? "✓" : st.started ? "◐" : "○"}</span>
+          <span class="sum-t"><b>${esc(m.title)}</b><small>${st.complete ? (tr.modDone[m.id] ? "Completed " + fmtLongDate(tr.modDone[m.id]) : "Completed") : `${st.done} of ${st.total} done`}</small></span>
+          ${st.complete ? "" : `<button class="link" type="button" data-tr="m:${m.id}">Open →</button>`}</li>`; }).join("")}</ol>
+    </section>`;
+}
+
+function renderTraining(){
+  const root = $("trainingRoot");
+  if (!T || !Array.isArray(T.modules) || !T.modules.length){
+    root.innerHTML = `<section class="card"><h2>Training content not found</h2><p class="empty">Upload training-content.js to the same folder as index.html.</p></section>`;
+    return;
+  }
+  const m = trView.startsWith("m:") ? modById(trView.slice(2)) : null;
+  if (trView === "welcome") root.innerHTML = trWelcome();
+  else if (trView === "summary") root.innerHTML = trSummary();
+  else if (m) root.innerHTML = trModule(m);
+  else { trView = "home"; root.innerHTML = trHome(); }
+  updateTitle();
+  if (trFocus){
+    const el = document.getElementById("step-" + trFocus);
+    if (el){ el.open = true; el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); }
+    trFocus = null;
+  }
+}
+function trGo(view, focus = null){
+  trView = view; trFocus = focus;
+  renderTraining();
+  if (!focus) window.scrollTo(0, 0);
+}
+function openLearn(ref){
+  const [mid, sid] = String(ref).split("/");
+  showTab("training");
+  trGo("m:" + mid, sid ? mid + ":" + sid : null);
+}
+
+$("trainingRoot").addEventListener("click", e => {
+  const b = e.target.closest("[data-tr]"); if (b){ trGo(b.dataset.tr); return; }
+  const pic = e.target.closest(".tr-img img");
+  if (pic){ $("zoomImg").src = pic.src; $("zoomImg").alt = pic.alt; $("zoomCap").textContent = pic.alt; $("zoom").hidden = false; return; }
+  const g = e.target.closest("[data-go]"); if (g) showTab(g.dataset.go);
+});
+$("zoom").addEventListener("click", () => { $("zoom").hidden = true; $("zoomImg").src = ""; });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("zoom").hidden) $("zoom").click(); });
+$("trainingRoot").addEventListener("change", e => {
+  const c = e.target.closest("[data-trstep]"); if (!c) return;
+  const m = trView.startsWith("m:") ? modById(trView.slice(2)) : null;
+  const wasDone = m ? modStats(m).complete : false, wasAll = overall().complete;
+  if (c.checked) tr.steps[c.dataset.trstep] = true; else delete tr.steps[c.dataset.trstep];
+  syncCompletion(); trSave(); renderTraining();
+  if (overall().complete && !wasAll) toast("Training complete. Well done!");
+  else if (m && modStats(m).complete && !wasDone) toast("Module complete ✓");
+});
+document.addEventListener("input", e => {
+  if (!e.target.classList.contains("gloss-search")) return;
+  const card = e.target.closest(".gloss");
+  const q = e.target.value.trim().toLowerCase();
+  let shownN = 0;
+  card.querySelectorAll(".g").forEach(g => { const on = !q || g.dataset.term.includes(q); g.hidden = !on; if (on) shownN++; });
+  card.querySelector(".gloss-none").hidden = shownN > 0;
+});
+
+/* ---------- training search ---------- */
+const SEARCH_STOP = new Set("a an the to do does i im how what whats is are for of in on my can you it and or with where when who which why should do".split(" "));
+const normS = x => String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+let trIndex = null, trHits = [], trSel = 0;
+function buildTrIndex(){
+  const out = [];
+  T.modules.forEach((m, i) => {
+    const num = m.num ?? i + 1;
+    if (m.kind !== "glossary" && m.kind !== "checklist"){
+      (m.steps || []).forEach(st => {
+        const lines = [].concat(st.when || [], st.text || [], st.how || [], st.listTitle || [], st.list || [], st.tip || [], st.important || [], st.example || [],
+          (st.images || []).map(im => im && im.caption || ""));
+        out.push({ kind: "step", ref: m.id + "/" + st.id, num, module: m.title, title: st.title, lines: lines.filter(Boolean).map(String),
+          hayT: normS(st.title), hay: normS(st.title + " " + m.title + " " + lines.join(" ")) });
+      });
+    }
+  });
+  const terms = T.modules.find(m => m.kind === "glossary");
+  (T.glossary || []).forEach(g => {
+    const lines = [].concat(g.def || [], g.points || [], g.note || [], g.example || []);
+    out.push({ kind: "term", ref: terms ? terms.id : "", term: g.term, num: "Aa", module: "Key terms", title: g.term + (g.full ? " (" + g.full + ")" : ""),
+      lines: lines.map(String), hayT: normS(g.term + " " + (g.full || "")), hay: normS(g.term + " " + (g.full || "") + " " + lines.join(" ")) });
+  });
+  return out;
+}
+function trSearch(q){
+  if (!trIndex) trIndex = buildTrIndex();
+  let words = normS(q).split(" ").filter(Boolean);
+  const kept = words.filter(w => !SEARCH_STOP.has(w));
+  if (kept.length) words = kept;
+  if (!words.length) return [];
+  const n = words.length, joined = words.join("");
+  const cover = hay => {
+    const flat = hay.replace(/ /g, ""), c = words.map(w => hay.includes(w));
+    for (let k = 0; k < n - 1; k++) if (flat.includes(words[k] + words[k + 1])) c[k] = c[k + 1] = true;
+    return { n: c.filter(Boolean).length, phrase: n > 1 && flat.includes(joined) };
+  };
+  return trIndex.map(e => {
+    const a = cover(e.hay); if (!a.n) return null;
+    const t = cover(e.hayT);
+    const whole = words.filter(w => (" " + e.hayT + " ").includes(" " + w + " ")).length / n * .4;
+    const score = a.n / n + (a.phrase ? .6 : 0) + t.n / n * .8 + (t.phrase ? .6 : 0) + whole + (e.kind === "term" ? .05 : 0);
+    return a.n / n >= (n <= 2 ? 1 : .67) ? { e, score } : null;
+  }).filter(Boolean).sort((x, y) => y.score - x.score).slice(0, 8).map(x => x.e);
+}
+function trMark(text, q){
+  const ws = normS(q).split(" ").filter(w => w.length > 1 && !SEARCH_STOP.has(w));
+  if (!ws.length) return esc(text);
+  const alts = ws.slice();
+  for (let k = 0; k < ws.length - 1; k++) alts.push(ws[k] + ws[k + 1], ws[k] + " " + ws[k + 1]);
+  alts.sort((a, b) => b.length - a.length);
+  // one pass, longest match first, so "pickup" lights up as one word
+  return esc(text).replace(new RegExp("(" + alts.join("|") + ")", "ig"), "<mark>$1</mark>");
+}
+function trSnippet(e, q){
+  const ws = normS(q).split(" ").filter(w => !SEARCH_STOP.has(w));
+  let best = e.lines[0] || "", bestN = -1;
+  e.lines.forEach(l => { const L = normS(l), f = L.replace(/ /g, ""); const k = ws.filter(w => L.includes(w)).length + (f.includes(ws.join("")) ? 2 : 0); if (k > bestN){ bestN = k; best = l; } });
+  return best.length > 150 ? best.slice(0, 147) + "…" : best;
+}
+function renderTrResults(){
+  const q = $("trQ").value.trim(), box = $("trResults");
+  $("trQx").hidden = !q;
+  if (q.length < 2){ box.hidden = true; return; }
+  trHits = trSearch(q); trSel = 0;
+  box.innerHTML = trHits.length ? trHits.map((e, k) => `<button class="tr-res ${k === 0 ? "sel" : ""}" type="button" role="option" data-hit="${k}">
+      <span class="tr-res-n ${e.kind === "term" ? "term" : ""}">${e.kind === "term" ? "Aa" : esc(String(e.num).padStart(2, "0"))}</span>
+      <small>${e.kind === "term" ? "Key term" : "Module " + esc(String(e.num)) + " · " + esc(e.module)}</small>
+      <b>${trMark(e.title, q)}</b>
+      <p>${trMark(trSnippet(e, q), q)}</p></button>`).join("")
+    : `<p class="tr-none">Nothing found for “${esc(q)}”. Try fewer or different words.</p>`;
+  box.hidden = false;
+}
+function openTrHit(e){
+  $("trQ").value = ""; $("trQx").hidden = true; $("trResults").hidden = true; $("trQ").blur();
+  if (e.kind === "term"){
+    if (!e.ref) return;
+    trGo("m:" + e.ref);
+    const g = document.querySelector("#trainingRoot .gloss-search");
+    if (g){ g.value = e.term; g.dispatchEvent(new Event("input", { bubbles: true })); g.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  } else openLearn(e.ref);
+}
+$("trQ").addEventListener("input", renderTrResults);
+$("trQ").addEventListener("focus", renderTrResults);
+$("trQ").addEventListener("keydown", e => {
+  if ($("trResults").hidden || !trHits.length) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp"){
+    e.preventDefault(); trSel = (trSel + (e.key === "ArrowDown" ? 1 : trHits.length - 1)) % trHits.length;
+    document.querySelectorAll("#trResults .tr-res").forEach((b, k) => b.classList.toggle("sel", k === trSel));
+  } else if (e.key === "Enter"){ e.preventDefault(); openTrHit(trHits[trSel]); }
+  else if (e.key === "Escape"){ $("trResults").hidden = true; }
+});
+$("trResults").addEventListener("click", e => { const b = e.target.closest("[data-hit]"); if (b) openTrHit(trHits[+b.dataset.hit]); });
+$("trQx").addEventListener("click", () => { $("trQ").value = ""; renderTrResults(); $("trQ").focus(); });
+document.addEventListener("click", e => { if (!e.target.closest("#trSearch")) $("trResults").hidden = true; });
+
+/* =====================================================================
+   ROUTES
+   Route names and postcodes come from routes-config.js.
+   ===================================================================== */
+const RPC = window.ROUTE_PLANNING || null;
+const PC_RE = /\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b/;
+const OUT_RE = /^[A-Z]{1,2}\d[A-Z\d]?$/;
+
+// District -> route number. Stand-alone routes always win.
+function rpBuildMap(cfg){
+  const map = new Map();
+  cfg.routes.filter(r => !r.standalone).concat(cfg.routes.filter(r => r.standalone)).forEach(r =>
+    (r.districts || []).forEach(d => {
+      d = String(d).trim().toUpperCase();
+      if (d && (!map.has(d) || r.standalone)) map.set(d, r.num);
+    }));
+  return map;
+}
+
+// Reads the pasted forecast: short postcode, full postcode, JDW, quantity.
+// Works with tabs (pasted from Excel), commas or spaces, in any column order.
+function rpParseParcels(text, cfg){
+  const map = rpBuildMap(cfg);
+  const rows = [], bad = [], seen = new Map();
+  String(text || "").split(/\r?\n/).forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line || !/[A-Za-z0-9]/.test(line)) return;                     // blank rows are ignored
+    let rest = line.toUpperCase();
+    const jm = rest.match(/\bJDW\d+\b/), jdw = jm ? jm[0] : "";
+    if (jm) rest = rest.replace(jm[0], " ");
+    const pm = rest.match(PC_RE);
+    let full = "", half = "", qty = null;
+    if (pm){ full = pm[1] + " " + pm[2]; rest = rest.replace(pm[0], " "); }
+    const toks = rest.split(/[\s,;|]+/).filter(Boolean);
+    const hi = toks.findIndex(t => OUT_RE.test(t));
+    if (hi > -1){ half = toks[hi]; toks.splice(hi, 1); }
+    const qi = toks.findIndex(t => /^\d+(\.\d+)?$/.test(t));
+    if (qi > -1) qty = Number(toks[qi]);
+    if (!full && !half){
+      if (!/POSTCODE|JDW|QUANTIT|WAYBILL/.test(line.toUpperCase())) bad.push({ line: i + 1, text: line });
+      return;                                                            // header rows are skipped quietly
+    }
+    const district = full ? full.split(" ")[0] : half;
+    if (jdw) seen.set(jdw, (seen.get(jdw) || 0) + 1);
+    rows.push({ full, half, jdw, district, key: full || half, qty: qty == null ? 1 : qty, route: map.get(district) || 0 });
+  });
+  return { rows, bad, dupes: [...seen].filter(([, n]) => n > 1).length };
+}
+
+// Parcels (the quantity column added up) and drops (unique full postcodes) per route
+function rpStats(parsed, cfg){
+  const blank = () => ({ parcels: 0, postcodes: new Map(), districts: new Map() });
+  const per = new Map(cfg.routes.map(r => [r.num, blank()])), un = blank();
+  parsed.rows.forEach(p => {
+    const s = p.route ? per.get(p.route) : un;
+    s.parcels += p.qty;
+    s.postcodes.set(p.key, (s.postcodes.get(p.key) || 0) + p.qty);
+    s.districts.set(p.district, (s.districts.get(p.district) || 0) + p.qty);
+  });
+  const routes = cfg.routes.map(r => { const s = per.get(r.num); return { num: r.num, r, parcels: s.parcels, drops: s.postcodes.size, postcodes: s.postcodes }; });
+  return {
+    routes,
+    unassigned: { parcels: un.parcels, drops: un.postcodes.size, districts: un.districts },
+    totalParcels: parsed.rows.reduce((a, p) => a + p.qty, 0),
+    totalDrops: routes.reduce((a, x) => a + x.drops, 0) + un.postcodes.size
+  };
+}
+
+/* ---------- state ---------- */
+// The driver list and today's plan live in memory only: they clear when
+// the app is closed, so no names are kept on the device.
+const AGENCIES = (RPC && RPC.agencies) || [{ code: "UKED", colour: "#A98BFF" }, { code: "INRW", colour: "#4DA3FF" }];
+let roster = [];                       // [{ name, agency }]
+let day = { parcelText: "", working: [], assign: {}, open: {} };
+let rpParsed = null, rpS = null, rpEditing = false, sugIndex = 0;
+
+const tidyName = s => String(s || "").replace(/\s+/g, " ").trim();
+const sameName = (a, b) => a.toLowerCase() === b.toLowerCase();
+const byName = (a, b) => a.localeCompare(b, "en", { sensitivity: "base" });
+const sortNames = list => list.sort(byName);
+const sortRoster = () => roster.sort((a, b) => byName(a.name, b.name));
+const inList = (list, n) => list.some(x => sameName(x, n));
+const driverOf = n => roster.find(d => sameName(d.name, n));
+const agencyOf = n => (driverOf(n) || {}).agency || "";
+const colourOf = code => (AGENCIES.find(a => a.code === code) || {}).colour || "";
+const dot = n => { const a = agencyOf(n), c = colourOf(a); return `<i class="ag-dot" style="${c ? `background:${c}` : ""}" title="${esc(a || "No agency")}"></i>`; };
+const routeOf = n => { for (const k in day.assign) if (inList(day.assign[k], n)) return +k; return 0; };
+const freeToday = () => day.working.filter(n => !routeOf(n));
+function unassign(n){
+  for (const k in day.assign){
+    day.assign[k] = day.assign[k].filter(x => !sameName(x, n));
+    if (!day.assign[k].length) delete day.assign[k];
+  }
+}
+function assignTo(num, n){ unassign(n); (day.assign[num] ||= []).push(n); }
+// Older saves kept plain names. Turn them into { name, agency }.
+const toDriver = d => typeof d === "string" ? { name: tidyName(d), agency: "" } : { name: tidyName(d.name), agency: d.agency || "" };
+
+function rpCompute(){
+  rpParsed = RPC && day.parcelText.trim() ? rpParseParcels(day.parcelText, RPC) : null;
+  rpS = rpParsed && rpParsed.rows.length ? rpStats(rpParsed, RPC) : null;
+}
+function rpLoad(){
+  roster = [];
+  day = { parcelText: "", working: [], assign: {}, open: {} };
+  $("rpParcels").value = "";
+  rpEditing = false; rpCompute();
+  if (tab === "routes") renderRoutes();
+}
+function rpChanged(){ renderRoutes(); }
+
+/* ---------- drawing ---------- */
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+function rpSplit(x, n){
+  if (!n || !x.parcels) return "";
+  if (n === 1) return `1 driver · ${plural(x.parcels, "parcel", "parcels")}, ${plural(x.drops, "drop", "drops")}`;
+  const p = x.parcels / n, d = x.drops / n, exact = Number.isInteger(p) && Number.isInteger(d);
+  return `${n} drivers · ${exact ? "" : "about "}${Math.round(p)} parcels, ${Math.round(d)} drops each`;
+}
+function renderRoutes(){
+  if (!RPC){ $("rpRoutes").innerHTML = `<p class="rp-empty">routes-config.js wasn't found. Upload it to the same folder as index.html.</p>`; return; }
+  $("rpTotParcels").textContent = rpS ? rpS.totalParcels : "–";
+  $("rpTotDrops").textContent = rpS ? rpS.totalDrops : "–";
+  $("rpTotWorking").textContent = day.working.length;
+  $("rpTotOn").textContent = day.working.filter(n => routeOf(n)).length;
+  rpRenderForecast(); rpRenderDrivers(); rpRenderRoster(); rpRenderList();
+  updateTitle();
+}
+
+function rpRenderForecast(){
+  const showInput = !rpS || rpEditing;
+  $("rpInput").hidden = !showInput;
+  $("rpCancel").hidden = !(rpS && rpEditing);
+  $("rpReplace").hidden = showInput;
+  const box = $("rpLoaded");
+  box.hidden = showInput;
+  if (showInput || !rpS) return;
+  const u = rpS.unassigned, notes = [];
+  if (u.parcels) notes.push(`<p class="rp-alert bad">${plural(u.parcels, "parcel isn't", "parcels aren't")} on any route: ${[...u.districts.keys()].map(esc).join(", ")}. Add the district in routes-config.js if it should be.</p>`);
+  if (rpParsed.bad.length) notes.push(`<p class="rp-alert warn">${plural(rpParsed.bad.length, "row", "rows")} couldn't be read (line ${rpParsed.bad.slice(0, 5).map(b => b.line).join(", ")}${rpParsed.bad.length > 5 ? "…" : ""}).</p>`);
+  if (rpParsed.dupes) notes.push(`<p class="rp-alert warn">${plural(rpParsed.dupes, "JDW number appears", "JDW numbers appear")} more than once. Each row is still counted.</p>`);
+  box.innerHTML = `<div class="rp-ok"><span class="rp-ok-ic">✓</span><div><b>Forecast loaded</b><span>${plural(rpS.totalParcels, "parcel", "parcels")} · ${plural(rpS.totalDrops, "drop", "drops")}</span></div></div>${notes.join("")}`;
+}
+
+function rpRenderDrivers(){
+  $("rpWorkCount").textContent = day.working.length;
+  $("rpWorking").innerHTML = day.working.length
+    ? sortNames(day.working.slice()).map(n => { const r = routeOf(n);
+        return `<span class="rp-name ${r ? "on" : ""}">${dot(n)}${esc(n)}${r ? `<small>R${r}</small>` : ""}<button type="button" data-unwork="${esc(n)}" aria-label="${esc(n)} isn't working">✕</button></span>`; }).join("")
+    : `<p class="rp-hint">${roster.length ? "Start typing a name above. Drivers from All drivers will come up." : "Add your drivers under All drivers first, then type their names here."}</p>`;
+}
+
+// The full driver list: a searchable, scrolling list instead of a wall of names
+function rpRenderRoster(){
+  const counts = AGENCIES.map(a => `<span class="ag-key">${`<i class="ag-dot" style="background:${a.colour}"></i>`}${esc(a.code)} ${roster.filter(d => d.agency === a.code).length}</span>`).join("");
+  $("rpRosterCount").textContent = roster.length;
+  $("rpRosterKey").innerHTML = counts;
+  const q = tidyName($("rpRosterSearch").value).toLowerCase();
+  const list = roster.filter(d => !q || d.name.toLowerCase().includes(q));
+  $("rpRosterSearch").hidden = roster.length < 8;
+  $("rpRoster").innerHTML = list.length ? list.map(d => `<div class="rp-rrow">${dot(d.name)}<span class="rp-rname-t">${esc(d.name)}</span>
+      <select data-setag="${esc(d.name)}" aria-label="Agency for ${esc(d.name)}" class="${d.agency ? "" : "unset"}">${d.agency ? "" : `<option value="">Agency</option>`}${AGENCIES.map(a => `<option ${a.code === d.agency ? "selected" : ""}>${esc(a.code)}</option>`).join("")}</select>
+      <button class="rp-rdel" type="button" data-unroster="${esc(d.name)}" aria-label="Remove ${esc(d.name)}">✕</button></div>`).join("")
+    : `<p class="rp-hint">${roster.length ? "No drivers match." : "No drivers saved yet."}</p>`;
+  $("rpRosterNote").textContent = "Not saved. The list clears when the app is closed.";
+}
+
+function rpRenderList(){
+  const free = sortNames(freeToday());
+  $("rpRouteNote").innerHTML = !day.working.length ? `<p class="rp-alert info">Add who's working today in step 2, then put them on routes here.</p>`
+    : !free.length ? `<p class="rp-alert good">✓ Everyone working today is on a route.</p>`
+    : `<p class="rp-alert info">${plural(free.length, "driver", "drivers")} still to place: ${free.map(esc).join(", ")}</p>`;
+  $("rpRoutes").innerHTML = RPC.routes.map(r => {
+    const x = rpS ? rpS.routes.find(y => y.num === r.num) : { parcels: 0, drops: 0, postcodes: new Map() };
+    const names = day.assign[r.num] || [], open = !!day.open[r.num];
+    const pcs = [...x.postcodes].sort((a, b) => a[0].localeCompare(b[0], "en", { numeric: true }));
+    return `<article class="rp-route ${names.length ? "has" : ""} ${rpS && !x.parcels ? "zero" : ""}">
+      <div class="rp-r-name"><i class="rp-badge">${r.num}</i><div><b>${esc(r.name)}</b>
+        ${pcs.length ? `<button class="rp-pcbtn" type="button" data-pc="${r.num}" aria-expanded="${open}">Postcodes<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>` : `<small>${rpS ? "No parcels" : "Waiting for forecast"}</small>`}</div></div>
+      <div class="rp-r-num"><b class="num">${rpS ? x.parcels : "–"}</b><span>parcels</span></div>
+      <div class="rp-r-num"><b class="num">${rpS ? x.drops : "–"}</b><span>drops</span></div>
+      <div class="rp-r-drv">
+        <div class="rp-r-chips">
+          ${names.map(n => `<span class="rp-name on">${dot(n)}${esc(n)}<button type="button" data-off="${esc(n)}" aria-label="Take ${esc(n)} off Route ${r.num}">✕</button></span>`).join("")}
+          ${free.length ? `<select class="rp-add" data-addto="${r.num}" aria-label="Add a driver to Route ${r.num}">
+            <option value="">+ Add driver</option>${free.map(n => `<option value="${esc(n)}">${esc(n)}${agencyOf(n) ? " · " + esc(agencyOf(n)) : ""}</option>`).join("")}
+          </select>
+          <button class="rp-rand" type="button" data-rand="${r.num}" title="Add a random driver who's working today">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Randomise</button>` : names.length ? "" : `<span class="rp-nodrv">No driver</span>`}
+        </div>
+        ${rpSplit(x, names.length) ? `<p class="rp-split">${rpSplit(x, names.length)}</p>` : ""}
+      </div>
+      ${open ? `<div class="rp-pcs">${pcs.map(([pc, n]) => `<span>${esc(pc)}${n > 1 ? `<i>×${n}</i>` : ""}</span>`).join("")}</div>` : ""}
+    </article>`;
+  }).join("");
+}
+
+/* ---------- working today: type ahead from All drivers ---------- */
+function rpMatches(q){
+  q = q.toLowerCase();
+  const avail = roster.filter(d => !inList(day.working, d.name));
+  const starts = avail.filter(d => d.name.toLowerCase().startsWith(q));
+  const words = avail.filter(d => !starts.includes(d) && d.name.toLowerCase().split(" ").some(w => w.startsWith(q)));
+  return starts.concat(words).slice(0, 6);
+}
+function rpRenderSuggest(){
+  const box = $("rpSuggest"), q = tidyName($("rpWorkInput").value);
+  if (!q){ box.hidden = true; return; }
+  const m = rpMatches(q);
+  const exact = roster.some(d => sameName(d.name, q));
+  const already = inList(day.working, q);
+  sugIndex = Math.min(sugIndex, Math.max(m.length - 1, 0));
+  box.innerHTML = m.map((d, i) => `<button type="button" role="option" class="rp-sug ${i === sugIndex ? "active" : ""}" data-sug="${esc(d.name)}">${dot(d.name)}<span>${esc(d.name)}</span><small>${esc(d.agency || "")}</small></button>`).join("")
+    + (already ? `<p class="rp-sug-note">${esc(q)} is already working today</p>`
+      : !exact && !m.length ? `<div class="rp-sug-new"><span>New driver <b>${esc(q)}</b></span>${AGENCIES.map(a => `<button type="button" data-newag="${esc(a.code)}"><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</button>`).join("")}</div>` : "");
+  box.hidden = false;
+}
+function rpPickWorking(name){
+  if (!inList(day.working, name)) day.working.push(name);
+  $("rpWorkInput").value = ""; sugIndex = 0; $("rpSuggest").hidden = true;
+  rpChanged(); $("rpWorkInput").focus();
+}
+function rpWorkEnter(){
+  const q = tidyName($("rpWorkInput").value);
+  if (!q) return toast("Start typing a driver's name", "bad");
+  const m = rpMatches(q);
+  if (m.length) return rpPickWorking(m[sugIndex] ? m[sugIndex].name : m[0].name);
+  if (inList(day.working, q)) return toast(`${q} is already working today`);
+  rpRenderSuggest(); toast(`Pick ${AGENCIES.map(a => a.code).join(" or ")} to add ${q} as a new driver`, "bad");
+}
+$("rpWorkInput").addEventListener("input", () => { sugIndex = 0; rpRenderSuggest(); });
+$("rpWorkInput").addEventListener("focus", rpRenderSuggest);
+$("rpWorkInput").addEventListener("blur", () => setTimeout(() => { $("rpSuggest").hidden = true; }, 150));
+$("rpWorkInput").addEventListener("keydown", e => {
+  const n = $("rpSuggest").querySelectorAll("[data-sug]").length;
+  if (e.key === "ArrowDown" && n){ e.preventDefault(); sugIndex = (sugIndex + 1) % n; rpRenderSuggest(); }
+  else if (e.key === "ArrowUp" && n){ e.preventDefault(); sugIndex = (sugIndex - 1 + n) % n; rpRenderSuggest(); }
+  else if (e.key === "Enter"){ e.preventDefault(); rpWorkEnter(); }
+  else if (e.key === "Escape"){ $("rpSuggest").hidden = true; }
+});
+$("rpWorkAdd").addEventListener("click", rpWorkEnter);
+$("rpSuggest").addEventListener("pointerdown", e => e.preventDefault());   // keeps the keyboard open
+$("rpSuggest").addEventListener("click", e => {
+  const s = e.target.closest("[data-sug]"), a = e.target.closest("[data-newag]");
+  if (s) rpPickWorking(s.dataset.sug);
+  else if (a){
+    const name = tidyName($("rpWorkInput").value);
+    if (!name) return;
+    roster.push({ name, agency: a.dataset.newag }); sortRoster();
+    toast(`${name} added to All drivers`);
+    rpPickWorking(name);
+  }
+});
+
+/* ---------- all drivers ---------- */
+function rpRosterFromInput(){
+  const names = $("rpRosterInput").value.split(/[,\n]+/).map(tidyName).filter(Boolean);
+  const agency = $("rpRosterAgency").value;
+  if (!names.length) return toast("Type a driver's name", "bad");
+  if (!agency) return toast(`Choose ${AGENCIES.map(a => a.code).join(" or ")}`, "bad");
+  let added = 0;
+  names.forEach(n => { const d = driverOf(n); if (d) d.agency = agency; else { roster.push({ name: n, agency }); added++; } });
+  sortRoster();
+  $("rpRosterInput").value = ""; $("rpRosterInput").focus(); renderRoutes();
+  toast(added ? `${plural(added, "driver", "drivers")} added` : "Already on the list. Agency updated.");
+}
+$("rpRosterAgency").innerHTML = `<option value="">Agency</option>` + AGENCIES.map(a => `<option>${esc(a.code)}</option>`).join("");
+$("rpRosterAdd").addEventListener("click", rpRosterFromInput);
+$("rpRosterInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); rpRosterFromInput(); } });
+$("rpRosterSearch").addEventListener("input", rpRenderRoster);
+
+/* ---------- actions ---------- */
+$("rpProcess").addEventListener("click", () => {
+  const t = $("rpParcels").value;
+  if (!t.trim()) return toast("Paste the forecast first", "bad");
+  const before = day.parcelText;
+  day.parcelText = t; rpCompute();
+  if (!rpS){ day.parcelText = before; rpCompute(); return toast("No parcels found. Check what was pasted.", "bad"); }
+  day.open = {}; rpEditing = false; rpChanged();
+  toast(`${plural(rpS.totalParcels, "parcel", "parcels")} across ${plural(rpS.totalDrops, "drop", "drops")}`);
+});
+$("rpReplace").addEventListener("click", () => { rpEditing = true; $("rpParcels").value = ""; renderRoutes(); $("rpParcels").focus(); });
+$("rpCancel").addEventListener("click", () => { rpEditing = false; $("rpParcels").value = day.parcelText; renderRoutes(); });
+$("routesView").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const d = b.dataset;
+  if (d.unwork){ day.working = day.working.filter(n => !sameName(n, d.unwork)); unassign(d.unwork); rpChanged(); }
+  else if (d.unroster){
+    if (!confirm(`Remove ${d.unroster} from All drivers?\n\nThey won't come up when you type names any more. You can add them back later.`)) return;
+    roster = roster.filter(x => !sameName(x.name, d.unroster)); renderRoutes();
+    toast(`${d.unroster} removed`);
+  }
+  else if (d.off){ unassign(d.off); rpChanged(); }
+  else if (d.pc){ if (day.open[d.pc]) delete day.open[d.pc]; else day.open[d.pc] = true; rpChanged(); }
+  else if (d.rand){
+    const free = freeToday();
+    if (!free.length) return toast(day.working.length ? "Everyone working today is already on a route" : "Add who's working today first", "bad");
+    const u = new Uint32Array(1); crypto.getRandomValues(u);
+    const pick = free[u[0] % free.length];
+    assignTo(+d.rand, pick); rpChanged(); toast(`${pick} added to Route ${d.rand}`);
+  }
+});
+$("routesView").addEventListener("change", e => {
+  const s = e.target.closest("[data-addto]"), a = e.target.closest("[data-setag]");
+  if (s && s.value){ assignTo(+s.dataset.addto, s.value); rpChanged(); }
+  else if (a){ const d = driverOf(a.dataset.setag); if (d){ d.agency = a.value; renderRoutes(); } }
+});
+
+// Plain text for WhatsApp: one route per line with a gap between, names only
+function rpPlanText(){
+  const lines = [`Routes for ${prettyDate(today(), { weekday: "long", day: "numeric", month: "long" })}`];
+  RPC.routes.forEach(r => { const names = day.assign[r.num] || []; if (names.length) lines.push("", `Route ${r.num}. ${names.join(", ")}`); });
+  return lines.join("\n");
+}
+$("rpCopy").addEventListener("click", async () => {
+  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
+  toast(await copyText(rpPlanText()) ? "Plan copied. Paste it into WhatsApp" : "Couldn't copy. Your browser blocked it");
+});
+$("rpNewDay").addEventListener("click", () => {
+  if (!confirm("Start a new day? This clears the forecast, who's working and the routes. All drivers stay until the app is closed.")) return;
+  day = { parcelText: "", working: [], assign: {}, open: {} };
+  $("rpParcels").value = ""; rpEditing = false; rpCompute(); rpChanged();
+});
+
+/* ---------- display card to screenshot for the group ---------- */
+function rpShowCard(){
+  const anyDrivers = RPC.routes.some(r => (day.assign[r.num] || []).length);
+  const out = day.working.filter(n => routeOf(n)).length;
+  const d = new Date(today() + "T12:00:00");
+  const stat = (v, label) => `<div><b>${v}</b><span>${label}</span></div>`;
+  $("rpPoster").innerHTML = `
+    <div class="rp-p-glow" aria-hidden="true"></div>
+    <header class="rp-p-head">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><span class="brand-t">Shift Report<small class="credit">By Cameron Gill</small></span></div>
+      <div class="rp-p-date"><b>${d.toLocaleDateString("en-GB", { day: "numeric" })}</b><span>${d.toLocaleDateString("en-GB", { month: "short" })}</span></div>
+    </header>
+    <div class="rp-p-title"><h2>Today's routes<span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span></h2></div>
+    <div class="rp-p-stats">${stat(rpS ? rpS.totalParcels : "–", "Parcels")}${stat(rpS ? rpS.totalDrops : "–", "Drops")}${stat(anyDrivers ? out : RPC.routes.length, anyDrivers ? "Drivers" : "Routes")}</div>
+    <div class="rp-p-grid">${RPC.routes.map(r => {
+      const x = rpS ? rpS.routes.find(y => y.num === r.num) : null;
+      const names = day.assign[r.num] || [];
+      const zero = rpS && x && !x.parcels && !names.length;
+      return `<div class="rp-p-tile ${zero ? "zero" : ""}">
+        <div class="rp-p-th"><span class="rp-p-num">${r.num}</span><small>${esc(r.name)}</small></div>
+        <div class="rp-p-n"><b>${x ? x.parcels : "–"}</b><span>${x ? plural(x.drops, "drop", "drops") : "parcels"}</span></div>
+        ${anyDrivers ? `<div class="rp-p-drv">${names.length ? names.map(n => `<span>${dot(n)}${esc(n)}</span>`).join("") : `<em>No driver</em>`}</div>` : ""}
+      </div>`;
+    }).join("")}</div>
+    ${rpS && rpS.unassigned.parcels ? `<p class="rp-p-note">${plural(rpS.unassigned.parcels, "parcel isn't", "parcels aren't")} on a route yet</p>` : ""}
+    <footer class="rp-p-foot"><span>${rpS ? "Parcels and drops from today's forecast" : "Load a forecast to show parcel counts"}</span>
+      ${anyDrivers ? `<span class="rp-p-key">${AGENCIES.map(a => `<span><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</span>`).join("")}</span>` : ""}</footer>`;
+  $("rpShow").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function rpHideCard(){ $("rpShow").hidden = true; document.body.style.overflow = ""; }
+$("rpDisplay").addEventListener("click", () => {
+  if (!RPC) return toast("routes-config.js wasn't found", "bad");
+  rpShowCard();
+});
+$("rpShowClose").addEventListener("click", rpHideCard);
+$("rpShow").addEventListener("click", e => { if (e.target.id === "rpShow") rpHideCard(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("rpShow").hidden) rpHideCard(); });
+
+// Read-only view of the routes, used for automated checks
+window.routePlanCheck = () => ({
+  routes: rpS ? rpS.routes.map(x => ({ num: x.num, parcels: x.parcels, drops: x.drops })) : [],
+  assign: JSON.parse(JSON.stringify(day.assign)), working: day.working.slice(),
+  roster: roster.map(d => d.name), rosterFull: JSON.parse(JSON.stringify(roster)), text: rpPlanText()
+});
+
+
+/* =====================================================================
+   START
+   ===================================================================== */
+clearForm(); showTab("shift"); render();
+trView = "home"; trLoad(); rpLoad();
+document.body.dataset.ready = "1";
+</script>
+</body>
+</html>

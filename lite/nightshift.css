@@ -1,0 +1,1454 @@
+/* =====================================================================
+   Nightshift UI  v5  (results and form)
+   The one stylesheet for Shift Report Lite. index.html only keeps a tiny
+   inline block that paints the page in the right theme before this file
+   loads, and a small script that picks Light, Dark or Auto.
+
+   HOW IT IS ORGANISED
+     1. Tokens        colours, type, spacing, radii, shadows
+     2. Base          page defaults and small helpers
+     3. Components    cards, buttons, fields, toggles, chips, alerts...
+     4. App shell     sign in, sidebar, page header, layout
+     5. Views         This shift, Training, Routes, the group display card
+     6. Responsive    one block per breakpoint, widest first:
+                      1200 tablet, 1000 one column, 860 phone,
+                      600 small phone, 350 very narrow
+     7. Preferences   touch screens, reduced motion, reduced transparency
+
+   DESIGN RULES
+     - Surfaces are solid. The only blur is on the sticky page header and
+       the phone bars, where content scrolls underneath.
+     - Orange is for actions and "you are here" only: the main button,
+       the selected tab, the current step, keyboard focus. Labels, counts
+       and decoration stay neutral.
+     - Green, amber and red are only for status, and always come with
+       words or an icon too.
+     - Violet is for categories (PM shift, a driver agency), so a label
+       never reads as an action or a status.
+     - "You are here" is a soft claret fill or outline (the selected tab,
+       the current step, an open row), never a coloured edge stripe or glow.
+       Status edges on notes and tasks stay green, amber or red.
+     - Radii follow depth: cards 16, panels inside cards 12, controls 10,
+       small things 8, chips are pills.
+
+   COMPONENTS (class names kept from earlier versions)
+     .card .card.hero      panel, and the emphasised version
+     .btn                  add .primary .secondary .danger .wide .sm
+     .icon-btn .link       square icon button, text button (.quiet)
+     .f                    field: <label class="f">Name<input></label>
+     .seg                  segmented toggle. Selected: aria-checked="true"
+     .stepper              minus, number, plus
+     .check                tick pill: <label class="check"><input type="checkbox"><span>Text</span></label>
+     .tick                 checkbox row used in Live ops
+     .chip                 small pill. Add .violet (emphasised neutral, old name kept)
+                           .good .bad .warn .am .pm
+     .count                counter pill. Add .done
+     .bar > i              progress bar. Set the width on the <i>
+     .nav > .tab           navigation. Selected: aria-selected="true"
+     .toast                pop up message. .show to display, .bad for errors
+     .good .bad .warn .flat   text colours for performance
+     .num                  numbers line up in columns
+     .sr                   hidden on screen, still read by screen readers
+   ===================================================================== */
+
+/* Archivo, served from this app's own fonts folder so nothing is
+   fetched from another server. SIL Open Font License, see fonts/OFL.txt. */
+@font-face{font-family:"Archivo";font-style:normal;font-weight:400 700;font-stretch:62% 125%;font-display:swap;
+  src:url("fonts/archivo-latin-ext.woff2") format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Archivo";font-style:normal;font-weight:400 700;font-stretch:62% 125%;font-display:swap;
+  src:url("fonts/archivo-latin.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+/* =====================================================================
+   1. TOKENS
+   ===================================================================== */
+:root{
+  color-scheme:dark;
+
+  /* Dark is the default theme. The light theme further down redefines the
+     same names, so every component works in both without changes. */
+
+  /* surfaces, darkest to lightest */
+  --ns-bg:#111013;          /* page */
+  --ns-bg-2:#16141A;        /* chrome: sidebar, header, phone bars */
+  --ns-surface:#1B1920;     /* cards */
+  --ns-surface-2:#232028;   /* panels inside cards, hover */
+  --ns-surface-3:#2C2832;   /* pop ups, toasts, selected neutral */
+  --ns-sunk:#0E0D10;        /* inside inputs */
+  --ns-line:#2F2B36;
+  --ns-line-2:#403A49;
+  --ns-line-3:#6A6276;      /* hovered input edge, planned bars */
+
+  /* text */
+  --ns-ink:#F4F2F5;
+  --ns-ink-2:#D3CED8;
+  --ns-muted:#A39CAB;
+  --ns-faint:#908999;
+
+  /* soft washes over any surface: hover, tracks, empty slots */
+  --ns-wash-1:rgba(255,255,255,.03);
+  --ns-wash-2:rgba(255,255,255,.07);
+  --ns-wash-3:rgba(255,255,255,.1);
+  --ns-wash-4:rgba(255,255,255,.28);
+
+  /* glass behind the sticky header and the phone bars */
+  --ns-glass:rgba(22,20,26,.9);
+  --ns-glass-bar:rgba(22,20,26,.94);
+
+  /* brand: claret. Change these to re-colour the app */
+  --ns-accent-rgb:184,64,106;
+  --ns-accent:#B8406A;
+  --ns-accent-hover:#C2466F;
+  --ns-accent-press:#A33760;
+  --ns-on-accent:#FFFFFF;            /* text on a claret fill */
+  --ns-accent-text:#EC93B1;          /* claret text on a dark surface */
+  --ns-accent-soft:rgba(var(--ns-accent-rgb),.16);
+  --ns-accent-line:rgba(236,147,177,.42);
+  --ns-focus-ring:#EC93B1;
+
+  /* status: the referee's green, yellow card and red card */
+  --ns-good:#3CC27A; --ns-good-text:#8FE0B3; --ns-good-soft:rgba(60,194,122,.14);  --ns-good-line:rgba(60,194,122,.40);
+  --ns-bad:#F05252;  --ns-bad-text:#FFA8A8;  --ns-bad-soft:rgba(240,82,82,.14);   --ns-bad-line:rgba(240,82,82,.45);
+  --ns-warn:#F2C230; --ns-warn-text:#F7DA80; --ns-warn-soft:rgba(242,194,48,.14);  --ns-warn-line:rgba(242,194,48,.42);
+  --ns-info:#5AA9E6; --ns-info-text:#B5D6F5; --ns-info-soft:rgba(90,169,230,.13);  --ns-info-line:rgba(90,169,230,.40);
+  --ns-on-status:#17141B;            /* text on a green, amber or red fill */
+
+  /* category: labels such as PM and driver agencies */
+  --ns-cat:#A98BFF; --ns-cat-text:#CDBDFF; --ns-cat-soft:rgba(169,139,255,.12); --ns-cat-line:rgba(169,139,255,.40);
+
+  /* the chevron inside selects, drawn in --ns-muted */
+  --ns-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23A39CAB' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  /* type */
+  --ns-font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --ns-num-stretch:72%;     /* narrow Archivo for scorelines and form tiles */
+  --ns-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ns-fs-xs:12px;
+  --ns-fs-sm:13px;
+  --ns-fs:15px;
+  --ns-fs-md:17px;
+  --ns-fs-lg:20px;
+  --ns-fs-xl:26px;
+
+  /* spacing (4px steps) */
+  --ns-sp-1:4px; --ns-sp-2:8px; --ns-sp-3:12px; --ns-sp-4:16px;
+  --ns-sp-5:20px; --ns-sp-6:24px; --ns-sp-8:32px; --ns-sp-10:40px;
+  --ns-pad:20px;            /* inside a card */
+  --ns-gap:16px;            /* between cards */
+
+  /* shape and depth */
+  --ns-r-sm:8px;
+  --ns-r:10px;
+  --ns-r-md:12px;
+  --ns-r-lg:16px;
+  --ns-pill:999px;
+  --ns-shadow-pop:0 18px 40px -14px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.03);
+  --ns-shadow-card:none;
+  --ns-focus:0 0 0 3px rgba(var(--ns-accent-rgb),.38);
+
+  /* motion: one set of durations and one easing for the whole app */
+  --ns-ease:cubic-bezier(.16,1,.3,1);   /* quick start, gentle settle */
+  --ns-dur-1:120ms;         /* hover, press, small colour changes */
+  --ns-dur-2:200ms;         /* panels, tabs, toasts */
+  --ns-dur-3:320ms;         /* larger moments: a result coming in */
+  --ns-dur-gauge:700ms;     /* the FTDS gauge sweeping to its value */
+
+  /* layout */
+  --ns-side-w:248px;
+  --ns-content-w:1200px;
+  --ns-dock-h:64px;         /* phone tab bar, without the safe area */
+  --ns-actionbar-h:62px;    /* phone Save bar */
+}
+
+/* ---------- light theme ----------
+   Tuned on its own rather than inverted: cool off-white page, white cards
+   lifted by a soft shadow, deeper claret, and status colours dark enough
+   to read as text on white. */
+:root[data-theme=light]{
+  color-scheme:light;
+
+  --ns-bg:#F2F1F4;
+  --ns-bg-2:#FBFAFC;
+  --ns-surface:#FFFFFF;
+  --ns-surface-2:#F7F6F9;
+  --ns-surface-3:#EEECF1;
+  --ns-sunk:#FAF9FB;
+  --ns-line:#E4E1E8;
+  --ns-line-2:#D2CDD8;
+  --ns-line-3:#8F8898;
+
+  --ns-ink:#17141B;
+  --ns-ink-2:#3A3540;
+  --ns-muted:#5E5766;
+  --ns-faint:#6F6877;
+
+  --ns-wash-1:rgba(23,20,27,.035);
+  --ns-wash-2:rgba(23,20,27,.07);
+  --ns-wash-3:rgba(23,20,27,.1);
+  --ns-wash-4:rgba(23,20,27,.3);
+
+  --ns-glass:rgba(251,250,252,.88);
+  --ns-glass-bar:rgba(251,250,252,.94);
+
+  --ns-accent-rgb:142,42,78;
+  --ns-accent:#8E2A4E;
+  --ns-accent-hover:#7A2242;
+  --ns-accent-press:#6A1C39;
+  --ns-on-accent:#FFFFFF;
+  --ns-accent-text:#8E2A4E;
+  --ns-accent-soft:rgba(var(--ns-accent-rgb),.08);
+  --ns-accent-line:rgba(var(--ns-accent-rgb),.35);
+  --ns-focus-ring:#8E2A4E;
+
+  --ns-good:#2EA866; --ns-good-text:#0F6B3E; --ns-good-soft:rgba(46,168,102,.12); --ns-good-line:rgba(19,128,74,.38);
+  --ns-bad:#E5484D;  --ns-bad-text:#B42A35;  --ns-bad-soft:rgba(229,72,77,.09);  --ns-bad-line:rgba(200,50,60,.40);
+  --ns-warn:#E9B21F; --ns-warn-text:#7F5600; --ns-warn-soft:rgba(233,178,31,.18); --ns-warn-line:rgba(176,124,0,.42);
+  --ns-info:#3B82D0; --ns-info-text:#1F5596; --ns-info-soft:rgba(59,130,208,.10); --ns-info-line:rgba(47,111,191,.38);
+  --ns-on-status:#17141B;
+
+  --ns-cat:#6B4FD8; --ns-cat-text:#5B3FC4; --ns-cat-soft:rgba(91,63,196,.08); --ns-cat-line:rgba(91,63,196,.35);
+
+  --ns-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%235E5766' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  --ns-shadow-pop:0 18px 40px -16px rgba(23,20,27,.28),0 0 0 1px rgba(23,20,27,.06);
+  --ns-shadow-card:0 1px 2px rgba(23,20,27,.05),0 6px 20px -14px rgba(23,20,27,.16);
+}
+
+/* =====================================================================
+   2. BASE
+   ===================================================================== */
+*{box-sizing:border-box}
+html{background:var(--ns-bg);-webkit-text-size-adjust:100%;touch-action:manipulation}
+html,body{margin:0}
+body{
+  min-height:100vh;min-height:100dvh;
+  background:var(--ns-bg);color:var(--ns-ink);
+  font:var(--ns-fs)/1.5 var(--ns-font);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+/* Stops Safari zooming in on a quick double tap. Pinch to zoom still works. */
+button,a,label,select,input,textarea,.check{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{-webkit-user-select:none;user-select:none}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:600}
+:focus-visible{outline:2px solid var(--ns-focus-ring);outline-offset:2px}
+/* hidden must always win over display rules below */
+[hidden]{display:none!important}
+::selection{background:rgba(var(--ns-accent-rgb),.4)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.good{color:var(--ns-good-text)}
+.bad{color:var(--ns-bad-text)}
+.warn{color:var(--ns-warn-text)}
+.flat{color:var(--ns-ink)}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* =====================================================================
+   3. COMPONENTS
+   ===================================================================== */
+
+/* ---------- card ---------- */
+.card{
+  position:relative;
+  background:var(--ns-surface);
+  border:1px solid var(--ns-line);
+  border-radius:var(--ns-r-lg);
+  padding:var(--ns-pad);
+  box-shadow:var(--ns-shadow-card);
+}
+.card.hero{border-color:var(--ns-line-2)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:var(--ns-sp-3);flex-wrap:wrap;margin-bottom:var(--ns-sp-4)}
+.card h2{font-size:var(--ns-fs-md);letter-spacing:-.01em;line-height:1.3}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:44px;padding:0 18px;border-radius:var(--ns-r);
+  border:1px solid transparent;background:transparent;
+  font-size:14px;font-weight:600;line-height:1;white-space:nowrap;cursor:pointer;
+  transition:background-color .15s,border-color .15s,color .15s;
+}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--ns-accent);color:var(--ns-on-accent)}
+.btn.primary:hover{background:var(--ns-accent-hover)}
+.btn.primary:active{background:var(--ns-accent-press)}
+.btn.secondary{background:var(--ns-surface-2);border-color:var(--ns-line-2);color:var(--ns-ink)}
+.btn.secondary:hover{background:var(--ns-surface-3)}
+
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.wide{width:100%}
+.btn.sm{height:36px;padding:0 12px;font-size:13px;border-radius:var(--ns-r-sm);gap:6px}
+.btn.sm svg.i{width:16px;height:16px}
+
+.icon-btn{
+  width:40px;height:40px;flex:none;display:grid;place-items:center;
+  border:1px solid var(--ns-line-2);border-radius:var(--ns-r);
+  background:var(--ns-surface-2);color:var(--ns-muted);cursor:pointer;
+  transition:background-color .15s,color .15s;
+}
+.icon-btn:hover{background:var(--ns-surface-3);color:var(--ns-ink)}
+
+.link{background:none;border:0;padding:4px 0;color:var(--ns-accent-text);font-weight:600;font-size:14px;cursor:pointer;justify-self:start;text-underline-offset:3px}
+.link:hover{text-decoration:underline}
+.link.quiet{color:var(--ns-muted)}
+
+/* ---------- fields ---------- */
+.f{display:flex;flex-direction:column;gap:6px;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-muted)}
+input,select,textarea{
+  width:100%;height:44px;padding:0 12px;
+  border:1px solid var(--ns-line-2);border-radius:var(--ns-r);
+  background:var(--ns-sunk);color:var(--ns-ink);
+  font-size:16px;font-weight:500;
+  transition:border-color .15s,box-shadow .15s;
+}
+input::placeholder,textarea::placeholder{color:var(--ns-faint)}
+input:hover,select:hover,textarea:hover{border-color:var(--ns-line-3)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ns-accent);box-shadow:var(--ns-focus)}
+input:disabled,select:disabled{opacity:.55;cursor:not-allowed}
+textarea{height:auto;min-height:84px;padding:10px 12px;line-height:1.45;resize:vertical;display:block}
+input[type=number]{font-variant-numeric:tabular-nums;font-size:18px;font-weight:600;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=date],input[type=month]{min-width:0;display:block;-webkit-appearance:none;appearance:none;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=month]::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+:root[data-theme=light] input[type=date]::-webkit-calendar-picker-indicator,:root[data-theme=light] input[type=month]::-webkit-calendar-picker-indicator{filter:none;opacity:.6}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
+select{
+  padding-right:38px;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background:var(--ns-sunk) var(--ns-chevron) no-repeat right 14px center;
+}
+select option{background:var(--ns-surface-3);color:var(--ns-ink)}
+select.unset{color:var(--ns-faint)}
+
+/* ---------- segmented toggle ---------- */
+.seg{
+  display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;
+  height:44px;padding:3px;border-radius:var(--ns-r);
+  background:var(--ns-sunk);border:1px solid var(--ns-line-2);
+}
+.seg button{border:0;background:transparent;border-radius:7px;padding:0 14px;font-size:14px;font-weight:600;color:var(--ns-muted);cursor:pointer;transition:background-color .15s,color .15s}
+.seg button:hover{color:var(--ns-ink)}
+.seg button[aria-checked=true]{background:var(--ns-accent-soft);color:var(--ns-ink);box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+
+/* ---------- stepper ---------- */
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px}
+.stepper button{height:44px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);color:var(--ns-ink);font-size:20px;line-height:1;cursor:pointer;transition:background-color .15s}
+.stepper button:hover{background:var(--ns-surface-3)}
+.stepper button:active{background:var(--ns-accent-soft);border-color:var(--ns-accent-line)}
+.stepper input{text-align:center}
+
+/* ---------- tick pill (choices and "I've done this") ---------- */
+.check{position:relative;display:inline-flex;cursor:pointer}
+.check input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.check span{
+  display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:0 14px 0 12px;
+  border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);
+  font-size:14px;font-weight:500;color:var(--ns-ink-2);transition:background-color .15s,border-color .15s;
+}
+.check span::before{content:"";width:18px;height:18px;flex:none;border-radius:5px;border:1.5px solid var(--ns-faint);background:center/11px 9px no-repeat}
+.check:hover span{border-color:var(--ns-line-3)}
+.check input:checked+span{border-color:var(--ns-accent-line);background:var(--ns-accent-soft);color:var(--ns-ink)}
+.check input:checked+span::before,
+.tick input:checked{
+  border-color:transparent;background-color:var(--ns-accent);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='%23FFFFFF' stroke-width='2.2'/%3E%3C/svg%3E");
+}
+.check input:focus-visible+span{box-shadow:var(--ns-focus)}
+
+/* ---------- checkbox row (Live ops issue steps) ---------- */
+.tick{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 10px;border-radius:var(--ns-r);cursor:pointer;font-size:15px;transition:background-color .15s}
+.tick:hover{background:var(--ns-wash-1)}
+.tick input{-webkit-appearance:none;appearance:none;flex:none;width:22px;height:22px;padding:0;margin:0;border-radius:6px;border:1.5px solid var(--ns-faint);background:transparent center/12px 10px no-repeat;cursor:pointer}
+.tick input:checked{background-color:var(--ns-good)}
+.tick input:focus{box-shadow:var(--ns-focus)}
+.tick.done span{color:var(--ns-muted);text-decoration:line-through;text-decoration-color:var(--ns-wash-4)}
+
+/* ---------- chips and counters ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;
+  border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);
+  font-size:12px;font-weight:600;color:var(--ns-ink-2);white-space:nowrap;
+}
+.chip.violet{background:var(--ns-surface-3);border-color:var(--ns-line-3);color:var(--ns-ink)}
+.chip.pm{background:var(--ns-cat-soft);border-color:var(--ns-cat-line);color:var(--ns-cat-text)}
+
+.chip.warn{background:var(--ns-warn-soft);border-color:var(--ns-warn-line);color:var(--ns-warn-text)}
+.chip.good{background:var(--ns-good-soft);border-color:var(--ns-good-line);color:var(--ns-good-text)}
+.chip.bad{background:var(--ns-bad-soft);border-color:var(--ns-bad-line);color:var(--ns-bad-text)}
+.count{
+  display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--ns-pill);
+  font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+  background:var(--ns-surface-2);border:1px solid var(--ns-line);color:var(--ns-muted);
+}
+.count.done{background:var(--ns-good-soft);border-color:var(--ns-good-line);color:var(--ns-good-text)}
+
+/* a still status dot (the green "active" light) */
+.pulse{display:inline-block;width:8px;height:8px;flex:none;border-radius:50%;background:var(--ns-good)}
+
+/* status light with a soft ring, coloured by the parent's state */
+.glow-dot{width:10px;height:10px;flex:none;border-radius:50%;background:var(--ns-faint)}
+
+/* ---------- progress bar ---------- */
+.bar{height:6px;border-radius:var(--ns-pill);background:var(--ns-wash-2);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:var(--ns-pill);background:var(--ns-accent);transition:width .3s var(--ns-ease)}
+
+/* ---------- notices: one look, coloured by tone ---------- */
+.rp-alert,.banner,.important,.tip,.setup{
+  --tone-soft:var(--ns-surface-2);--tone-line:var(--ns-line-2);--tone-text:var(--ns-ink-2);
+  margin:0;padding:10px 12px;border-radius:var(--ns-r);
+  border:1px solid var(--tone-line);background:var(--tone-soft);color:var(--tone-text);
+  font-size:14px;line-height:1.45;
+}
+.rp-alert.good,.banner.active{--tone-soft:var(--ns-good-soft);--tone-line:var(--ns-good-line);--tone-text:var(--ns-good-text)}
+.rp-alert.bad{--tone-soft:var(--ns-bad-soft);--tone-line:var(--ns-bad-line);--tone-text:var(--ns-bad-text)}
+.rp-alert.warn,.banner.when,.important,.setup{--tone-soft:var(--ns-warn-soft);--tone-line:var(--ns-warn-line);--tone-text:var(--ns-warn-text)}
+.rp-alert.info{--tone-soft:var(--ns-info-soft);--tone-line:var(--ns-info-line);--tone-text:var(--ns-info-text)}
+.banner.recurring,.tip{--tone-soft:var(--ns-accent-soft);--tone-line:var(--ns-accent-line);--tone-text:var(--ns-ink-2)}
+.important b{color:var(--ns-warn-text)}
+.tip b{color:var(--ns-accent-text)}
+
+/* ---------- empty states ---------- */
+.empty{margin:0;color:var(--ns-muted);font-size:14px}
+
+.rp-empty,.todo{
+  margin:0;padding:16px;border-radius:var(--ns-r-md);
+  border:1px dashed var(--ns-line-2);color:var(--ns-muted);font-size:14px;
+}
+
+.todo{color:var(--ns-faint);font-size:13.5px}
+
+/* ---------- navigation (layout per screen size is in section 6) ---------- */
+.nav{display:grid;gap:2px}
+.tab{
+  position:relative;display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;
+  border:0;border-radius:var(--ns-r);background:transparent;
+  color:var(--ns-muted);font-size:14px;font-weight:500;text-align:left;cursor:pointer;
+  transition:background-color .15s,color .15s;
+}
+.tab:hover{background:var(--ns-surface-2);color:var(--ns-ink)}
+.tab[aria-selected=true]{background:var(--ns-accent-soft);color:var(--ns-ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+.tab[aria-selected=true] svg.i{color:var(--ns-accent)}
+/* the phone tab bar draws a pill behind the selected icon with this */
+.tab[aria-selected=true]::before{content:"";position:absolute;display:none}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;right:24px;bottom:24px;z-index:50;max-width:min(440px,calc(100% - 32px));
+  padding:12px 16px;border-radius:var(--ns-r-md);
+  background:var(--ns-surface-3);border:1px solid var(--ns-line-2);box-shadow:var(--ns-shadow-pop);
+  font-size:14px;font-weight:500;color:var(--ns-ink);
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .2s var(--ns-ease),transform .2s var(--ns-ease);
+}
+.toast.show{opacity:1;transform:none}
+.toast.bad{border-color:var(--ns-bad-line);box-shadow:var(--ns-shadow-pop),inset 3px 0 0 var(--ns-bad)}
+
+/* =====================================================================
+   4. APP SHELL
+   ===================================================================== */
+
+/* ---------- brand ---------- */
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.brand-t{display:flex;flex-direction:column;line-height:1.15}
+.credit{margin-top:3px;font-size:10.5px;font-weight:500;letter-spacing:.02em;color:var(--ns-faint)}
+.mark{width:30px;height:30px;flex:none;border-radius:8px;background:url("icons/icon.svg") center/cover no-repeat}
+
+/* ---------- sign in ---------- */
+
+.setup{margin:0 0 18px}
+
+/* ---------- frame ---------- */
+.app{display:grid;grid-template-columns:var(--ns-side-w) minmax(0,1fr);min-height:100vh;min-height:100dvh;overflow-x:clip}
+.main{min-width:0}
+
+/* sidebar (desktop). Tablets and phones restyle it in section 6. */
+.side{
+  position:sticky;top:0;height:100vh;height:100dvh;
+  display:flex;flex-direction:column;padding:20px 12px 12px;
+  background:var(--ns-bg-2);border-right:1px solid var(--ns-line);
+}
+.side .brand{padding:4px 10px 24px}
+.side .install-btn{margin:16px 4px 0}
+
+/* banner shown in preview mode */
+
+/* page header: title on the left, Save and Reset on the right */
+.pagehead{
+  position:sticky;top:0;z-index:10;
+  background:var(--ns-glass);border-bottom:1px solid var(--ns-line);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+.pagehead-inner{max-width:var(--ns-content-w);margin:0 auto;padding:16px 32px;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pagehead h1{font-size:var(--ns-fs-xl);line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.pagehead p{margin:4px 0 0;color:var(--ns-muted);font-size:14px}
+.actionbar{display:flex;align-items:center;gap:8px}
+.draft{margin-right:6px;color:var(--ns-faint);font-size:13px}
+
+/* content */
+.content{max-width:var(--ns-content-w);margin:0 auto;padding:24px 32px 64px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:var(--ns-gap);margin-bottom:var(--ns-gap)}
+.row.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:0}
+
+/* =====================================================================
+   5. VIEWS
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   This shift: setup
+   --------------------------------------------------------------------- */
+.setup-ctl{display:flex;gap:8px;align-items:center}
+.setup-ctl input{width:168px}
+.matrix{display:grid;grid-template-columns:76px minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center}
+.mx-h{font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-muted)}
+.mx-r{font-size:14px;font-weight:600;color:var(--ns-ink-2)}
+.matrix input{height:52px;font-size:22px}
+
+/* last 7 shifts chart */
+
+/* form guide: the last 7 shifts as results, oldest on the left */
+
+/* ---------------------------------------------------------------------
+   This shift: results (KPIs)
+   --------------------------------------------------------------------- */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi{
+  position:relative;display:flex;flex-direction:column;min-width:0;padding:16px;
+  border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2);
+  container-type:inline-size;
+}
+/* top rail shows how the number is doing; the + or − sign says it in words */
+.kpi[data-tone=good]{box-shadow:inset 0 2px 0 var(--ns-good)}
+.kpi[data-tone=bad]{box-shadow:inset 0 2px 0 var(--ns-bad)}
+.kpi-name{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-muted)}
+.kpi-name::before{content:"";width:8px;height:8px;flex:none;border-radius:50%;background:var(--ns-line-3)}
+.kpi[data-tone=good] .kpi-name::before{background:var(--ns-good)}
+.kpi[data-tone=bad] .kpi-name::before{background:var(--ns-bad)}
+.kpi-var{margin:14px 0;font-size:40px;font-size:clamp(28px,24cqi,48px);font-weight:700;font-stretch:var(--ns-num-stretch);line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
+.kpi-hint{margin:-6px 0 12px;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-faint)}
+.kpi-pa{display:grid;gap:12px;margin-top:auto;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.kpi-pa>span{display:grid;grid-template-columns:1fr auto;align-items:baseline}
+.kpi-pa b{font-size:15px;font-weight:600;color:var(--ns-ink);font-variant-numeric:tabular-nums}
+.pa-bar{grid-column:1/-1;display:block;height:6px;margin-top:6px;border-radius:var(--ns-pill);background:var(--ns-wash-2);overflow:hidden}
+.pa-bar i{display:block;height:100%;width:0;border-radius:var(--ns-pill);background:var(--ns-line-3);transition:width .35s var(--ns-ease)}
+.kpi-pa>span+span .pa-bar i{background:var(--ns-accent)}
+.kpi[data-tone=good] .kpi-pa>span+span .pa-bar i{background:var(--ns-good)}
+.kpi[data-tone=bad] .kpi-pa>span+span .pa-bar i{background:var(--ns-bad)}
+.summary{margin:14px 0 0;padding:12px 14px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-surface-2);font-size:14px;color:var(--ns-ink-2)}
+.notes2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:14px}
+
+/* ---------------------------------------------------------------------
+   This shift: FTDS live. The one place that is allowed to be loud.
+   A rail across the top and the gauge take the colour of the state.
+   --------------------------------------------------------------------- */
+.band{--state:var(--ns-line-2);--state-text:var(--ns-ink);--state-soft:transparent;margin-bottom:var(--ns-gap);padding:24px;overflow:hidden}
+.band[data-state=good]{--state:var(--ns-good);--state-text:var(--ns-good-text);--state-soft:var(--ns-good-soft)}
+.band[data-state=warn]{--state:var(--ns-warn);--state-text:var(--ns-warn-text);--state-soft:var(--ns-warn-soft)}
+.band[data-state=bad]{--state:var(--ns-bad);--state-text:var(--ns-bad-text);--state-soft:var(--ns-bad-soft)}
+.band::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--state)}
+.band-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
+.band h2{display:flex;align-items:center;gap:10px}
+.band .glow-dot{background:var(--state);box-shadow:0 0 0 4px var(--state-soft)}
+.band[data-state=idle] .glow-dot{background:var(--ns-faint)}
+.band-grid{display:grid;grid-template-columns:minmax(0,240px) 280px minmax(0,1fr);gap:32px;align-items:center}
+.band-inputs{display:grid;gap:14px}
+.band .f{color:var(--ns-ink-2)}
+.band .f .sub{display:block;margin-top:1px;font-weight:500;font-size:var(--ns-fs-xs);color:var(--ns-muted)}
+
+.gauge{position:relative;width:280px;max-width:100%;margin:0 auto}
+.gauge svg{display:block;width:100%;height:auto;overflow:visible}
+.g-track,.g-val{fill:none;stroke-width:12;stroke-linecap:round}
+.g-track{stroke:var(--ns-wash-2)}
+.g-val{stroke:var(--state);transition:stroke-dasharray .45s var(--ns-ease)}
+.band[data-state=idle] .g-val{opacity:0}
+.g-tick{stroke:var(--ns-ink);stroke-width:2.5;stroke-linecap:round}
+.g-txt{fill:var(--ns-muted);font:600 11px var(--ns-font)}
+.g-center{position:absolute;left:0;right:0;bottom:4px;text-align:center}
+.ftds-pct{font-size:56px;font-weight:700;font-stretch:var(--ns-num-stretch);line-height:1;letter-spacing:-.01em;color:var(--ns-ink)}
+.g-label{margin-top:6px;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+
+.status{margin:0 0 18px;font-size:19px;font-weight:600;line-height:1.3;letter-spacing:-.01em;color:var(--state-text)}
+.slots-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
+.slots-head b{color:var(--ns-ink);font-weight:600}
+.slots{display:flex;flex-wrap:wrap;gap:5px;min-height:14px}
+.slot{width:20px;height:8px;border-radius:var(--ns-pill);background:var(--ns-wash-3)}
+.slot.used{background:var(--ns-ink-2)}
+.band[data-state=warn] .slot.used{background:var(--ns-warn)}
+.slot.over{background:var(--ns-bad)}
+.slot-more,.slot-note{align-self:center;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
+
+.band-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:24px}
+.band-stats div{min-width:0;padding:12px 14px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.band-stats span{display:block;font-size:var(--ns-fs-xs);font-weight:500;line-height:1.3;color:var(--ns-muted)}
+.band-stats b{display:block;margin-top:6px;font-size:24px;font-weight:700;font-stretch:var(--ns-num-stretch);letter-spacing:-.005em;font-variant-numeric:tabular-nums;color:var(--ns-ink)}
+.band-stats small{display:block;margin-top:2px;font-size:11px;color:var(--ns-faint)}
+
+/* ---------------------------------------------------------------------
+   This shift: redelivery and rejection notes
+   --------------------------------------------------------------------- */
+
+.note{
+  display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px 12px;align-items:start;
+  margin-top:10px;padding:14px;border-radius:var(--ns-r-md);
+  border:1px solid var(--ns-line);background:var(--ns-surface-2);
+  transition:border-color .2s;
+}
+.note:first-child{margin-top:0}
+.note>.f{grid-column:2}
+
+.note.done{border-color:var(--ns-good-line);box-shadow:inset 3px 0 0 var(--ns-good)}
+
+/* JDW numbers: a box that takes one or many, and grows with what's pasted */
+textarea.jdw{
+  min-height:64px;max-height:220px;field-sizing:content;resize:vertical;
+  font-weight:600;letter-spacing:.03em;font-variant-numeric:tabular-nums;line-height:1.5;
+}
+textarea.jdw::placeholder{letter-spacing:.03em;font-weight:500}
+   /* the wrong JDW itself is marked in the chips below */
+
+.note .f .sub{margin-left:4px;font-weight:500;color:var(--ns-faint)}
+/* what the box read: one chip per JDW, wrong ones in red, repeats in amber */
+
+/* narrow panel: what the box read sits right under it, before the reason */
+
+.note>.f:not(.jdw-f){order:3}
+
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+
+/* wide notes panel: JDW and reason side by side */
+@container (min-width:470px){
+  .note{grid-template-columns:32px minmax(196px,1fr) minmax(0,1.1fr)}
+  .note>.f{grid-column:auto}
+  .note>.other{grid-column:2/-1}
+  .note>.f:not(.jdw-f){order:0}
+}
+
+/* ---------------------------------------------------------------------
+   History: shift reports
+   --------------------------------------------------------------------- */
+
+.h-stat{padding:18px 20px}
+.h-stat span{font-size:var(--ns-fs-sm);font-weight:500;color:var(--ns-muted)}
+.h-stat b{display:block;margin-top:6px;font-size:38px;font-weight:700;font-stretch:var(--ns-num-stretch);line-height:1.1;letter-spacing:-.01em}
+
+/* a report opened up */
+
+/* ---------------------------------------------------------------------
+   History: recorded routes
+   --------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------
+   Account and staff accounts
+   --------------------------------------------------------------------- */
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.staff{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 14px;align-items:center;padding:14px 16px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.staff.off{opacity:.55}
+
+/* ---------------------------------------------------------------------
+   Training: search
+   --------------------------------------------------------------------- */
+.tr-search{position:relative;margin:0 0 20px}
+.tr-search-box{position:relative}
+.tr-search-box svg.i{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--ns-muted);pointer-events:none}
+.tr-search input{height:48px;padding-left:44px;padding-right:44px;background:var(--ns-surface)}
+.tr-search-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:var(--ns-r-sm);background:transparent;color:var(--ns-muted);font-size:16px;cursor:pointer}
+.tr-search-x:hover{background:var(--ns-surface-2);color:var(--ns-ink)}
+.tr-results{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;max-height:min(60vh,520px);overflow:auto;
+  padding:6px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line-2);background:var(--ns-surface-3);box-shadow:var(--ns-shadow-pop);
+}
+.tr-res{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;width:100%;padding:10px 12px;border:0;border-radius:var(--ns-r);background:transparent;color:var(--ns-ink);text-align:left;cursor:pointer}
+.tr-res:hover,.tr-res.sel{background:var(--ns-accent-soft)}
+.tr-res-n{grid-row:span 3;align-self:start;width:32px;height:32px;border-radius:var(--ns-r-sm);display:grid;place-items:center;font-size:var(--ns-fs-sm);font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
+.tr-res-n.term{font-size:14px}
+.tr-res small{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.tr-res b{font-size:15px;font-weight:600}
+.tr-res p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ns-ink-2)}
+.tr-res mark{padding:0 2px;border-radius:3px;background:rgba(var(--ns-accent-rgb),.3);color:var(--ns-ink)}
+.tr-none{margin:0;padding:14px;font-size:14px;color:var(--ns-muted)}
+
+/* ---------------------------------------------------------------------
+   Training: overview. The strip shows every module in order:
+   filled green = completed, tall orange = up next (or the module you
+   are in), outlined = still to do.
+   --------------------------------------------------------------------- */
+.tr-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 32px;align-items:center;margin-bottom:24px;padding:24px}
+.card .tr-hero-main h2{margin:12px 0 6px;font-size:var(--ns-fs-xl);line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.tr-hero p{margin:0 0 18px;max-width:520px;color:var(--ns-ink-2)}
+.tr-ring{text-align:center}
+.ring-box{position:relative;width:132px;height:132px;margin:0 auto}
+.ring-box svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--ns-wash-2);stroke-width:10}
+.ring-val{fill:none;stroke:var(--ns-accent);stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .5s var(--ns-ease)}
+.tr-hero[data-state=done] .ring-val{stroke:var(--ns-good)}
+.ring-txt{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-txt b{font-size:30px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.ring-txt span{margin-top:4px;font-size:var(--ns-fs-xs);color:var(--ns-muted)}
+.tr-ring p{margin:10px 0 0;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-ink-2)}
+.tr-overview{grid-column:1/-1;padding-top:18px;border-top:1px solid var(--ns-line)}
+
+.tr-strip{display:flex;gap:3px;flex:1;min-width:200px}
+.tr-strip button{position:relative;flex:1;min-width:0;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
+.tr-strip button::before{content:"";position:absolute;left:0;right:0;top:50%;height:8px;transform:translateY(-50%);border-radius:3px;box-shadow:inset 0 0 0 1px var(--ns-line-3);transition:height .15s var(--ns-ease)}
+.tr-strip button:hover::before{box-shadow:inset 0 0 0 1px var(--ns-muted)}
+.tr-strip button.part::before{box-shadow:inset 0 0 0 1px var(--ns-accent-line);background:var(--ns-accent-soft)}
+.tr-strip button.done::before{background:var(--ns-good);box-shadow:none}
+.tr-strip button.cur::before{height:16px;background:var(--ns-accent);box-shadow:none}
+.tr-strip button.cur.done::before{background:var(--ns-good)}
+.tr-key{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 0;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.tr-key span{display:inline-flex;align-items:center;gap:7px}
+.tr-key i{display:inline-block;width:16px;height:8px;border-radius:3px;box-shadow:inset 0 0 0 1px var(--ns-line-3)}
+.tr-key i.done{background:var(--ns-good);box-shadow:none}
+.tr-key i.cur{height:12px;background:var(--ns-accent);box-shadow:none}
+.tr-hero .tr-key{margin-bottom:0}
+
+/* module cards */
+.tr-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
+.tr-section-head h2{font-size:var(--ns-fs-md)}
+.tr-section-head span{font-size:var(--ns-fs-sm);color:var(--ns-faint)}
+.tr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tr-card{display:flex;flex-direction:column;gap:10px;padding:18px;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background-color .15s}
+.tr-card:hover{border-color:var(--ns-line-3);background:var(--ns-surface-2)}
+.tr-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tr-num{
+  width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:var(--ns-fs-sm);font-weight:700;letter-spacing:0;
+  color:var(--ns-muted);box-shadow:inset 0 0 0 1.5px var(--ns-line-3);
+}
+.tr-card[data-state=progress] .tr-num{color:var(--ns-accent-text);box-shadow:inset 0 0 0 1.5px var(--ns-accent-line);background:var(--ns-accent-soft)}
+.tr-card[data-state=done] .tr-num{color:var(--ns-on-status);background:var(--ns-good);box-shadow:none}
+.tr-card[data-next]{border-color:var(--ns-accent-line);box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+.tr-card[data-next] .tr-num{color:var(--ns-on-accent);background:var(--ns-accent);box-shadow:none}
+.tr-card-title{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.tr-card-desc{flex:1;font-size:13.5px;color:var(--ns-muted)}
+.tr-card .bar{display:block;margin-top:4px}
+.tr-card[data-state=done] .bar i{background:var(--ns-good)}
+.tr-card-foot{display:flex;justify-content:space-between;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+
+/* ---------------------------------------------------------------------
+   Training: welcome page
+   --------------------------------------------------------------------- */
+.tr-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;min-height:28px;margin-bottom:16px}
+.card .tr-title{margin:12px 0 6px;font-size:var(--ns-fs-xl);line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.tr-welcome{max-width:860px;padding:24px}
+.tr-welcome p{max-width:640px;margin:0 0 10px;color:var(--ns-ink-2)}
+.tr-welcome h3{margin:24px 0 12px;font-size:15px}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
+.legend div{padding:14px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.legend p{margin:10px 0 0;font-size:13.5px}
+.objectives{margin:0 0 24px;padding:12px 14px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.objectives summary{display:flex;justify-content:space-between;gap:10px;font-weight:600;cursor:pointer}
+.objectives summary span{font-size:var(--ns-fs-sm);font-weight:500;color:var(--ns-muted)}
+.objectives ol{margin:12px 0 0;padding-left:22px;columns:2;column-gap:28px;font-size:14px;color:var(--ns-ink-2)}
+.objectives li{margin-bottom:5px;break-inside:avoid}
+
+/* ---------------------------------------------------------------------
+   Training: a module
+   --------------------------------------------------------------------- */
+.tr-mhead{margin-bottom:16px}
+.tr-mhead .chips{display:flex;flex-wrap:wrap;gap:8px}
+.tr-mhead p{margin:0 0 16px;color:var(--ns-ink-2)}
+.tr-prog{display:flex;align-items:center;gap:14px}
+.tr-prog .bar{flex:1}
+.tr-prog span{font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tr-mhead .tr-prog .bar i{transition:width .3s var(--ns-ease)}
+
+/* steps: number = to do, orange with a rail = up next, green tick = done */
+.tr-steps{display:grid;gap:10px}
+.step{border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface);transition:border-color .15s}
+.step[open]{border-color:var(--ns-line-2)}
+.step[data-state=current]{border-color:var(--ns-accent-line);box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+.step summary{display:flex;align-items:center;gap:14px;padding:14px 16px;list-style:none;cursor:pointer;border-radius:var(--ns-r-md)}
+.step summary::-webkit-details-marker{display:none}
+.step summary:hover .step-h b{color:var(--ns-ink)}
+.step-n{
+  width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:var(--ns-fs-sm);font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--ns-muted);box-shadow:inset 0 0 0 1.5px var(--ns-line-3);
+}
+.step[data-state=current] .step-n{color:var(--ns-on-accent);background:var(--ns-accent);box-shadow:none}
+.step.done .step-n{color:var(--ns-on-status);background:var(--ns-good);box-shadow:none}
+.step-h{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.step-h b{font-size:15.5px;font-weight:600;line-height:1.3}
+.step.done:not([open]) .step-h b{color:var(--ns-muted);font-weight:500}
+.step-chips{display:flex;flex-wrap:wrap;gap:6px}
+.step-chev{color:var(--ns-faint);transition:transform .2s var(--ns-ease)}
+.step[open] .step-chev{transform:rotate(180deg)}
+.step-body{display:grid;gap:14px;padding:0 16px 18px 62px}
+.step-body>p{margin:0;color:var(--ns-ink-2)}
+/* briefly outlines a step opened from search */
+.step.flash{animation:flash 1.6s var(--ns-ease)}
+@keyframes flash{from{outline:2px solid var(--ns-accent);outline-offset:2px}to{outline:2px solid transparent;outline-offset:6px}}
+
+.banner{display:flex;align-items:flex-start;gap:10px}
+.banner .pulse{margin-top:6px}
+.banner .b-ic{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700}
+.banner.recurring .b-ic{background:var(--ns-accent);color:var(--ns-on-accent)}
+.banner.when .b-ic{background:var(--ns-warn);color:var(--ns-on-status)}
+.how{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:how}
+.how li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start;font-size:15px;line-height:1.45}
+.how li::before{counter-increment:how;content:counter(how);width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:var(--ns-fs-xs);font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-2);box-shadow:inset 0 0 0 1px var(--ns-line-2)}
+.facts{display:flex;flex-wrap:wrap;gap:10px}
+.facts div{min-width:150px;padding:12px 14px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-2)}
+.facts span{display:block;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.facts b{display:block;margin-top:2px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.blist-t{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--ns-ink-2)}
+.blist ul{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.blist li{padding:6px 12px;border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);font-size:14px}
+.scenario{padding:14px 16px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-2)}
+.scenario-t{margin:0 0 8px;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-ink)}
+.scenario ul{display:grid;gap:4px;margin:0;padding-left:18px;font-size:14.5px;color:var(--ns-ink-2)}
+.scenario li:last-child{color:var(--ns-ink);font-weight:600}
+.example{max-width:440px;padding:12px 14px;border-radius:14px 14px 14px 4px;border:1px solid var(--ns-line-2);background:var(--ns-surface-3);white-space:pre-wrap;font-size:14px}
+
+/* photos */
+.imgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:start}
+.ph{
+  max-width:420px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:16px;border-radius:var(--ns-r-md);border:1.5px dashed var(--ns-line-2);background:var(--ns-surface-2);
+  text-align:center;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-muted);
+}
+.ph svg.i{width:28px;height:28px;margin-bottom:4px;color:var(--ns-faint)}
+.ph small{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-faint)}
+.tr-img{margin:0}
+.tr-img img{display:block;width:auto;max-width:100%;max-height:420px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);cursor:zoom-in}
+.tr-img>.ph{display:none}
+.tr-img.wide{grid-column:1/-1}
+.tr-img.missing img,.tr-img.missing figcaption{display:none}
+.tr-img.missing>.ph{display:flex}
+.tr-img figcaption{margin-top:6px;font-size:var(--ns-fs-xs);color:var(--ns-muted)}
+
+/* "I've done this" tick. Ticked goes green, the colour of done everywhere. */
+.step-check{justify-self:start}
+.step-check span{min-height:44px;padding:0 18px 0 14px;font-size:15px}
+.step-check input:checked+span{border-color:var(--ns-good-line);background:var(--ns-good-soft);color:var(--ns-good-text)}
+.step-check input:checked+span::before{background-color:var(--ns-good)}
+.tr-donebar{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 16px;border-radius:var(--ns-r-md);border:1px solid var(--ns-good-line);background:var(--ns-good-soft)}
+.tr-done-ic{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--ns-on-status);background:var(--ns-good)}
+.tr-donebar div{display:flex;flex-direction:column}
+.tr-donebar span{font-size:var(--ns-fs-sm);color:var(--ns-ink-2)}
+.tr-nav{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+
+/* glossary and the checklist preview (also used in Live ops) */
+.gloss,.chk-preview{margin-bottom:16px}
+.gloss input{margin-bottom:12px}
+.gloss dl{display:grid;gap:8px;margin:0}
+.gloss .g{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;padding:12px 14px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.gloss dt{font-size:15px;font-weight:700;color:var(--ns-ink)}
+.gloss dt small{display:block;margin-top:3px;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.gloss dd{display:grid;gap:8px;margin:0;font-size:14.5px;color:var(--ns-ink-2)}
+.gloss dd p{margin:0}
+.gloss dd ul{display:grid;gap:3px;margin:0;padding-left:18px}
+.gloss .tbd{color:var(--ns-faint)}
+.g-ex{padding:8px 12px;border-radius:var(--ns-r-sm);background:var(--ns-accent-soft);font-size:13.5px}
+.g-note{font-size:var(--ns-fs-sm);color:var(--ns-muted)}
+.chk-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.chk-cols .is-active{padding:12px;border-radius:var(--ns-r);border:1px solid var(--ns-good-line);background:var(--ns-good-soft)}
+.chk-cols .chk-note{margin:0 0 8px;font-size:var(--ns-fs-sm);color:var(--ns-muted)}
+.chk-cols h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px;color:var(--ns-ink-2)}
+.chk-cols ul{display:grid;gap:4px;margin:0;padding-left:18px;font-size:14px;color:var(--ns-ink-2)}
+
+/* training summary */
+.tr-summary{max-width:860px;padding:24px}
+.tr-sum-head{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.tr-sum-head p{margin:0;color:var(--ns-ink-2)}
+.card .tr-sum-head .tr-title{margin-top:0}
+.tr-orb{width:64px;height:64px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--ns-ink);background:var(--ns-surface-3);box-shadow:inset 0 0 0 1.5px var(--ns-line-2)}
+.tr-orb.done{font-size:28px;color:var(--ns-on-status);background:var(--ns-good);box-shadow:none}
+.sum-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.sum-list li{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.sum-ic{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--ns-muted);box-shadow:inset 0 0 0 1.5px var(--ns-line-3)}
+.sum-list li.done .sum-ic{color:var(--ns-on-status);background:var(--ns-good);box-shadow:none}
+.sum-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.sum-t small{font-size:12.5px;color:var(--ns-muted)}
+
+/* photo viewer */
+.zoom{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px;background:rgba(6,7,11,.94);cursor:zoom-out}
+.zoom figure{margin:0;max-width:min(1100px,100%);text-align:center}
+.zoom img{max-width:100%;max-height:82vh;border-radius:var(--ns-r-md)}
+.zoom figcaption{margin-top:10px;font-size:14px;color:var(--ns-ink-2)}
+.zoom .icon-btn{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px}
+
+/* ---------------------------------------------------------------------
+   Live ops
+   --------------------------------------------------------------------- */
+/* the delivery wave countdown */
+.wave{
+  --state:var(--ns-accent);--state-soft:var(--ns-accent-soft);--state-text:var(--ns-accent-text);
+  display:flex;align-items:center;gap:14px;margin-bottom:var(--ns-gap);padding:14px 16px;
+  border-radius:var(--ns-r-lg);border:1px solid var(--ns-line-2);background:var(--ns-surface);
+  box-shadow:inset 3px 0 0 var(--state);
+}
+.wave[data-s=warn]{--state:var(--ns-warn);--state-soft:var(--ns-warn-soft);--state-text:var(--ns-warn-text);border-color:var(--ns-warn-line)}
+.wave[data-s=bad]{--state:var(--ns-bad);--state-soft:var(--ns-bad-soft);--state-text:var(--ns-bad-text);border-color:var(--ns-bad-line)}
+.wave[data-s=off]{--state:var(--ns-line-3);--state-soft:var(--ns-surface-2);--state-text:var(--ns-muted);opacity:.75}
+
+/* every task card has a rail: red = needs action, orange = repeating,
+   green = ongoing. Amber or red on a repeating job means due or overdue. */
+
+.due{margin:4px 0 8px;font-size:24px;font-weight:600;letter-spacing:-.025em;color:var(--ns-ink)}
+.due.warn{color:var(--ns-warn-text)}
+.due.bad{color:var(--ns-bad-text)}
+.due.off{font-size:16px;color:var(--ns-muted)}
+.sent{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--ns-line);font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-faint)}
+.sent>span:first-child{margin-right:4px}
+
+.resolved{margin-top:18px;font-size:13.5px}
+.resolved summary{font-weight:600;color:var(--ns-muted);cursor:pointer}
+.resolved ul{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.resolved li{display:flex;align-items:center;gap:10px;color:var(--ns-ink-2)}
+.resolved li small{margin-left:auto;color:var(--ns-faint)}
+
+/* ---------------------------------------------------------------------
+   Routes
+   --------------------------------------------------------------------- */
+.rp-hero{display:grid;grid-template-columns:repeat(2,minmax(0,1.3fr)) repeat(2,minmax(0,1fr));gap:12px;margin-bottom:var(--ns-gap);padding:16px}
+.rp-big,.rp-mini{min-width:0;padding:14px 16px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.rp-big span,.rp-mini span{display:block;font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-muted)}
+.rp-big b{display:block;margin-top:6px;font-size:44px;font-weight:600;line-height:1;letter-spacing:-.04em}
+.rp-mini b{display:block;margin-top:8px;font-size:28px;font-weight:600;line-height:1;letter-spacing:-.03em}
+.rp-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--ns-gap);margin-bottom:var(--ns-gap);align-items:start}
+/* step numbers 1, 2, 3 in the card titles */
+.rp-n{width:24px;height:24px;flex:none;display:inline-grid;place-items:center;margin-right:10px;vertical-align:1px;border-radius:7px;font-size:var(--ns-fs-sm);font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
+.rp-paste{min-height:150px;font:500 13.5px/1.55 var(--ns-mono)}
+.rp-actions{display:flex;align-items:center;gap:14px;margin-top:12px}
+.rp-ok{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--ns-r-md);border:1px solid var(--ns-good-line);background:var(--ns-good-soft)}
+.rp-ok-ic{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--ns-on-status);background:var(--ns-good)}
+.rp-ok b{display:block;font-size:16px;font-weight:600}
+.rp-ok span{font-size:14px;color:var(--ns-good-text)}
+.rp-alert{margin:10px 0 0;font-size:13.5px}
+#rpRouteNote .rp-alert{margin:0 0 14px}
+.rp-nodrv{font-size:var(--ns-fs-sm);font-weight:600;color:var(--ns-faint)}
+.rp-hint{margin:0;font-size:13.5px;color:var(--ns-faint)}
+.rp-head-btns{display:flex;gap:8px}
+
+/* working today */
+.rp-type{position:relative}
+.rp-addrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.rp-addrow.three{grid-template-columns:minmax(0,1fr) 110px auto}
+.rp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rp-name{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 4px 0 12px;border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);font-size:14px;font-weight:600;white-space:nowrap}
+.rp-name.on{border-color:var(--ns-line-3);background:var(--ns-surface-3)}
+.rp-name small{font-size:11px;font-weight:700;color:var(--ns-good-text)}
+.rp-name button{width:28px;height:28px;flex:none;border:0;border-radius:50%;background:var(--ns-wash-2);color:var(--ns-ink-2);font-size:12px;cursor:pointer}
+.rp-name button:hover{background:var(--ns-bad-soft);color:var(--ns-bad-text)}
+/* small dot in the agency's colour (the colour comes from routes-config.js) */
+.ag-dot{display:inline-block;width:8px;height:8px;flex:none;margin-right:7px;vertical-align:1px;border-radius:50%;background:var(--ns-faint)}
+.rp-keys{display:inline-flex;gap:10px;margin-left:4px}
+.ag-key{display:inline-flex;align-items:center;font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.ag-key .ag-dot{margin-right:5px}
+
+/* type ahead under "Type a driver's name" */
+.rp-suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;display:grid;gap:2px;padding:6px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line-2);background:var(--ns-surface-3);box-shadow:var(--ns-shadow-pop)}
+.rp-sug{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:var(--ns-r-sm);background:transparent;color:var(--ns-ink);font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.rp-sug span{flex:1}
+.rp-sug small{font-size:11px;font-weight:600;color:var(--ns-faint)}
+.rp-sug:hover,.rp-sug.active{background:var(--ns-accent-soft)}
+.rp-sug-new{display:flex;align-items:center;gap:6px;margin-top:2px;padding:8px 12px;border-top:1px solid var(--ns-line);font-size:13.5px;color:var(--ns-muted)}
+.rp-suggest .rp-sug-new:first-child{margin-top:0;border-top:0}
+.rp-sug-new span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-sug-new b{color:var(--ns-ink)}
+.rp-sug-new button{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:var(--ns-pill);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);color:var(--ns-ink);font-size:12.5px;font-weight:600;cursor:pointer}
+.rp-sug-new button:hover{background:var(--ns-accent-soft);border-color:var(--ns-accent-line)}
+.rp-sug-note{margin:0;padding:10px 12px;font-size:13.5px;color:var(--ns-muted)}
+
+/* all drivers */
+.rp-roster{margin-top:18px;padding-top:14px;border-top:1px solid var(--ns-line)}
+.rp-roster summary{display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;flex-wrap:wrap;margin-bottom:12px;list-style:none;font-weight:600;color:var(--ns-ink-2);cursor:pointer}
+.rp-roster summary::-webkit-details-marker{display:none}
+.rp-roster summary::after{content:"";width:7px;height:7px;margin:0 0 3px 4px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s}
+.rp-roster[open] summary::after{transform:rotate(-135deg);margin-bottom:-3px}
+.rp-search{margin-top:10px}
+.rp-rlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;max-height:300px;margin-top:10px;padding-right:2px;overflow:auto}
+.rp-rrow{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 6px 0 10px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.rp-rname-t{flex:1;min-width:0;font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-rrow select{width:auto;height:32px;padding:0 24px 0 8px;border-radius:var(--ns-r-sm);background-position:right 8px center;font-size:var(--ns-fs-xs);font-weight:600;color:var(--ns-ink-2)}
+.rp-rrow select.unset{border-color:var(--ns-warn-line);color:var(--ns-warn-text)}
+.rp-rdel{width:32px;height:32px;flex:none;border:0;border-radius:var(--ns-r-sm);background:transparent;color:var(--ns-faint);cursor:pointer}
+.rp-rdel:hover{background:var(--ns-bad-soft);color:var(--ns-bad-text)}
+.rp-foot{margin:12px 0 0;font-size:12.5px;color:var(--ns-faint)}
+
+/* route cards. A green route number means the route has a driver. */
+.rp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.rp-route{
+  position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"name name" "p d" "drv drv";
+  gap:12px;align-items:start;align-content:start;padding:16px;
+  border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2);
+  transition:border-color .15s;
+}
+.rp-route.has{border-color:var(--ns-line-2)}
+.rp-route.has .rp-badge{color:var(--ns-good-text);background:var(--ns-good-soft)}
+.rp-route.zero{opacity:.55}
+.rp-r-name{grid-area:name;display:flex;align-items:center;gap:12px;min-width:0}
+.rp-r-name>div{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.rp-r-name b{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.rp-r-name small{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-faint)}
+.rp-badge{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:var(--ns-r-sm);font-style:normal;font-size:15px;font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
+.rp-pcbtn{display:inline-flex;align-items:center;gap:2px;margin-top:2px;padding:0;border:0;background:none;color:var(--ns-muted);font-size:12.5px;font-weight:600;cursor:pointer;transition:color .15s}
+.rp-pcbtn:hover,.rp-pcbtn[aria-expanded=true]{color:var(--ns-ink)}
+.rp-pcbtn svg.i{width:14px;height:14px;transition:transform .2s}
+.rp-pcbtn[aria-expanded=true] svg.i{transform:rotate(180deg)}
+.rp-route>.rp-r-num:nth-child(2){grid-area:p}
+.rp-route>.rp-r-num:nth-child(3){grid-area:d}
+.rp-r-num{padding:10px 12px;border-radius:var(--ns-r);border:1px solid var(--ns-line);background:var(--ns-bg-2)}
+.rp-r-num b{display:block;font-size:24px;font-weight:600;line-height:1.1;letter-spacing:-.03em}
+.rp-r-num span{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.rp-r-drv{grid-area:drv;min-width:0}
+.rp-r-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.rp-add{width:auto;height:36px;padding:0 32px 0 12px;border-style:dashed;border-color:var(--ns-line-3);background-position:right 12px center;font-size:13.5px;font-weight:600;color:var(--ns-ink-2)}
+.rp-add:disabled{opacity:.5;cursor:not-allowed;color:var(--ns-muted)}
+.rp-rand{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-3);color:var(--ns-ink);font-size:13.5px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
+.rp-rand svg.i{width:15px;height:15px;color:var(--ns-muted)}
+.rp-rand:hover{border-color:var(--ns-line-3)}
+.rp-rand:disabled{opacity:.4;cursor:not-allowed}
+.rp-split{margin:8px 0 0;font-size:12.5px;font-weight:500;color:var(--ns-muted)}
+.rp-pcs{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;max-height:260px;padding-top:4px;overflow:auto}
+.rp-pcs span{display:flex;justify-content:space-between;padding:6px 10px;border-radius:var(--ns-r-sm);border:1px solid var(--ns-line);background:var(--ns-bg-2);font-size:var(--ns-fs-sm);font-weight:600}
+.rp-pcs i{font-style:normal;font-size:var(--ns-fs-xs);font-weight:700;color:var(--ns-muted)}
+.rp-end{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* Record routes (primary) and Display for the group (secondary) */
+.rp-display{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:var(--ns-r);border:1px solid var(--ns-line-2);background:var(--ns-surface-2);color:var(--ns-ink);font-size:var(--ns-fs-sm);font-weight:600;cursor:pointer;transition:background-color .15s}
+.rp-display svg.i{width:15px;height:15px}
+.rp-display:hover{background:var(--ns-surface-3)}
+.rp-display.rec{border-color:transparent;background:var(--ns-accent);color:var(--ns-on-accent)}
+.rp-display.rec:hover{background:var(--ns-accent-hover)}
+
+/* ---------------------------------------------------------------------
+   The routes card people screenshot for the group chat
+   --------------------------------------------------------------------- */
+/* The card is a picture for the drivers' group, so it keeps the dark look
+   whichever theme the app is in. The photo viewer does the same. These are
+   the dark theme's colours: change them together with the tokens at the top. */
+:root[data-theme=light] .rp-show,
+:root[data-theme=light] .zoom{
+  color-scheme:dark;
+  --ns-bg:#111013;          /* page */
+  --ns-bg-2:#16141A;        /* chrome: sidebar, header, phone bars */
+  --ns-surface:#1B1920;     /* cards */
+  --ns-surface-2:#232028;   /* panels inside cards, hover */
+  --ns-surface-3:#2C2832;   /* pop ups, toasts, selected neutral */
+  --ns-sunk:#0E0D10;        /* inside inputs */
+  --ns-line:#2F2B36;
+  --ns-line-2:#403A49;
+  --ns-line-3:#6A6276;      /* hovered input edge, planned bars */
+  --ns-ink:#F4F2F5;
+  --ns-ink-2:#D3CED8;
+  --ns-muted:#A39CAB;
+  --ns-faint:#908999;
+  --ns-wash-1:rgba(255,255,255,.03);
+  --ns-wash-2:rgba(255,255,255,.07);
+  --ns-wash-3:rgba(255,255,255,.1);
+  --ns-wash-4:rgba(255,255,255,.28);
+  --ns-glass:rgba(22,20,26,.9);
+  --ns-glass-bar:rgba(22,20,26,.94);
+  --ns-accent-rgb:184,64,106;
+  --ns-accent:#B8406A;
+  --ns-accent-hover:#C2466F;
+  --ns-accent-press:#A33760;
+  --ns-on-accent:#FFFFFF;            /* text on a claret fill */
+  --ns-accent-text:#EC93B1;          /* claret text on a dark surface */
+  --ns-accent-soft:rgba(var(--ns-accent-rgb),.16);
+  --ns-accent-line:rgba(236,147,177,.42);
+  --ns-focus-ring:#EC93B1;
+  --ns-good:#3CC27A; --ns-good-text:#8FE0B3; --ns-good-soft:rgba(60,194,122,.14);  --ns-good-line:rgba(60,194,122,.40);
+  --ns-bad:#F05252;  --ns-bad-text:#FFA8A8;  --ns-bad-soft:rgba(240,82,82,.14);   --ns-bad-line:rgba(240,82,82,.45);
+  --ns-warn:#F2C230; --ns-warn-text:#F7DA80; --ns-warn-soft:rgba(242,194,48,.14);  --ns-warn-line:rgba(242,194,48,.42);
+  --ns-info:#5AA9E6; --ns-info-text:#B5D6F5; --ns-info-soft:rgba(90,169,230,.13);  --ns-info-line:rgba(90,169,230,.40);
+  --ns-on-status:#17141B;            /* text on a green, amber or red fill */
+  --ns-cat:#A98BFF; --ns-cat-text:#CDBDFF; --ns-cat-soft:rgba(169,139,255,.12); --ns-cat-line:rgba(169,139,255,.40);
+  --ns-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23A39CAB' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  color:var(--ns-ink);
+}
+.rp-show{
+  position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  background:rgba(6,7,11,.94);
+}
+.rp-show-x{position:fixed;z-index:2;top:calc(14px + env(safe-area-inset-top));right:14px;background:var(--ns-surface-3)}
+.rp-show-hint{margin:0;font-size:12.5px;color:var(--ns-faint)}
+.rp-poster{
+  position:relative;flex:none;width:min(560px,100%);padding:20px 18px 16px;overflow:hidden;
+  border-radius:20px;border:1px solid var(--ns-line-2);background:var(--ns-surface);
+}
+.rp-p-glow{display:none}
+.rp-p-head{display:flex;align-items:center;justify-content:space-between}
+.rp-p-head .brand{font-size:14px}
+.rp-p-head .mark{width:24px;height:24px;border-radius:7px}
+.rp-p-date{width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;border-radius:var(--ns-r);background:var(--ns-surface-3);color:var(--ns-ink);box-shadow:inset 0 0 0 1px var(--ns-line-2)}
+.rp-p-date b{font-size:20px}
+.rp-p-date span{margin-top:2px;font-size:11px;font-weight:600}
+.rp-p-title{margin:12px 0}
+.rp-p-title h2 span{margin-left:8px;font-size:.62em;font-weight:500;letter-spacing:0;color:var(--ns-muted)}
+.rp-p-title h2{font-size:26px;line-height:1.1;font-weight:700;letter-spacing:-.025em}
+.rp-p-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.rp-p-stats div{padding:10px 12px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.rp-p-stats b{display:block;font-size:24px;font-weight:700;line-height:1.05;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.rp-p-stats span{font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.rp-p-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rp-p-tile{display:flex;flex-direction:column;gap:6px;min-width:0;padding:11px 11px 12px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-surface-2)}
+.rp-p-tile.zero{opacity:.45}
+.rp-p-th{display:flex;align-items:center;gap:7px;min-width:0}
+.rp-p-num{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:7px;font-size:var(--ns-fs-sm);font-weight:700;color:var(--ns-ink-2);background:var(--ns-surface-3)}
+.rp-p-th small{min-width:0;font-size:11.5px;font-weight:600;line-height:1.2;color:var(--ns-ink-2)}
+.rp-p-n b{font-size:24px;font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.rp-p-n span{display:block;margin-top:2px;font-size:11px;font-weight:500;color:var(--ns-muted)}
+.rp-p-drv{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid var(--ns-line)}
+.rp-p-drv span{display:flex;align-items:flex-start;min-width:0;font-size:12.5px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.rp-p-drv span .ag-dot{margin-top:4px}
+.rp-p-drv em{font-style:normal;font-size:var(--ns-fs-xs);color:var(--ns-faint)}
+.rp-p-note{margin:10px 0 0;font-size:var(--ns-fs-xs);color:var(--ns-warn-text)}
+.rp-p-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid var(--ns-line);font-size:var(--ns-fs-xs);font-weight:500;color:var(--ns-muted)}
+.rp-p-key{display:inline-flex;gap:12px}
+.rp-p-key span{display:inline-flex;align-items:center}
+
+/* ---------------------------------------------------------------------
+   Theme switch: Light, Dark or Auto (follows the device)
+   A claret pill slides behind the chosen option. On small phones a
+   single round button cycles through the three instead.
+   --------------------------------------------------------------------- */
+.theme-seg{position:relative;width:100%;height:40px;margin-top:auto}
+.theme-seg::before{
+  content:"";position:absolute;z-index:0;top:3px;bottom:3px;left:3px;width:calc((100% - 10px) / 3);
+  border-radius:7px;background:var(--ns-accent-soft);box-shadow:inset 0 0 0 1px var(--ns-accent-line);
+  transform:translateX(calc(var(--i, 2) * (100% + 2px)));transition:transform var(--ns-dur-2) var(--ns-ease);
+}
+.theme-seg button{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;font-size:13px}
+.theme-seg button[aria-checked=true]{background:transparent;box-shadow:none}
+.theme-seg svg.i{width:16px;height:16px}
+
+.theme-cycle{display:none}
+.theme-cycle svg.i{transition:transform var(--ns-dur-3) var(--ns-ease)}
+.theme-cycle:active svg.i{transform:rotate(-30deg)}
+
+/* =====================================================================
+   MOTION
+   One set of durations and one easing (see the tokens). Motion only
+   shows that something changed: nothing loops while you work, nothing
+   waits for an animation, and all of it switches off when the device
+   asks for reduced motion (section 7).
+   ===================================================================== */
+@keyframes ns-rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes ns-fade{from{opacity:0}to{opacity:1}}
+@keyframes ns-pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes ns-slot{from{opacity:0;transform:scaleX(.2)}to{opacity:1;transform:none}}
+@keyframes ns-ping{from{box-shadow:0 0 0 0 var(--state);opacity:.85}to{box-shadow:0 0 0 14px var(--state);opacity:0}}
+@keyframes ns-arrive{0%{opacity:0;transform:translateX(18px) scale(.9)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes ns-shimmer{from{background-position:120% 0}to{background-position:-20% 0}}
+
+/* switching theme: the page cross-fades (browsers with view transitions),
+   otherwise colours ease across */
+::view-transition-old(root),::view-transition-new(root){animation-duration:240ms;animation-timing-function:ease}
+html.theme-fade,html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{
+  transition:background-color 240ms ease,color 240ms ease,border-color 240ms ease,fill 240ms ease,stroke 240ms ease,box-shadow 240ms ease!important;
+}
+
+/* changing tab: the page settles in */
+.content:not([hidden]){animation:ns-rise var(--ns-dur-2) var(--ns-ease)}
+
+/* buttons and controls */
+.btn,.icon-btn,.seg button,.stepper button,.rp-rand,.rp-display,.tab{
+  transition:background-color var(--ns-dur-1) ease,border-color var(--ns-dur-1) ease,color var(--ns-dur-1) ease,
+             box-shadow var(--ns-dur-2) var(--ns-ease),transform var(--ns-dur-1) var(--ns-ease);
+}
+.btn.primary:hover{box-shadow:0 6px 16px -10px rgba(var(--ns-accent-rgb),.9)}
+.stepper button:active,.icon-btn:active,.seg button:active{transform:scale(.96)}
+/* Save confirms itself for a moment before going back to normal */
+.btn.primary.ok{background:var(--ns-good);color:var(--ns-on-status);box-shadow:none}
+
+/* FTDS gauge: the arc sweeps to its value, the knob rides its tip, the
+   colour eases between states, and the light rings once when the state
+   changes (for example on target to below target) */
+.g-val{transition:stroke-dasharray var(--ns-dur-gauge) var(--ns-ease),stroke var(--ns-dur-3) ease}
+.g-knob{transform-box:view-box;transform-origin:100px 100px;transition:transform var(--ns-dur-gauge) var(--ns-ease),opacity var(--ns-dur-2) ease}
+.g-knob circle{fill:var(--state);stroke:var(--ns-surface);stroke-width:3.5;transition:fill var(--ns-dur-3) ease}
+.band[data-state=idle] .g-knob{opacity:0}
+.band .glow-dot{position:relative;transition:background-color var(--ns-dur-3) ease}
+.band.pinged .glow-dot::after{content:"";position:absolute;inset:0;border-radius:50%;animation:ns-ping 800ms var(--ns-ease)}
+.status{transition:color var(--ns-dur-3) ease}
+.status.fresh{animation:ns-rise var(--ns-dur-2) var(--ns-ease)}
+.slot{transition:background-color var(--ns-dur-2) ease}
+.slot.new{animation:ns-slot var(--ns-dur-3) var(--ns-ease);transform-origin:left center}
+
+/* form guide: tiles deal in from the left; a newly saved shift slides in */
+
+/* overlays open with a short fade and settle */
+.rp-show:not([hidden]),.zoom:not([hidden]){animation:ns-fade var(--ns-dur-2) ease}
+.rp-show:not([hidden]) .rp-poster,.zoom:not([hidden]) figure{animation:ns-pop var(--ns-dur-3) var(--ns-ease)}
+.rp-pcs{animation:ns-rise var(--ns-dur-2) var(--ns-ease)}
+.rp-roster[open]>:not(summary){animation:ns-fade var(--ns-dur-2) ease}
+.toast{transition:opacity var(--ns-dur-2) var(--ns-ease),transform var(--ns-dur-2) var(--ns-ease)}
+
+/* loading placeholders while reports arrive */
+
+/* ---------------------------------------------------------------------
+   Lite: no saved-shifts box, so the setup card keeps its natural height,
+   and a quiet privacy line closes This shift on phones
+   --------------------------------------------------------------------- */
+#shiftView>.row{align-items:start}
+.privacy-note{display:none;margin:20px 4px 0;font-size:var(--ns-fs-sm);color:var(--ns-muted);text-align:center}
+
+/* =====================================================================
+   6. RESPONSIVE (widest first)
+   ===================================================================== */
+
+/* ---------- wide screens only ---------- */
+@media (min-width:1001px){
+  /* shift results stretch to the height of the setup card beside them */
+  .results-card{display:flex;flex-direction:column}
+  .results-card .kpis{flex:1}
+  /* Live ops: the glossary stays in view beside the tasks and scrolls on its own */
+  
+  
+  
+}
+
+/* ---------- 1200 and below: tablets. The sidebar becomes a header. ---------- */
+@media (max-width:1200px){
+  .app{display:block}
+  .side{
+    position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px;
+    padding:12px 20px;border-right:0;border-bottom:1px solid var(--ns-line);
+  }
+  .side .brand{padding:0;margin-right:auto}
+  .side .install-btn{margin:0}
+  
+  .theme-seg{width:auto;margin:0}
+  .theme-seg button{padding:0 10px}
+  
+  
+  
+  
+  .nav{order:3;flex-basis:100%;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;border-radius:var(--ns-r-md);border:1px solid var(--ns-line);background:var(--ns-sunk)}
+  .tab{justify-content:center;gap:8px;min-height:40px;padding:0 8px}
+  .tab[aria-selected=true]{box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+  .tab[aria-selected=true]::before{display:none}
+  
+  .pagehead-inner,.content{padding-left:20px;padding-right:20px}
+  .band-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+  .band-inputs{grid-column:1/-1;order:2;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .band-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rp-hero{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* ---------- 1000 and below: everything in one column ---------- */
+@media (max-width:1000px){
+  .row,.row.even,.rp-top{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ---------- 860 and below: phones. Tab bar at the bottom, Save bar above it. ----------
+   Nothing on .side or .pagehead may use blur, filter or transform here:
+   any of them would trap the fixed tab bar or Save bar inside it. */
+@media (max-width:860px){
+  .side{padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
+
+  /* tab bar: icon and name on every tab, a pill behind the selected icon */
+  .nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:31;
+    gap:0;padding:5px max(4px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px,env(safe-area-inset-left));
+    border:0;border-top:1px solid var(--ns-line);border-radius:0;
+    background:var(--ns-glass-bar);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  }
+  .tab{flex-direction:column;justify-content:flex-start;gap:5px;min-height:calc(var(--ns-dock-h) - 6px);padding:5px 2px 4px;font-size:11px;font-weight:500;line-height:1.2;white-space:nowrap}
+  .tab:hover{background:transparent}
+  .tab svg.i{position:relative;z-index:1;width:22px;height:22px}
+  .tab[aria-selected=true]{background:transparent;box-shadow:none}
+  .tab[aria-selected=true]::before{display:block;left:50%;right:auto;top:1px;bottom:auto;width:54px;height:30px;transform:translateX(-50%);border-radius:var(--ns-pill);background:var(--ns-accent-soft);box-shadow:inset 0 0 0 1px var(--ns-accent-line)}
+  
+
+  /* page title scrolls with the page; Save and Reset sit above the tab bar */
+  .pagehead{position:static;background:transparent;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .pagehead-inner{min-height:0;padding:18px max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+  .pagehead h1{font-size:24px}
+  .pagehead p{font-size:13.5px}
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom));z-index:30;
+    padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));
+    border-top:1px solid var(--ns-line);
+    background:var(--ns-glass-bar);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  }
+  .actionbar .btn{flex:1 1 0;min-width:0;padding:0 10px;white-space:normal;line-height:1.15;text-align:center}
+  /* Save takes the room; Reset steps back to a quiet text button so it
+     isn't hit by mistake */
+  
+  
+  .draft{display:none}
+
+  /* Lite: only Clear here, so it sits in the page header, not a fixed bar */
+  .actionbar{position:static;padding:0;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .actionbar .btn{flex:none;padding:0 16px}
+  #shiftView{padding-bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 32px)}
+  body[data-tab=shift] .toast{bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 12px)}
+  .privacy-note{display:block}
+
+  /* FTDS: the steppers people press all shift come before the gauge */
+  .band-inputs{order:-1;align-items:end}
+  .content{padding:16px max(16px,env(safe-area-inset-right)) calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 32px) max(16px,env(safe-area-inset-left))}
+  #shiftView{padding-bottom:calc(var(--ns-dock-h) + var(--ns-actionbar-h) + env(safe-area-inset-bottom) + 32px)}
+  .toast{left:16px;right:16px;max-width:none;bottom:calc(var(--ns-dock-h) + env(safe-area-inset-bottom) + 12px)}
+  body[data-tab=shift] .toast{bottom:calc(var(--ns-dock-h) + var(--ns-actionbar-h) + env(safe-area-inset-bottom) + 12px)}
+
+  /* history rows become small cards */
+  
+  
+  
+  
+  
+  
+  
+}
+
+/* ---------- 600 and below: small phones ---------- */
+@media (max-width:600px){
+  :root{--ns-pad:16px;--ns-gap:12px}
+  .side .install-btn{order:4;width:100%}
+  .theme-seg{display:none}
+  .theme-cycle{display:grid}
+  
+  
+  
+  .card-head{align-items:stretch}
+
+  /* this shift */
+  .setup-ctl{width:100%}
+  .setup-ctl label{flex:1;min-width:0}
+  .setup-ctl input{width:100%}
+  .matrix{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);gap:8px}
+  .kpis{grid-template-columns:1fr;gap:8px}
+  /* compact KPI: name and number on one line, planned and actual side by side */
+  .kpi{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:14px}
+  .kpi-name{grid-column:1;grid-row:1}
+  .kpi-hint{grid-column:1;grid-row:2;margin:4px 0 0}
+  .kpi-var{grid-column:2;grid-row:1/3;margin:0;font-size:32px}
+  .kpi-pa{grid-column:1/-1;grid-row:3;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:12px}
+  .notes2{grid-template-columns:1fr}
+  .band{padding:20px 16px}
+  .band-grid{grid-template-columns:1fr;gap:20px}
+  /* Volume and Rejected side by side, Redeliveries full width under them */
+  .band-inputs{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 12px;align-items:end}
+  .band-inputs>.f:last-child{grid-column:1/-1}
+  .band-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+     /* form guide: weekday only on small phones */
+  .ftds-pct{font-size:44px}
+
+  /* history and account */
+  
+  .h-stat{padding:14px}
+  .h-stat b{font-size:24px}
+  
+  
+  
+  
+  
+  
+  
+  
+  .two{grid-template-columns:1fr}
+  
+  
+  .staff{grid-template-columns:1fr}
+  
+
+  /* training */
+  .tr-hero{grid-template-columns:1fr;gap:16px;padding:20px 16px}
+  .card .tr-hero-main h2,.card .tr-title{font-size:23px}
+  .tr-ring{display:flex;align-items:center;gap:16px;text-align:left}
+  .ring-box{width:84px;height:84px;margin:0}
+  .ring-txt b{font-size:20px}
+  .ring-txt span{display:none}
+  .tr-ring p{margin:0}
+  .tr-grid{grid-template-columns:1fr}
+  .tr-welcome,.tr-summary{padding:20px 16px}
+  .tr-top{gap:12px}
+  .tr-top .tr-strip{flex-basis:100%;order:2}
+  .step summary{gap:12px;padding:12px 14px}
+  .step-body{padding:0 14px 16px}
+  .tr-nav .btn{flex:1;min-width:0}
+  .gloss .g{grid-template-columns:1fr;gap:6px}
+  .objectives ol{columns:1}
+  .imgs{grid-template-columns:1fr}
+  .facts div{flex:1}
+  .chk-cols{grid-template-columns:1fr}
+  .tr-sum-head{align-items:flex-start}
+  .tr-orb{width:52px;height:52px;font-size:16px}
+
+  /* live ops */
+  .wave{gap:12px;padding:12px 14px}
+  .wave .link{display:none}
+  
+  
+
+  /* routes: two route cards side by side */
+  .rp-hero{gap:8px;padding:12px}
+  .rp-big,.rp-mini{padding:12px 14px}
+  .rp-big b{font-size:36px}
+  .rp-mini b{font-size:24px}
+  .rp-head-btns .btn{padding:0 10px}
+  .rp-rlist{grid-template-columns:1fr}
+  .rp-addrow.three{grid-template-columns:minmax(0,1fr) 104px}
+  .rp-addrow.three .btn{grid-column:1/-1}
+  .rp-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .rp-route{gap:8px;padding:12px}
+  .rp-r-name{gap:9px}
+  .rp-r-name b{font-size:14.5px;line-height:1.2}
+  .rp-badge{width:30px;height:30px;font-size:14px}
+  .rp-r-num{padding:8px 9px}
+  .rp-r-num b{font-size:20px}
+  .rp-r-num span{font-size:11px}
+  .rp-r-chips{gap:6px}
+  .rp-r-chips .rp-name{max-width:100%;height:auto;min-height:32px;padding:3px 3px 3px 10px;font-size:13px;line-height:1.2;white-space:normal}
+  .rp-add,.rp-rand{width:100%;justify-content:center;font-size:12.5px}
+  .rp-split{font-size:11.5px}
+  
+  .rp-end .rp-display{flex:1 1 auto;justify-content:center}
+}
+
+/* ---------- 350 and below: very narrow phones ---------- */
+@media (max-width:350px){
+  .tab{font-size:11px}
+  .band-inputs{grid-template-columns:1fr}
+  .side .brand{gap:8px;font-size:15px}
+  
+  .matrix{grid-template-columns:56px minmax(0,1fr) minmax(0,1fr)}
+  .h-stat b{font-size:20px}
+  
+  .rp-list{grid-template-columns:1fr}
+  .rp-p-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* =====================================================================
+   7. PREFERENCES
+   ===================================================================== */
+
+/* touch screens: bigger targets, and 16px text in fields so iPhones
+   don't zoom in when one is tapped */
+@media (pointer:coarse){
+  .btn.sm,.rp-display,.rp-rand,.rp-add{height:40px}
+  .icon-btn{width:44px;height:44px}
+  .rp-name button{width:32px;height:32px}
+  .rp-rdel{width:36px;height:36px}
+  .rp-rrow select,.rp-add{font-size:16px}
+  .tr-strip button{height:30px}
+  .link{padding:8px 0}
+}
+
+/* phones: hide the tab bar and Save bar while typing, so they don't sit
+   on top of the field just above the keyboard. They come back on blur. */
+@media (max-width:860px) and (pointer:coarse){
+  body:has(input:not([type=checkbox]):not([type=radio]):not([type=date]):not([type=month]):focus,textarea:focus) :is(.nav){display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}
+
+@media (prefers-reduced-transparency:reduce){
+  .pagehead{background:var(--ns-bg);-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+@media (prefers-reduced-transparency:reduce) and (max-width:860px){
+  .nav{background:var(--ns-bg-2);-webkit-backdrop-filter:none;backdrop-filter:none}
+}
