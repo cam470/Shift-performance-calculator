@@ -8,7 +8,7 @@ Every shift is played against the 98% target, and every saved shift is a result.
 
 ## Themes
 
-Two themes, tuned separately rather than inverted. Dark is the default. The `<html>` element carries `data-theme="dark"` or `data-theme="light"`; the light theme redefines the same tokens under `:root[data-theme=light]`.
+Two themes, tuned separately rather than inverted. A new visitor starts on Auto, which follows the device's light or dark setting. The `<html>` element carries `data-theme="dark"` or `data-theme="light"`; the dark values sit on `:root` (the fallback if the theme script cannot run) and the light theme redefines the same tokens under `:root[data-theme=light]`.
 
 - **Choosing a theme:** the Light / Dark / Auto switch in the sidebar (a single cycling button on small phones). Auto follows the device and changes with it. The choice is stored on the device as `localStorage.theme`.
 - **No flash:** a small script in `<head>` sets the theme before the page draws.
@@ -33,14 +33,15 @@ Two themes, tuned separately rather than inverted. Dark is the default. The `<ht
 | Category (PM, agencies) | `--ns-cat` | `#A98BFF` | `#6B4FD8` |
 
 Rules:
-- Claret means "press this" or "you are here" only. It is never used for a status.
-- Green, yellow and red are only for status and always come with a word or an icon (✓, ⚠, ✕).
+- Claret means "press this" or "you are here" only: the main button, links, the selected tab, the current step, focus. It is never used for a status or as decoration (numbers, badges, labels stay neutral).
+- "You are here" is a soft claret fill or outline, never a coloured edge stripe.
+- Green, yellow and red are only for status and always come with a word or a drawn icon (the tick and cross in the form guide, the warning mark).
 - Fills such as status icons use `--ns-*` base colours with `--ns-on-status` text; status written as text uses the `-text` variants, which pass contrast on every surface.
 - Washes (`--ns-wash-1` to `--ns-wash-4`) are the tracks, empty slots and hovers; they flip between white-on-dark and ink-on-light.
 
 ## Type
 
-Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(--ns-num-stretch)`) for result numbers such as the form guide. Sizes come from the `--ns-fs-*` tokens.
+Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(--ns-num-stretch)`) for result numbers: the FTDS readout in the gauge, the KPI variances, the FTDS band figures, History's headline figures and FTDS column, and the form guide. Sizes come from the `--ns-fs-*` tokens.
 
 ## Motion
 
@@ -59,3 +60,7 @@ Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(
 ## Signature: the form guide
 
 "Last 7 shifts" on This shift shows one tile per saved shift, oldest on the left: a tick and green when FTDS reached 98%, a cross and red when it didn't. The newest tile is outlined. Each tile also carries its full date, shift and value for screen readers.
+
+## App icon
+
+`icons/icon.svg` is the source: the original Shift Report route icon, recoloured to claret. The PNGs (`icon-192.png`, `icon-512.png`, `favicon-32.png`, `apple-touch-icon.png`, `maskable-512.png`) were rendered from it with headless Chromium at each file's pixel size. The Apple and maskable versions are square without the rounded tile, and the maskable one scales the route to 80% so it sits inside Android's safe zone. Each PNG carries this origin in its metadata (`impeccable embed-prompt <file> --read`). To change the icon, edit the SVG and re-render all five.

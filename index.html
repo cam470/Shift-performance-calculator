@@ -897,7 +897,7 @@ async function saveShift(){
     btn.disabled = false;
     if (saved){
       // the button says it worked for a moment, then goes back to normal
-      btn.textContent = "Saved ✓"; btn.classList.add("ok");
+      btn.innerHTML = ICON_TICK + "Saved"; btn.classList.add("ok");
       setTimeout(() => { btn.classList.remove("ok"); btn.textContent = "Save shift report"; }, 1800);
     } else btn.textContent = "Save shift report";
   }
@@ -910,6 +910,9 @@ function resetShift(){
 }
 
 /* ---------- last 7 shifts chart ---------- */
+// drawn tick and cross, in the same stroke as the other icons
+const ICON_TICK = `<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+const ICON_CROSS = `<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>`;
 let trendArrive = false;   // set by Save so the newest result slides in
 let trendDrawn = false;    // tiles deal in once, the first time they show
 function renderTrend(msg){
@@ -944,10 +947,10 @@ function renderTrend(msg){
       return `<li class="fg ${win ? "win" : "loss"}${last ? " latest" : ""}${last && arrive ? " arrive" : ""}" style="--n:${i}"
         title="${esc(full(r))} ${esc(r.shift || "")}: ${r.ftds.toFixed(2)}%">
         <span class="sr">${esc(full(r))} ${esc(r.shift || "")}: ${r.ftds.toFixed(2)}%, ${win ? "on target" : "below target"}.</span>
-        <i aria-hidden="true">${win ? "✓" : "✕"}</i><b aria-hidden="true">${r.ftds.toFixed(1)}</b><small aria-hidden="true">${esc(day(r))}${r.shift ? `<span class="fg-s"> ${esc(r.shift)}</span>` : ""}</small></li>`;
+        <i aria-hidden="true">${win ? ICON_TICK : ICON_CROSS}</i><b aria-hidden="true">${r.ftds.toFixed(1)}</b><small aria-hidden="true">${esc(day(r))}${r.shift ? `<span class="fg-s"> ${esc(r.shift)}</span>` : ""}</small></li>`;
     }).join("")}
   </ol>
-  <p class="fg-key"><span><i class="w">✓</i>98% or more</span><span><i class="l">✕</i>Below 98%</span></p>`;
+  <p class="fg-key"><span><i class="w">${ICON_TICK}</i>98% or more</span><span><i class="l">${ICON_CROSS}</i>Below 98%</span></p>`;
 }
 
 /* ---------- copy summary ---------- */
@@ -2428,7 +2431,7 @@ function rpShowCard(){
       <div class="brand"><span class="mark" aria-hidden="true"></span><span class="brand-t">Shift Report<small class="credit">By Cameron Gill</small></span></div>
       <div class="rp-p-date"><b>${d.toLocaleDateString("en-GB", { day: "numeric" })}</b><span>${d.toLocaleDateString("en-GB", { month: "short" })}</span></div>
     </header>
-    <div class="rp-p-title"><span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span><h2>Today's routes</h2></div>
+    <div class="rp-p-title"><h2>Today's routes<span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span></h2></div>
     <div class="rp-p-stats">${stat(rpS ? rpS.totalParcels : "–", "Parcels")}${stat(rpS ? rpS.totalDrops : "–", "Drops")}${stat(anyDrivers ? out : RPC.routes.length, anyDrivers ? "Drivers" : "Routes")}</div>
     <div class="rp-p-grid">${RPC.routes.map(r => {
       const x = rpS ? rpS.routes.find(y => y.num === r.num) : null;
