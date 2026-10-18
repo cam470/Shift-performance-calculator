@@ -10,7 +10,7 @@
    - Anything else (Firebase sign in and database calls) is left alone.
 
    When you change the list below, bump VERSION so phones pick it up. */
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE = "shift-report-" + VERSION;
 const APP_SHELL = [
   "./",
