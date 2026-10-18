@@ -52,7 +52,7 @@
     <h1>Ready for your shift?</h1>
     <p class="lead">Sign in with the username and password your manager gave you.</p>
     <div class="card">
-      <p class="setup" id="setupMsg" hidden>Firebase isn't connected yet. Paste your Firebase config into this file to turn on sign in. You can still preview the layout below.</p>
+      <p class="setup" id="setupMsg" hidden>Firebase isn't connected yet. Paste your Firebase config into firebase-config.js to turn on sign in. You can still preview the layout below.</p>
       <form id="loginForm" novalidate>
         <label class="f">Username<input type="text" id="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="For example jsmith"></label>
         <label class="f">Password<input type="password" id="password" autocomplete="current-password"></label>
@@ -426,7 +426,7 @@
   }, 5000);
 </script>
 <script type="module">
-/* Firebase settings live in firebase-config.js (generated at deploy time, see README).
+/* Firebase settings live in firebase-config.js, in the same folder as this file.
    It's only loaded when sign in is turned on, so a problem with that file
    can't stop the rest of the app from opening. */
 let firebaseConfig = {};

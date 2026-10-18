@@ -703,7 +703,6 @@ textarea.jdw.invalid:focus{box-shadow:0 0 0 3px var(--ns-bad-soft)}
 .checks{display:flex;flex-wrap:wrap;gap:8px}
 .notes-panel.rej .check input:checked+span{border-color:var(--ns-warn-line);background:var(--ns-warn-soft)}
 .notes-panel.rej .check input:checked+span::before{background-color:var(--ns-warn)}
-.warnline{margin:12px 0 0;font-size:var(--ns-fs-sm);color:var(--ns-warn-text)}
 /* wide notes panel: JDW and reason side by side */
 @container (min-width:470px){
   .note{grid-template-columns:32px minmax(196px,1fr) minmax(0,1.1fr)}
