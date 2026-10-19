@@ -8,12 +8,6 @@
    ===================================================================== */
 
 window.ROUTE_PLANNING = {
-  // Driver agencies and the colour of the small dot shown next to names
-  agencies: [
-    { code: "UKED", colour: "#A98BFF" },
-    { code: "INRW", colour: "#4DA3FF" }
-  ],
-
   routes: [
     { num: 1, name: "North",
       districts: ["B66", "B21", "B20", "B42", "B24", "B43", "B23", "B44", "B73", "B35", "B72", "B74", "B75", "B79", "B46", "B76", "B77", "B78", "B71", "B19"] },

@@ -4,7 +4,7 @@ The visual system for Shift Report. Everything lives in `nightshift.css` as CSS 
 
 ## Direction: results and form
 
-Every shift is played against the 98% target, and every saved shift is a result. The look borrows how people read football results: confident scorelines, a form guide of recent results, and the referee's colours for status. Navigation, buttons and forms stay standard; the idea only shapes colour, type, density and one signature feature, the form guide.
+Every shift is played against the 98% target. The look borrows how people read football results: confident scorelines and the referee's colours for status. Navigation, buttons and forms stay standard; the idea only shapes colour, type and density, and the FTDS gauge is the one loud moment.
 
 ## Themes
 
@@ -35,13 +35,13 @@ Two themes, tuned separately rather than inverted. A new visitor starts on Auto,
 Rules:
 - Claret means "press this" or "you are here" only: the main button, links, the selected tab, the current step, focus. It is never used for a status or as decoration (numbers, badges, labels stay neutral).
 - "You are here" is a soft claret fill or outline, never a coloured edge stripe.
-- Green, yellow and red are only for status and always come with a word or a drawn icon (the tick and cross in the form guide, the warning mark).
+- Green, yellow and red are only for status and always come with a word or an icon.
 - Fills such as status icons use `--ns-*` base colours with `--ns-on-status` text; status written as text uses the `-text` variants, which pass contrast on every surface.
 - Washes (`--ns-wash-1` to `--ns-wash-4`) are the tracks, empty slots and hovers; they flip between white-on-dark and ink-on-light.
 
 ## Type
 
-Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(--ns-num-stretch)`) for result numbers: the FTDS readout in the gauge, the KPI variances, the FTDS band figures, History's headline figures and FTDS column, and the form guide. Sizes come from the `--ns-fs-*` tokens.
+Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(--ns-num-stretch)`) for result numbers: the FTDS readout in the gauge, the KPI variances and the FTDS band figures. Sizes come from the `--ns-fs-*` tokens.
 
 ## Motion
 
@@ -51,15 +51,9 @@ Archivo, one family. Normal width for the interface; narrow (`font-stretch: var(
   - the status light rings once when the state changes;
   - new redelivery slots pop in;
   - key numbers count to their new value;
-  - the form guide deals in and a newly saved shift slides in;
-  - Save shows "Saved ✓" for a moment;
   - tabs, overlays and the theme switch fade.
-- Nothing loops while you work (loading placeholders only), and nothing delays an action.
+- Nothing loops while you work, and nothing delays an action.
 - `prefers-reduced-motion: reduce` turns all of it off.
-
-## Signature: the form guide
-
-"Last 7 shifts" on This shift shows one tile per saved shift, oldest on the left: a tick and green when FTDS reached 98%, a cross and red when it didn't. The newest tile is outlined. Each tile also carries its full date, shift and value for screen readers.
 
 ## App icon
 
