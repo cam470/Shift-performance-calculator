@@ -78,8 +78,6 @@
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-4.5L21 9l-9 4.5z"/><path d="M7 11.2V15c0 1.4 2.2 3 5 3s5-1.6 5-3v-3.8M21 9v5"/></svg>Training</button>
       <button class="tab" role="tab" type="button" data-tab="ops" aria-selected="false">
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 5 12 2.5-6h4"/></svg>Live ops<span class="tab-badge" id="opsBadge" hidden></span></button>
-      <button class="tab" role="tab" type="button" data-tab="history" aria-selected="false">
-        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>History</button>
 </nav>
     <button class="btn secondary sm install-btn" id="installBtn" type="button" hidden><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Install app</button>
     <div class="seg theme-seg" role="radiogroup" aria-label="Theme">
@@ -97,14 +95,13 @@
   </aside>
 
   <div class="main">
-    <div class="preview-bar" id="previewBanner" hidden>Preview mode. Reports saved here disappear when you close the page.</div>
+    <div class="preview-bar" id="previewBanner" hidden>Preview mode. Nothing is kept when you close the page.</div>
     <header class="pagehead">
       <div class="pagehead-inner">
         <div><h1 id="pageTitle">PM shift</h1><p id="pageSub"></p></div>
         <div class="actionbar" id="actionbar">
-          <span class="draft">Kept on this device until you save</span>
+          <span class="draft">Kept on this device only</span>
           <button class="btn secondary" id="reset" type="button">Reset for next shift</button>
-          <button class="btn primary" id="save" type="button">Save shift report</button>
         </div>
       </div>
     </header>
@@ -131,13 +128,6 @@
             <span class="mx-r">Drivers</span>
             <input type="number" id="pd" min="0" inputmode="numeric" aria-label="Planned drivers">
             <input type="number" id="ad" min="0" inputmode="numeric" aria-label="Actual drivers">
-          </div>
-          <div class="trend">
-            <div class="trend-head">
-              <h3>Last 7 shifts <span>FTDS</span></h3>
-              <span class="chip" id="trendAvg" hidden></span>
-            </div>
-            <div id="trendChart"></div>
           </div>
         </section>
 
@@ -221,13 +211,8 @@
         </div>
       </section>
 
-      <div class="row even">
-        <section class="card notes-panel red" id="redPanel"><div class="np-head"><h2>Redelivery notes</h2><span class="count" id="redCount">None</span></div><div class="bar"><i id="redBar"></i></div><div id="redNotes"></div></section>
-        <section class="card notes-panel rej" id="rejPanel"><div class="np-head"><h2>Rejection notes</h2><span class="count" id="rejCount">None</span></div><div class="bar"><i id="rejBar"></i></div><div id="rejNotes"></div></section>
-      </div>
     </main>
 
-    <!-- History -->
     <main id="accountView" class="content" hidden>
       <div class="acct-grid">
         <div>
@@ -273,42 +258,8 @@
             <p class="form-msg" id="sfMsg" role="status"></p>
           </form>
           <div class="staff-list" id="staffList"></div>
-          <p class="muted acct-note">Staff can't reset their own password. If someone forgets theirs, delete their account in Firebase (Authentication, Users), then add them again here with the same username. Their training progress carries over.</p>
+          <p class="muted acct-note">Staff can't reset their own password. If someone forgets theirs, delete their account in Firebase (Authentication, Users), then add them again here with the same username.</p>
         </section>
-      </div>
-    </main>
-
-    <main id="historyView" class="content" hidden>
-      <div class="seg h-switch" role="radiogroup" aria-label="Show">
-        <button type="button" role="radio" data-hpane="shifts" aria-checked="true">Shift reports</button>
-        <button type="button" role="radio" data-hpane="routes" aria-checked="false">Routes</button>
-      </div>
-      <div id="hShiftsPane">
-      <div class="h-summary">
-        <div class="card h-stat"><span>Shifts</span><b class="num" id="hShifts">0</b></div>
-        <div class="card h-stat"><span>Overall FTDS</span><b class="num" id="hFtds">–</b></div>
-        <div class="card h-stat"><span>Below 98%</span><b class="num" id="hBelow">0</b></div>
-      </div>
-      <div class="h-tools">
-        <h2 class="h-title" id="hTitle">Reports</h2>
-        <div class="seg" role="radiogroup" aria-label="Filter by shift">
-          <button type="button" role="radio" data-hf="all" aria-checked="true">All</button>
-          <button type="button" role="radio" data-hf="AM" aria-checked="false">AM</button>
-          <button type="button" role="radio" data-hf="PM" aria-checked="false">PM</button>
-        </div>
-        <input type="month" id="hMonth" aria-label="Filter by month">
-        <button class="btn secondary" id="hRefresh" type="button">Refresh</button>
-      </div>
-      <div class="card h-list" id="histList"></div>
-      </div>
-      <div id="hRoutesPane" hidden>
-        <div class="h-tools">
-          <h2 class="h-title">Recorded routes <span class="count" id="rrCount">0 days</span></h2>
-          <input type="search" id="rrSearch" class="rr-search" placeholder="Find a driver" aria-label="Find a driver">
-          <button class="btn secondary" id="rrRefresh" type="button">Refresh</button>
-        </div>
-        <div id="rrWho"></div>
-        <div class="card h-list" id="rrList"></div>
       </div>
     </main>
 
@@ -336,7 +287,7 @@
           </div>
           <form id="issueForm" class="issue-form" hidden>
             <label class="f">What's happening<select id="issueType"></select></label>
-            <label class="f" id="issueDriverWrap">Driver or route<input id="issueDriver" autocomplete="off" placeholder="For example Route 14"></label>
+            <label class="f" id="issueDriverWrap">Route<input id="issueDriver" autocomplete="off" placeholder="For example Route 14"></label>
             <label class="f full">Note <input id="issueNote" autocomplete="off" placeholder="Optional. Anything the team should know"></label>
             <div class="issue-btns"><button class="btn secondary sm" type="button" id="issueCancel">Cancel</button><button class="btn primary sm" type="submit">Add issue</button></div>
           </form>
@@ -354,8 +305,8 @@
       <section class="card hero rp-hero" aria-live="polite">
         <div class="rp-big"><span>Parcels</span><b class="num" id="rpTotParcels">–</b></div>
         <div class="rp-big"><span>Drops</span><b class="num" id="rpTotDrops">–</b></div>
-        <div class="rp-mini"><span>Working today</span><b class="num" id="rpTotWorking">0</b></div>
-        <div class="rp-mini"><span>On a route</span><b class="num" id="rpTotOn">0</b></div>
+        <div class="rp-mini"><span>Routes with parcels</span><b class="num" id="rpTotRoutes">–</b></div>
+        <div class="rp-mini"><span>Not on a route</span><b class="num" id="rpTotUn">–</b></div>
       </section>
 
       <div class="rp-top">
@@ -368,41 +319,19 @@
           </div>
         </section>
 
-        <section class="card">
-          <div class="card-head"><h2><span class="rp-n">2</span>Working today</h2><span class="count" id="rpWorkCount">0</span></div>
-          <div class="rp-type">
-            <div class="rp-addrow">
-              <input id="rpWorkInput" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type a driver's name" aria-label="Driver working today" role="combobox" aria-controls="rpSuggest">
-              <button class="btn secondary" id="rpWorkAdd" type="button">Add</button>
-            </div>
-            <div class="rp-suggest" id="rpSuggest" role="listbox" hidden></div>
-          </div>
-          <div class="rp-chips" id="rpWorking"></div>
-          <details class="rp-roster" id="rpRosterBox">
-            <summary>All drivers <span class="count" id="rpRosterCount">0</span><span class="rp-keys" id="rpRosterKey"></span></summary>
-            <div class="rp-addrow three">
-              <input id="rpRosterInput" autocomplete="off" autocapitalize="words" placeholder="Driver name (or several, with commas)" aria-label="Add drivers">
-              <select id="rpRosterAgency" aria-label="Agency"></select>
-              <button class="btn secondary" id="rpRosterAdd" type="button">Add</button>
-            </div>
-            <input type="search" id="rpRosterSearch" class="rp-search" placeholder="Search drivers" aria-label="Search drivers" hidden>
-            <div class="rp-rlist" id="rpRoster"></div>
-            <p class="rp-foot" id="rpRosterNote"></p>
-          </details>
-        </section>
       </div>
 
       <section class="card">
         <div class="card-head">
-          <h2><span class="rp-n">3</span>Routes</h2>
+          <h2><span class="rp-n">2</span>Routes</h2>
           <div class="rp-head-btns">
-            <button class="btn secondary sm" id="rpCopy" type="button">Copy plan</button>
+            <button class="btn secondary sm" id="rpCopy" type="button">Copy routes</button>
             <button class="btn secondary sm" id="rpNewDay" type="button">New day</button>
           </div>
         </div>
         <div id="rpRouteNote"></div>
         <div class="rp-list" id="rpRoutes"></div>
-        <div class="rp-end"><span class="rp-recorded" id="rpRecorded"></span><button class="rp-display rec" id="rpRecord" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>Record routes</button><button class="rp-display" id="rpDisplay" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Display for the group</button></div>
+        <div class="rp-end"><button class="rp-display rec" id="rpDisplay" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Display for the group</button></div>
       </section>
     </main>
   </div>
@@ -432,9 +361,10 @@
 let firebaseConfig = {};
 
 /* 1b. Sign in.
-   false = no sign in. Anyone with the link can use the app, and everything
-           is saved on the device they use (phone, tablet or computer).
-   true  = staff sign in with Firebase accounts and reports are shared. */
+   Firebase is only used to sign in: accounts and roles. Nothing else is
+   sent to it. Shift figures, routes and training stay on each device.
+   false = no sign in. Anyone with the link can use the app.
+   true  = staff sign in with Firebase accounts. */
 const REQUIRE_LOGIN = true;
 
 /* 1c. Usernames. Staff sign in with a short username. Behind the scenes
@@ -442,21 +372,9 @@ const REQUIRE_LOGIN = true;
    to be real. Don't change this once accounts exist, or nobody can sign in. */
 const USERNAME_DOMAIN = "shiftreport.app";
 
-/* 2. Should staff see every report, or only their own?
-   false = staff see their own, admins see all.
-   true  = everyone sees all (also change the read rule, see setup guide). */
-const STAFF_SEE_ALL = false;
-
 /* 3. Volume buffer. A difference between planned and actual volume
    up to this many parcels, over or under, shows green. More shows red. */
 const VOLUME_BUFFER = 100;
-
-/* 4. Reasons in the dropdowns. Edit these to match yours.
-   "Other" lets staff type their own reason. Remove it if you don't want that. */
-const REDELIVERY_REASONS = ["Customer requested afternoon", "Customer unavailable", "Wrong address", "Driver failed to deliver on time", "Other"];
-const REJECTION_REASONS = ["Damaged parcel", "Customer doesn't want parcel", "No address or phone number", "Other"];
-const DAMAGED = "Damaged parcel";               // this reason asks who damaged it
-const DAMAGE_SOURCES = ["MK truck", "Driver", "Depot"];
 
 const FB_VERSION = "10.12.2";
 let configured = false;
@@ -468,8 +386,6 @@ const has = x => Number.isFinite(x);
 const val = id => { const v = $(id).value; if (v === "") return NaN; const x = Number(v); return has(x) && x >= 0 ? x : NaN; };
 const fmtInt = x => has(x) ? Math.round(x).toLocaleString("en-GB") : "–";
 const fmt1 = x => has(x) ? x.toFixed(1) : "–";
-const nz = x => has(x) ? x : null;
-const r2 = x => has(x) ? Math.round(x * 100) / 100 : null;
 function signed(x, d = 0){
   if (!has(x)) return "–";
   const r = Number(x.toFixed(d));
@@ -481,22 +397,6 @@ const volTone = x => !has(x) ? "" : Math.abs(x) <= VOLUME_BUFFER ? "good" : "bad
 const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function prettyDate(iso, opts){ if (!iso) return ""; const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", opts); }
-const toDate = ts => !ts ? null : ts.toDate ? ts.toDate() : new Date(ts);
-const JDW_RE = /^JDW\d{12}$/;
-// One note holds one or more JDW numbers (pasted or typed) that share a reason
-const blankNote = () => ({ text: "", reason: "", damagedBy: [], other: "" });
-const JDW_EXAMPLE = "JDW200673847264";
-// every JDW-like word in what was pasted: spaces, commas or new lines between them
-const jdwList = text => (String(text || "").toUpperCase().match(/[A-Z0-9]+/g) || []);
-const reasonDone = x => !!x.reason && (x.reason !== DAMAGED || (x.damagedBy || []).length > 0) && (x.reason !== "Other" || !!(x.other || "").trim());
-function listJoin(a){ return a.length > 1 ? a.slice(0, -1).join(", ") + " and " + a[a.length - 1] : a.join(""); }
-function reasonText(x){
-  if (!x.reason) return "";
-  if (x.reason === DAMAGED && (x.damagedBy || []).length) return `${DAMAGED} (${listJoin(x.damagedBy)})`;
-  if (x.reason === "Other") return (x.other || "").trim() ? "Other: " + x.other.trim() : "Other";
-  return x.reason;
-}
-
 // restart a one-off CSS animation (the class names one in nightshift.css)
 function replay(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
 
@@ -509,12 +409,7 @@ function toast(msg, kind = ""){
 /* ---------- state ---------- */
 let fb = null, user = null, profile = null, preview = false, deviceMode = false;
 const NAME_KEY = "shiftReport:name";
-const REPORTS_KEY = "shiftReport:reports";
-let shift = "PM", tab = "shift", hFilter = "all";
-let notes = { red: [], rej: [] };
-const shown = { red: -1, rej: -1 };
-let reports = [];
-let memoryStore = [];
+let shift = "PM", tab = "shift";
 // FTDS volume copies actual volume until someone types a different number in it.
 // Clearing it starts the copying again.
 let volLinked = true;
@@ -629,177 +524,9 @@ function render(){
   $("sBridge").textContent = has(c.bridge) ? c.bridge.toFixed(2) + "%" : "–";
   $("sMargin").textContent = has(c.margin) ? signed(c.margin, 2) + "%" : "–";
 
-  syncNotes("red", c.red);
-  syncNotes("rej", c.rej);
-  updateNoteCounts();
   updateTitle();
   saveDraft();
 }
-
-/* ---------- notes ----------
-   Each note is one reason with one or more JDW numbers. Staff paste a
-   list (from a message or a spreadsheet) and pick the reason once. Every
-   JDW stands for one redelivery or rejection, so the panel compares how
-   many are entered with the count in FTDS live. Saved reports still keep
-   one line per JDW, so History reads them as before. */
-const jdwPrefixOk = v => { v = v.trim(); return "JDW".startsWith(v.slice(0, 3)) && /^\d{0,12}$/.test(v.slice(3)); };
-function normNote(t, x){
-  x = { ...blankNote(), ...(x || {}) };
-  if (typeof x.jdw === "string" && !x.text) x.text = x.jdw;   // drafts from before notes held a list
-  delete x.jdw;
-  if (!Array.isArray(x.damagedBy)) x.damagedBy = [];
-  const list = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
-  if (x.reason && !list.includes(x.reason)){        // older drafts had typed reasons
-    if (list.includes("Other")){ x.other = x.other || x.reason; x.reason = "Other"; } else x.reason = "";
-  }
-  return x;
-}
-// what a panel adds up to: every JDW entered, which are wrong or repeated, how many are finished
-function tally(t){
-  const seen = new Map(), all = [];
-  notes[t].forEach((x, i) => jdwList(x.text).forEach(j => { all.push({ j, i }); seen.set(j, (seen.get(j) || 0) + 1); }));
-  // a JDW pasted twice is one parcel, so repeats count once
-  const done = new Set(all.filter(({ j, i }) => JDW_RE.test(j) && reasonDone(notes[t][i])).map(({ j }) => j)).size;
-  const bad = all.filter(({ j }) => !JDW_RE.test(j)).length;
-  const dups = [...seen].filter(([, n]) => n > 1).map(([j]) => j);
-  return { entered: seen.size, done, bad, dups };
-}
-function noteState(t, el, item, typing = false){
-  const list = jdwList(item.text), dups = new Set(tally(t).dups);
-  // while typing, the last JDW only goes red once it can't become valid
-  const isBad = (j, k) => !JDW_RE.test(j) && !(typing && k === list.length - 1 && jdwPrefixOk(j));
-  const anyBad = list.some(isBad);
-  el.classList.toggle("done", list.length > 0 && !anyBad && list.every(j => JDW_RE.test(j)) && reasonDone(item));
-  el.classList.toggle("invalid", anyBad);
-  el.querySelector("[data-k=text]").classList.toggle("invalid", anyBad);
-  el.querySelector("select").classList.toggle("unset", !item.reason);
-  el.querySelector(".jdw-chips").innerHTML = list.length
-    ? `<span class="jdw-n">${list.length} JDW${list.length > 1 ? "s" : ""}</span>` + list.map((j, k) =>
-        `<span class="jdw-chip${isBad(j, k) ? " bad" : dups.has(j) ? " dup" : ""}">${esc(j)}${dups.has(j) && !isBad(j, k) ? " <small>twice</small>" : ""}</span>`).join("")
-    : "";
-  const dmg = el.querySelector(".damage"), oth = el.querySelector(".other");
-  if (dmg) dmg.hidden = item.reason !== DAMAGED;
-  if (oth) oth.hidden = item.reason !== "Other";
-  el.classList.toggle("need-damage", item.reason === DAMAGED && !item.damagedBy.length);
-}
-function noteHTML(t, x, i, many){
-  const reasons = t === "red" ? REDELIVERY_REASONS : REJECTION_REASONS;
-  const opts = reasons.map(r => `<option value="${esc(r)}"${r === x.reason ? " selected" : ""}>${esc(r)}</option>`).join("");
-  const damage = reasons.includes(DAMAGED) ? `
-    <div class="damage" hidden>
-      <span class="damage-label">Damaged by</span>
-      <div class="checks">${DAMAGE_SOURCES.map(d => `<label class="check"><input type="checkbox" data-dmg="${esc(d)}"${x.damagedBy.includes(d) ? " checked" : ""}><span>${esc(d)}</span></label>`).join("")}</div>
-    </div>` : "";
-  const other = reasons.includes("Other") ? `
-    <label class="f other" hidden><span>Other reason</span><input data-k="other" value="${esc(x.other)}" autocomplete="off" placeholder="Type the reason"></label>` : "";
-  return `<div class="note" data-i="${i}">
-    <span class="note-n num">${i + 1}</span>
-    <label class="f jdw-f"><span>JDW numbers <span class="sub">Paste one or more</span></span><textarea class="jdw" data-k="text" rows="2" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${JDW_EXAMPLE}">${esc(x.text)}</textarea><em class="hint">Each must be JDW and 12 numbers, like ${JDW_EXAMPLE}</em></label>
-    <label class="f"><span>Reason <span class="sub">For all of these</span></span><select data-k="reason"><option value="">Choose a reason</option>${opts}</select></label>
-    <div class="jdw-chips" aria-live="polite"></div>
-    ${damage}${other}
-    ${many ? `<button class="link quiet note-del" type="button" data-del="${i}">Remove this note</button>` : ""}
-  </div>`;
-}
-function renderNotes(t){
-  const box = $(t + "Notes"), word = t === "red" ? "redeliveries" : "rejections";
-  if (!notes[t].length) notes[t].push(blankNote());
-  notes[t] = notes[t].map(x => normNote(t, x));
-  const many = notes[t].length > 1;
-  box.innerHTML = notes[t].map((x, i) => noteHTML(t, x, i, many)).join("")
-    + `<button class="btn secondary sm note-add" type="button" data-add><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add JDWs with another reason</button>`
-    + `<p class="note-sum" aria-live="polite"></p>`;
-  box.querySelectorAll(".note").forEach(el => noteState(t, el, notes[t][+el.dataset.i]));
-  box.dataset.word = word;
-}
-function syncNotes(t, raw){
-  raw = Math.floor(raw) || 0;
-  if (raw === shown[t]) return;
-  const was = shown[t]; shown[t] = raw;
-  const box = $(t + "Notes");
-  if (!raw){
-    box.innerHTML = t === "red"
-      ? `<p class="empty-notes">No redeliveries. Press + on Redeliveries in FTDS live, then paste the JDW numbers here.</p>`
-      : `<p class="empty-notes">No rejections. Press + on Rejected parcels in FTDS live, then paste the JDW numbers here.</p>`;
-    return;
-  }
-  // keep what's typed: only draw the notes when they aren't on screen yet
-  if (was <= 0 || !box.querySelector(".note")) renderNotes(t);
-}
-function updateNoteCounts(){
-  ["red","rej"].forEach(t => {
-    const n = Math.max(0, shown[t]), k = tally(t), done = Math.min(k.done, n);
-    const el = $(t + "Count");
-    el.textContent = n ? `${done} of ${n} done` : "None";
-    const complete = n > 0 && done === n && k.entered === n && !k.bad && !k.dups.length;
-    el.classList.toggle("done", complete);
-    $(t + "Bar").style.width = n ? (done / n * 100) + "%" : "0%";
-    $(t + "Panel").classList.toggle("complete", complete);
-    const sum = $(t + "Notes").querySelector(".note-sum");
-    if (!sum) return;
-    const label = t === "red" ? "Redeliveries" : "Rejected parcels";
-    if (k.entered > n){
-      sum.className = "note-sum warn";
-      sum.innerHTML = `${k.entered} JDW numbers entered, but ${label} is ${n}. <button class="link" type="button" data-setcount="${k.entered}">Change ${label} to ${k.entered}</button>`;
-    } else if (k.entered < n){
-      sum.className = "note-sum";
-      sum.textContent = `${n - k.entered} more JDW number${n - k.entered > 1 ? "s" : ""} to add.`;
-    } else {
-      sum.className = "note-sum"; sum.textContent = "";
-    }
-    if (k.dups.length){
-      sum.className = "note-sum warn";
-      sum.insertAdjacentHTML("afterbegin", `${k.dups.map(esc).join(", ")} ${k.dups.length > 1 ? "are" : "is"} entered twice, so ${k.dups.length > 1 ? "they count" : "it counts"} once. `);
-    }
-  });
-}
-["red","rej"].forEach(t => {
-  const box = $(t + "Notes");
-  const itemOf = el => { const note = el.closest(".note"); return [note, notes[t][+note.dataset.i]]; };
-  const refresh = (typing) => box.querySelectorAll(".note").forEach(el => noteState(t, el, notes[t][+el.dataset.i], typing && el.contains(document.activeElement)));
-  const update = (el, typing) => {
-    const [note, item] = itemOf(el);
-    if (el.dataset.dmg){
-      const set = new Set(item.damagedBy);
-      el.checked ? set.add(el.dataset.dmg) : set.delete(el.dataset.dmg);
-      item.damagedBy = DAMAGE_SOURCES.filter(d => set.has(d));
-    } else {
-      if (el.dataset.k === "text"){
-        const a = el.selectionStart, b = el.selectionEnd, v = el.value.toUpperCase();
-        if (v !== el.value){ el.value = v; try { el.setSelectionRange(a, b); } catch (_) {} }
-      }
-      item[el.dataset.k] = el.value;
-    }
-    // repeats can sit in another note, so check every note in this panel
-    if (el.dataset.k === "text") refresh(typing); else noteState(t, note, item, typing);
-    updateNoteCounts(); saveDraft();
-    if (el.tagName === "SELECT" && item.reason === "Other") note.querySelector("[data-k=other]")?.focus();
-  };
-  box.addEventListener("input", e => {
-    const el = e.target;
-    if ((el.tagName === "INPUT" || el.tagName === "TEXTAREA") && el.type !== "checkbox" && el.dataset.k) update(el, true);
-  });
-  box.addEventListener("change", e => {
-    const el = e.target;
-    if (el.tagName === "SELECT" || el.type === "checkbox") update(el, false);
-  });
-  box.addEventListener("focusout", e => {
-    if (e.target.dataset.k !== "text") return;
-    refresh(false);
-  });
-  box.addEventListener("click", e => {
-    const add = e.target.closest("[data-add]"), del = e.target.closest("[data-del]"), set = e.target.closest("[data-setcount]");
-    if (add){
-      notes[t].push(blankNote()); renderNotes(t); updateNoteCounts(); saveDraft();
-      box.querySelector(`.note[data-i="${notes[t].length - 1}"] textarea`)?.focus();
-    } else if (del){
-      notes[t].splice(+del.dataset.del, 1); renderNotes(t); updateNoteCounts(); saveDraft();
-    } else if (set){
-      // the count in FTDS live follows the JDW numbers only when asked
-      $(t).value = set.dataset.setcount; render();
-    }
-  });
-});
 
 /* ---------- shift, title, tabs ---------- */
 function setShift(s){
@@ -824,12 +551,6 @@ function updateTitle(){
   } else if (tab === "account"){
     $("pageTitle").textContent = "Your account";
     $("pageSub").textContent = profile?.username ? "Signed in as " + profile.username : "";
-  } else if (hPane === "routes"){
-    $("pageTitle").textContent = "Route history";
-    $("pageSub").textContent = "Who drove which route each day";
-  } else {
-    $("pageTitle").textContent = "Shift history";
-    $("pageSub").textContent = deviceMode ? "Reports saved on this device" : (profile?.role === "admin" || STAFF_SEE_ALL) ? "Every report saved at the station" : "Reports you have saved";
   }
 }
 function showTab(t){
@@ -837,13 +558,11 @@ function showTab(t){
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
   $("shiftView").hidden = t !== "shift";
   $("actionbar").hidden = t !== "shift";
-  $("historyView").hidden = t !== "history";
   $("trainingView").hidden = t !== "training";
   $("opsView").hidden = t !== "ops";
   $("routesView").hidden = t !== "routes";
   $("accountView").hidden = t !== "account";
   updateTitle();
-  if (t === "history"){ renderHistory(); if (hPane === "routes") renderRouteHistory(); }
   if (t === "training") renderTraining();
   if (t === "ops") renderOps();
   if (t === "routes") renderRoutes();
@@ -856,7 +575,7 @@ const draftKey = () => "shiftDraft:" + (user ? user.uid : "none");
 function saveDraft(){
   if (!user) return;
   try {
-    const d = { shift, notes };
+    const d = { shift };
     FIELDS.forEach(f => d[f] = $(f).value);
     localStorage.setItem(draftKey(), JSON.stringify(d));
   } catch (e) {}
@@ -864,7 +583,6 @@ function saveDraft(){
 function clearForm(){
   FIELDS.forEach(f => $(f).value = "");
   $("date").value = today();
-  notes = { red: [], rej: [] }; shown.red = -1; shown.rej = -1;
   volLinked = true;
   setShift(new Date().getHours() < 12 ? "AM" : "PM");
 }
@@ -877,153 +595,15 @@ function loadDraft(){
     if (!$("date").value) $("date").value = today();
     volLinked = !$("ftdsVol").value || $("ftdsVol").value === $("av").value;
     if (d.shift) setShift(d.shift);
-    if (d.notes){ notes.red = (d.notes.red || []).map(x => normNote("red", x)); notes.rej = (d.notes.rej || []).map(x => normNote("rej", x)); }
   } catch (e) {}
 }
 
-/* ---------- storage: Firestore, this device when sign in is off, or memory in preview ---------- */
-function deviceReports(){ try { return JSON.parse(localStorage.getItem(REPORTS_KEY) || "[]"); } catch (e) { return []; } }
-const store = {
-  async list(){
-    if (preview) return memoryStore.slice();
-    if (deviceMode) return deviceReports();
-    const { collection, query, where, orderBy, limit, getDocs } = fb.fs;
-    const col = collection(fb.db, "shifts");
-    const seeAll = profile.role === "admin" || STAFF_SEE_ALL;
-    const q = seeAll ? query(col, orderBy("createdAt", "desc"), limit(300))
-                     : query(col, where("submittedByUid", "==", user.uid), limit(300));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  },
-  async add(rec){
-    if (preview){ memoryStore.push({ ...rec, id: "p" + Date.now(), createdAt: new Date() }); return; }
-    if (deviceMode){
-      const all = deviceReports(); all.push({ ...rec, id: "d" + Date.now(), createdAt: Date.now() });
-      localStorage.setItem(REPORTS_KEY, JSON.stringify(all)); return;
-    }
-    await fb.fs.addDoc(fb.fs.collection(fb.db, "shifts"), { ...rec, createdAt: fb.fs.serverTimestamp() });
-  },
-  async remove(id){
-    if (preview){ memoryStore = memoryStore.filter(r => r.id !== id); return; }
-    if (deviceMode){ localStorage.setItem(REPORTS_KEY, JSON.stringify(deviceReports().filter(r => r.id !== id))); return; }
-    await fb.fs.deleteDoc(fb.fs.doc(fb.db, "shifts", id));
-  }
-};
-
-/* ---------- save and reset ---------- */
-async function saveShift(){
-  const c = compute(), date = $("date").value;
-  if (!date) return toast("Add the shift date before saving", "bad");
-  if (!has(c.av)) return toast("Add the actual volume before saving", "bad");
-  if (!has(c.fv)) return toast("Add the volume in FTDS live before saving", "bad");
-  // one saved line per JDW, each carrying its note's reason (the shape History reads)
-  const lines = x => {
-    const r = {
-      reason: x.reason,
-      damagedBy: x.reason === DAMAGED ? x.damagedBy.slice() : [],
-      other: x.reason === "Other" ? (x.other || "").trim() : "",
-      text: reasonText(x)
-    };
-    const list = jdwList(x.text);
-    return list.length ? list.map(jdw => ({ jdw, ...r })) : x.reason ? [{ jdw: "", ...r }] : [];
-  };
-  const once = a => { const seen = new Set(); return a.filter(x => !x.jdw || (!seen.has(x.jdw) && seen.add(x.jdw))); };
-  const rn = shown.red > 0 ? once(notes.red.flatMap(lines)) : [];
-  const jn = shown.rej > 0 ? once(notes.rej.flatMap(lines)) : [];
-  const finished = a => a.filter(x => JDW_RE.test(x.jdw) && reasonDone(x)).length;
-  const missing = Math.max(0, c.red - finished(rn)) + Math.max(0, c.rej - finished(jn));
-  if (missing && !confirm(`${missing} redeliver${missing > 1 ? "ies or rejections don't" : "y or rejection doesn't"} have a JDW and a reason yet${jn.some(x => x.reason === DAMAGED) ? ", and damaged parcels need who damaged them" : ""}. Save anyway?`)) return;
-  const extra = (rn.filter(x => x.jdw).length > c.red ? `${rn.filter(x => x.jdw).length} redelivery JDW numbers for ${c.red} redeliveries` : "")
-    || (jn.filter(x => x.jdw).length > c.rej ? `${jn.filter(x => x.jdw).length} rejection JDW numbers for ${c.rej} rejected parcels` : "");
-  if (extra && !confirm(`There are ${extra}. Save anyway?`)) return;
-  const badJdw = [...rn, ...jn].filter(x => x.jdw && !JDW_RE.test(x.jdw)).length;
-  if (badJdw && !confirm(`${badJdw} JDW number${badJdw > 1 ? "s aren't" : " isn't"} in the right format (JDW and 12 numbers, like ${JDW_EXAMPLE}). Save anyway?`)) return;
-  const dup = reports.find(r => r.date === date && r.shift === shift);
-  if (dup && !confirm(`A ${shift} report for ${prettyDate(date, { day: "numeric", month: "short" })} was already saved by ${dup.submittedBy}. Save another one?`)) return;
-
-  if (deviceMode && !localStorage.getItem(NAME_KEY)){
-    const n = (prompt("Your name, so the report shows who saved it:") || "").trim();
-    if (n){ localStorage.setItem(NAME_KEY, n); profile.name = n; $("whoName").textContent = n; }
-  }
-  const rec = {
-    date, shift,
-    planVolume: nz(c.pv), actualVolume: nz(c.av), planDrivers: nz(c.pd), actualDrivers: nz(c.ad),
-    volumeVar: nz(c.volVar), planPpr: r2(c.planPpr), actualPpr: r2(c.actualPpr), pprVar: r2(c.pprVar), driverVar: nz(c.drvVar),
-    ftdsVolume: nz(c.fv), rejected: c.rej, redeliveries: c.red, eligible: nz(c.eligible), firstTime: nz(c.firstTime),
-    ftds: r2(c.ftds), max98: nz(c.max98), parcelsDelivered: nz(c.delivered),
-    summary: summaryText(c),
-    redeliveryNotes: rn, rejectionNotes: jn,
-    varianceReason: $("varReason").value.trim(), keyRiskAction: $("keyRisk").value.trim(),
-    submittedBy: profile.name, submittedByUsername: profile.username || "", submittedByEmail: user.email || "", submittedByUid: user.uid
-  };
-  const btn = $("save"); btn.disabled = true; btn.textContent = "Saving…";
-  let saved = false;
-  try {
-    await store.add(rec);
-    saved = true;
-    toast("Shift report saved");
-    trendArrive = true;
-    await loadHistory();
-  } catch (e) {
-    toast("Report not saved. " + (e.code === "permission-denied" ? "Your account isn't allowed to save. Check the database rules." : "Check your connection and try again."), "bad");
-  } finally {
-    btn.disabled = false;
-    if (saved){
-      // the button says it worked for a moment, then goes back to normal
-      btn.innerHTML = ICON_TICK + "Saved"; btn.classList.add("ok");
-      setTimeout(() => { btn.classList.remove("ok"); btn.textContent = "Save shift report"; }, 1800);
-    } else btn.textContent = "Save shift report";
-  }
-}
+/* ---------- reset ---------- */
 function resetShift(){
-  if (!confirm("Clear this shift and start the next one? Saved reports stay in history.")) return;
+  if (!confirm("Clear this shift and start the next one?")) return;
   try { localStorage.removeItem(draftKey()); } catch (e) {}
   clearForm(); render();
   toast("Ready for the next shift");
-}
-
-/* ---------- last 7 shifts chart ---------- */
-// drawn tick and cross, in the same stroke as the other icons
-const ICON_TICK = `<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
-const ICON_CROSS = `<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>`;
-let trendArrive = false;   // set by Save so the newest result slides in
-let trendDrawn = false;    // tiles deal in once, the first time they show
-function renderTrend(msg){
-  const box = $("trendChart"), avgEl = $("trendAvg");
-  if (msg === "loading"){
-    box.innerHTML = `<p class="sr">Loading your last shifts…</p><ol class="form-guide" aria-hidden="true">${`<li class="fg skel"></li>`.repeat(7)}</ol>`;
-    avgEl.hidden = true; return;
-  }
-  if (msg){ box.innerHTML = `<p class="trend-empty">${msg}</p>`; avgEl.hidden = true; return; }
-  // reports are newest first, so take 7 and flip them to read left to right
-  const pts = reports.filter(r => has(r.ftds)).slice(0, 7).reverse();
-  if (!pts.length){
-    box.innerHTML = `<p class="trend-empty">Save a shift and your last 7 shifts show here.</p>`;
-    avgEl.hidden = true; return;
-  }
-  const elig = pts.reduce((a, r) => a + (r.eligible || 0), 0);
-  const first = pts.reduce((a, r) => a + (r.firstTime || 0), 0);
-  const avg = elig ? first / elig * 100 : pts.reduce((a, r) => a + r.ftds, 0) / pts.length;
-  avgEl.hidden = false;
-  avgEl.textContent = `Average ${avg.toFixed(2)}%`;
-  avgEl.className = "chip " + (avg >= 98 ? "good" : "bad");
-
-  // Like a football form guide: one tile per shift, a tick when it hit
-  // 98%, a cross when it didn't. The newest is outlined on the right.
-  const arrive = trendArrive; trendArrive = false;
-  const enter = !trendDrawn; trendDrawn = true;
-  const day = r => prettyDate(r.date, { weekday: "short" });
-  const full = r => prettyDate(r.date, { weekday: "long", day: "numeric", month: "long" });
-  box.innerHTML = `<ol class="form-guide${enter ? " enter" : ""}" aria-label="FTDS for the last ${pts.length} shifts">
-    ${pts.map((r, i) => {
-      const win = r.ftds >= 98, last = i === pts.length - 1;
-      return `<li class="fg ${win ? "win" : "loss"}${last ? " latest" : ""}${last && arrive ? " arrive" : ""}" style="--n:${i}"
-        title="${esc(full(r))} ${esc(r.shift || "")}: ${r.ftds.toFixed(2)}%">
-        <span class="sr">${esc(full(r))} ${esc(r.shift || "")}: ${r.ftds.toFixed(2)}%, ${win ? "on target" : "below target"}.</span>
-        <i aria-hidden="true">${win ? ICON_TICK : ICON_CROSS}</i><b aria-hidden="true">${r.ftds.toFixed(1)}</b><small aria-hidden="true">${esc(day(r))}${r.shift ? `<span class="fg-s"> ${esc(r.shift)}</span>` : ""}</small></li>`;
-    }).join("")}
-  </ol>
-  <p class="fg-key"><span><i class="w">${ICON_TICK}</i>98% or more</span><span><i class="l">${ICON_CROSS}</i>Below 98%</span></p>`;
 }
 
 /* ---------- copy summary ---------- */
@@ -1074,125 +654,6 @@ $("copySummary").addEventListener("click", async () => {
   } else toast("Couldn't copy. Your browser blocked it", "bad");
 });
 
-/* ---------- history ---------- */
-async function loadHistory(){
-  $("histList").innerHTML = `<p class="sr">Loading reports…</p>` + `<span class="skel skel-row"></span>`.repeat(3);
-  renderTrend("loading");
-  try {
-    reports = await store.list();
-  } catch (e) {
-    renderTrend("Couldn't load your last shifts.");
-    $("histList").innerHTML = `<p class="empty pad">Couldn't load history. ${e.code === "permission-denied" ? "Check the database rules in Firebase." : "Check your connection and press Refresh."}</p>`;
-    return;
-  }
-  reports.sort((a, b) =>
-    (b.date || "").localeCompare(a.date || "") ||
-    (b.shift || "").localeCompare(a.shift || "") ||
-    ((toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
-  renderHistory();
-  renderTrend();
-}
-
-function renderHistory(){
-  const seeAll = profile?.role === "admin" || STAFF_SEE_ALL;
-  $("hTitle").textContent = deviceMode ? "Reports on this device" : seeAll ? "All reports" : "Your reports";
-  const month = $("hMonth").value;
-  const rows = reports.filter(r => (hFilter === "all" || r.shift === hFilter) && (!month || (r.date || "").startsWith(month)));
-  const elig = rows.reduce((s, r) => s + (r.eligible || 0), 0);
-  const first = rows.reduce((s, r) => s + (r.firstTime || 0), 0);
-  const overall = elig ? first / elig * 100 : NaN;
-  const below = rows.filter(r => has(r.ftds) && r.ftds < 98).length;
-  $("hShifts").textContent = rows.length;
-  $("hFtds").textContent = has(overall) ? overall.toFixed(2) + "%" : "–";
-  $("hFtds").className = "num " + (has(overall) ? (overall >= 98 ? "good" : "bad") : "");
-  $("hBelow").textContent = below;
-  $("hBelow").className = "num " + (rows.length ? (below ? "bad" : "good") : "");
-
-  if (!rows.length){
-    $("histList").innerHTML = `<p class="empty pad">${reports.length ? "No reports match these filters." : "No reports saved yet. Save a shift and it shows up here."}</p>`;
-    return;
-  }
-  const head = `<div class="h-head"><span>Date</span><span>Shift</span><span>Volume</span><span>Volume var</span><span>PPR var</span><span>Driver var</span><span>Redeliveries</span><span>Rejected</span><span>Saved by</span><span>FTDS</span></div>`;
-  $("histList").innerHTML = head + rows.map(r => {
-    const ft = has(r.ftds) ? (r.ftds >= 98 ? "good" : "bad") : "";
-    return `<article class="h-item">
-      <button class="h-row" type="button" aria-expanded="false" data-id="${esc(r.id)}">
-        <span class="h-date"><small>Date</small><b>${esc(prettyDate(r.date, { weekday: "short", day: "numeric", month: "short" }))}</b></span>
-        <span class="h-shift"><small>Shift</small><span class="chip ${r.shift === "AM" ? "am" : "pm"}">${esc(r.shift)}</span></span>
-        <span><small>Volume</small><b class="num">${fmtInt(r.actualVolume)}</b></span>
-        <span><small>Volume var</small><b class="num ${volTone(r.volumeVar)}">${signed(r.volumeVar, 0)}</b></span>
-        <span><small>PPR var</small><b class="num ${toneOf(r.pprVar)}">${signed(r.pprVar, 1)}</b></span>
-        <span><small>Driver var</small><b class="num ${toneOf(r.driverVar)}">${signed(r.driverVar, 0)}</b></span>
-        <span><small>Redeliveries</small><b class="num">${fmtInt(r.redeliveries)}</b></span>
-        <span><small>Rejected</small><b class="num">${fmtInt(r.rejected)}</b></span>
-        <span class="h-by"><small>Saved by</small>${esc(r.submittedBy)}</span>
-        <span class="h-ftds ${ft}"><small>FTDS</small>${has(r.ftds) ? r.ftds.toFixed(2) + "%" : "–"}</span>
-      </button>
-      <div class="h-detail" hidden></div>
-    </article>`;
-  }).join("");
-}
-
-function notesList(a){
-  return a && a.length
-    ? `<ol class="d-list">${a.map(x => `<li><b class="${x.jdw && !JDW_RE.test(x.jdw) ? "bad" : ""}">${esc(x.jdw) || "No JDW"}</b><span>${esc(x.text || reasonText(x)) || "No reason given"}</span></li>`).join("")}</ol>`
-    : `<p class="empty">None recorded</p>`;
-}
-function detailHTML(r){
-  const lines = [
-    ["Volume", fmtInt(r.planVolume), fmtInt(r.actualVolume), r.volumeVar, 0],
-    ["PPR", fmt1(r.planPpr), fmt1(r.actualPpr), r.pprVar, 1],
-    ["Drivers", fmtInt(r.planDrivers), fmtInt(r.actualDrivers), r.driverVar, 0]
-  ];
-  const ftds = [
-    ["FTDS volume", fmtInt(r.ftdsVolume)], ["Rejected", fmtInt(r.rejected)],
-    ["First time", fmtInt(r.firstTime)], ["Redeliveries", fmtInt(r.redeliveries)], ["Max at 98%", fmtInt(r.max98)],
-    ["Margin vs 98%", has(r.ftds) ? signed(r.ftds - 98, 2) + "%" : "–"],
-    ["Parcels delivered", fmtInt(r.parcelsDelivered)]
-  ];
-  const when = toDate(r.createdAt)?.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-  return `
-    ${r.summary ? `<p class="d-summary">${esc(r.summary)}</p>` : ""}
-    ${r.varianceReason || r.keyRiskAction ? `<div class="d-text">
-      <div><h4>Variance and reason</h4><p>${esc(r.varianceReason || "None added")}</p></div>
-      <div><h4>Key risk and action</h4><p>${esc(r.keyRiskAction || "None added")}</p></div></div>` : ""}
-    <div class="d-grid">
-      <table class="d-table"><thead><tr><th></th><th>Planned</th><th>Actual</th><th>Variance</th></tr></thead>
-        <tbody>${lines.map(x => `<tr><th>${x[0]}</th><td class="num">${x[1]}</td><td class="num">${x[2]}</td><td class="num ${x[0] === "Volume" ? volTone(x[3]) : toneOf(x[3])}">${signed(x[3], x[4])}</td></tr>`).join("")}</tbody>
-      </table>
-      <dl class="d-ftds">${ftds.map(([k, v]) => `<div><dt>${k}</dt><dd class="num">${v}</dd></div>`).join("")}</dl>
-    </div>
-    <div class="d-notes">
-      <div><h4>Redelivery notes</h4>${notesList(r.redeliveryNotes)}</div>
-      <div><h4>Rejection notes</h4>${notesList(r.rejectionNotes)}</div>
-    </div>
-    <div class="d-foot">
-      <span>Saved by ${esc(r.submittedBy)}${r.submittedByUsername ? ` (${esc(r.submittedByUsername)})` : r.submittedByEmail ? ` (${esc(r.submittedByEmail)})` : ""}${when ? " on " + when : ""}</span>
-      ${profile.role === "admin" ? `<button class="btn danger" type="button" data-del="${esc(r.id)}">Delete report</button>` : ""}
-    </div>`;
-}
-
-$("histList").addEventListener("click", async e => {
-  const del = e.target.closest("[data-del]");
-  if (del){
-    if (!confirm("Delete this report for everyone? This can't be undone.")) return;
-    try { await store.remove(del.dataset.del); toast("Report deleted"); await loadHistory(); }
-    catch (err) { toast("Couldn't delete the report", "bad"); }
-    return;
-  }
-  const row = e.target.closest(".h-row"); if (!row) return;
-  const box = row.nextElementSibling, open = row.getAttribute("aria-expanded") === "true";
-  if (!open && !box.innerHTML){ const r = reports.find(x => x.id === row.dataset.id); if (r) box.innerHTML = detailHTML(r); }
-  row.setAttribute("aria-expanded", !open); box.hidden = open;
-});
-document.querySelectorAll("[data-hf]").forEach(b => b.addEventListener("click", () => {
-  hFilter = b.dataset.hf;
-  document.querySelectorAll("[data-hf]").forEach(x => x.setAttribute("aria-checked", x === b));
-  renderHistory();
-}));
-$("hMonth").addEventListener("input", renderHistory);
-$("hRefresh").addEventListener("click", loadHistory);
-
 /* ---------- wiring ---------- */
 $("bufHint").textContent = `±${VOLUME_BUFFER} is fine`;
 $("ftdsVol").addEventListener("input", () => {
@@ -1207,7 +668,6 @@ document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click"
   $(id).value = Math.max(0, cur + Number(d)); render();
 }));
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
-$("save").addEventListener("click", saveShift);
 $("reset").addEventListener("click", resetShift);
 // stop the mouse wheel changing a number you're typing in
 document.addEventListener("wheel", () => { const a = document.activeElement; if (a && a.type === "number") a.blur(); }, { passive: true });
@@ -1239,13 +699,13 @@ function enterApp(){
   $("whoName").title = deviceMode ? "Tap to change your name" : "";
   $("whoName").style.cursor = deviceMode ? "pointer" : "";
   $("previewBanner").hidden = !preview;
-  reports = [];
-  loadDraft(); showTab("shift"); render(); loadHistory();
-  trView = "home"; trLoad(); updateOpsBadge(); rpLoad(); rrLoad();
+  forgetDriverNames();
+  loadDraft(); showTab("shift"); render();
+  trView = "home"; trLoad(); updateOpsBadge(); rpLoad();
 }
 function showLogin(){
   $("appView").hidden = true; $("loginView").hidden = false;
-  reports = []; loginMsg(loginNote, loginNote ? "bad" : ""); loginNote = "";
+  loginMsg(loginNote, loginNote ? "bad" : ""); loginNote = "";
 }
 async function loadProfile(u){
   let s;
@@ -1280,7 +740,7 @@ $("signOut").addEventListener("click", async () => {
 function openAccount(e){
   if (e && e.target.closest("#signOut")) return;
   if (deviceMode){
-    const n = (prompt("Your name, shown on reports you save:", localStorage.getItem(NAME_KEY) || "") || "").trim();
+    const n = (prompt("Your name, shown in the app:", localStorage.getItem(NAME_KEY) || "") || "").trim();
     if (!n) return;
     localStorage.setItem(NAME_KEY, n); profile.name = n; $("whoName").textContent = n; toast("Name updated");
     return;
@@ -1377,7 +837,7 @@ const motion = (() => {
     };
     requestAnimationFrame(step);
   }
-  const COUNT = "#volVar, #pprVar, #drvVar, #ftdsPct, #rpTotParcels, #rpTotDrops, #rpTotWorking, #rpTotOn, .band-stats b, .h-stat b";
+  const COUNT = "#volVar, #pprVar, #drvVar, #ftdsPct, #rpTotParcels, #rpTotDrops, #rpTotRoutes, #rpTotUn, .band-stats b";
   const mo = new MutationObserver(list => {
     const seen = new Set();
     list.forEach(m => { const el = m.target.nodeType === 3 ? m.target.parentElement : m.target; if (el && el.matches && el.matches(COUNT)) seen.add(el); });
@@ -1393,7 +853,7 @@ const motion = (() => {
    Change password, sign out, and for admins: staff accounts.
    ===================================================================== */
 const initials = n => (n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
-let staffRows = [], staffTraining = {};
+let staffRows = [];
 function renderAccount(){
   $("acctAvatar").textContent = initials(profile.name);
   $("acctName").textContent = profile.name;
@@ -1425,32 +885,22 @@ $("signOut2").addEventListener("click", async () => { if (fb) await fb.a.signOut
 async function loadStaff(){
   $("staffList").innerHTML = `<p class="empty">Loading staff…</p>`;
   try {
-    const [us, ts] = await Promise.all([
-      fb.fs.getDocs(fb.fs.collection(fb.db, "users")),
-      fb.fs.getDocs(fb.fs.collection(fb.db, "training")).catch(() => null)
-    ]);
+    const us = await fb.fs.getDocs(fb.fs.collection(fb.db, "users"));
     staffRows = us.docs.map(d => ({ uid: d.id, ...d.data() }))
       .sort((a, b) => (a.active === false) - (b.active === false) || (a.name || "").localeCompare(b.name || ""));
-    staffTraining = {};
-    if (ts) ts.docs.forEach(d => staffTraining[d.id] = d.data());
     renderStaff();
   } catch (e) {
     $("staffList").innerHTML = `<p class="empty">Couldn't load staff. ${e.code === "permission-denied" ? "Check the Firestore rules have been published." : "Check your connection."}</p>`;
   }
 }
-function trainingDone(uid){
-  const d = staffTraining[uid]; if (!d || !T) return 0;
-  return T.modules.filter(m => d.modDone && d.modDone[m.id]).length;
-}
 function renderStaff(){
   $("staffCount").textContent = staffRows.filter(r => r.active !== false).length + " active";
   $("staffList").innerHTML = staffRows.length ? staffRows.map(r => {
-    const me = r.uid === user.uid, off = r.active === false, done = trainingDone(r.uid), total = T ? T.modules.length : 0;
+    const me = r.uid === user.uid, off = r.active === false;
     return `<div class="staff ${off ? "off" : ""}">
       <div class="staff-t"><b>${esc(r.name || r.username)}</b>${me ? ' <small class="you">(you)</small>' : ""}<small>${esc(r.username || "")}</small>
         <div class="staff-chips"><span class="chip ${r.role === "admin" ? "violet" : ""}">${r.role === "admin" ? "Admin" : "Staff"}</span>
-        ${off ? `<span class="chip bad">Turned off</span>` : ""}
-        ${total ? `<span class="chip ${done === total ? "good" : ""}">Training ${done} of ${total}</span>` : ""}</div></div>
+        ${off ? `<span class="chip bad">Turned off</span>` : ""}</div></div>
       ${me ? "" : `<div class="staff-btns">
         <button class="btn secondary sm" type="button" data-role="${esc(r.uid)}">${r.role === "admin" ? "Make staff" : "Make admin"}</button>
         <button class="btn ${off ? "secondary" : "danger"} sm" type="button" data-active="${esc(r.uid)}">${off ? "Turn on" : "Turn off"}</button></div>`}
@@ -1481,14 +931,9 @@ $("staffForm").addEventListener("submit", async e => {
     const cred = await fb.a.createUserWithEmailAndPassword(secAuth, toEmail(username), pass);
     const newUid = cred.user.uid;
     await fb.a.signOut(secAuth);
-    // Someone being added again after a password reset: bring their training across.
+    // Someone being added again after a password reset: remove their old account record.
     for (const old of staffRows.filter(r => r.username === username && r.uid !== newUid)){
-      try {
-        const t = await fb.fs.getDoc(fb.fs.doc(fb.db, "training", old.uid));
-        if (t.exists()) await fb.fs.setDoc(fb.fs.doc(fb.db, "training", newUid), t.data());
-        if (t.exists()) await fb.fs.deleteDoc(fb.fs.doc(fb.db, "training", old.uid));
-        await fb.fs.deleteDoc(fb.fs.doc(fb.db, "users", old.uid));
-      } catch (err) {}
+      try { await fb.fs.deleteDoc(fb.fs.doc(fb.db, "users", old.uid)); } catch (err) {}
     }
     await fb.fs.setDoc(fb.fs.doc(fb.db, "users", newUid), {
       name, username, role, active: true, createdAt: fb.fs.serverTimestamp(), createdBy: profile.username || ""
@@ -1574,36 +1019,15 @@ function syncCompletion(){
   if (!all) tr.doneAt = null;
 }
 
-/* ---------- saving progress: on this device, and in Firebase when connected ---------- */
+/* ---------- saving progress: on this device only ---------- */
 const trKey = () => "trainingProgress:" + (user ? user.uid : "none");
-function trSaveLocal(){ try { localStorage.setItem(trKey(), JSON.stringify(tr)); } catch (e) {} }
-let trCloudTimer, trCloudWarned = false;
 function trSave(){
-  tr.updated = Date.now(); trSaveLocal();
-  if (!fb || preview || !user) return;
-  clearTimeout(trCloudTimer);
-  trCloudTimer = setTimeout(async () => {
-    try {
-      await fb.fs.setDoc(fb.fs.doc(fb.db, "training", user.uid),
-        { steps: tr.steps, modDone: tr.modDone, doneAt: tr.doneAt, updated: tr.updated, name: profile?.name || "" });
-    } catch (e) {
-      if (!trCloudWarned){ trCloudWarned = true; toast("Training progress is only saved on this device. Add the training rule in Firebase.", "bad"); }
-    }
-  }, 1000);
+  tr.updated = Date.now();
+  try { localStorage.setItem(trKey(), JSON.stringify(tr)); } catch (e) {}
 }
-async function trLoad(){
+function trLoad(){
   tr = { steps: {}, modDone: {}, doneAt: null, updated: 0 };
   try { Object.assign(tr, JSON.parse(localStorage.getItem(trKey()) || "{}")); } catch (e) {}
-  if (fb && !preview && user){
-    try {
-      const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, "training", user.uid));
-      const d = snap.exists() ? snap.data() : null;
-      if (d && (d.updated || 0) > (tr.updated || 0)){
-        tr = { steps: d.steps || {}, modDone: d.modDone || {}, doneAt: d.doneAt || null, updated: d.updated || 0 };
-        trSaveLocal();
-      } else if (tr.updated && (!d || tr.updated > (d.updated || 0))) trSave();
-    } catch (e) {}
-  }
   if (tab === "training") renderTraining();
 }
 
@@ -2109,7 +1533,7 @@ $("issueForm").addEventListener("submit", e => {
   e.preventDefault();
   const t = LIVE.issues.find(x => x.id === $("issueType").value); if (!t) return;
   const driver = $("issueDriver").value.trim();
-  if (t.needsDriver && !driver){ toast("Add the driver or route", "bad"); $("issueDriver").focus(); return; }
+  if (t.needsDriver && !driver){ toast("Add the route", "bad"); $("issueDriver").focus(); return; }
   opsLoad();
   ops.issues.push({ id: Date.now().toString(36), type: t.id, driver: t.needsDriver ? driver : "", note: $("issueNote").value.trim(), created: Date.now(), steps: {} });
   opsSave(); $("issueForm").reset(); $("issueForm").hidden = true;
@@ -2211,89 +1635,36 @@ function rpStats(parsed, cfg){
   };
 }
 
-/* ---------- state ---------- */
-// The driver list is for the whole station: kept on this device, and in
-// Firebase once it's connected. Today's plan is kept on this device.
-const ROSTER_KEY = "driverRoster", DAY_KEY = "routeDay";
-const AGENCIES = (RPC && RPC.agencies) || [{ code: "UKED", colour: "#A98BFF" }, { code: "INRW", colour: "#4DA3FF" }];
-let roster = [];                       // [{ name, agency }]
-let day = { parcelText: "", working: [], assign: {}, open: {} };
-let rpParsed = null, rpS = null, rpEditing = false, sugIndex = 0;
-
-const tidyName = s => String(s || "").replace(/\s+/g, " ").trim();
-const sameName = (a, b) => a.toLowerCase() === b.toLowerCase();
-const byName = (a, b) => a.localeCompare(b, "en", { sensitivity: "base" });
-const sortNames = list => list.sort(byName);
-const sortRoster = () => roster.sort((a, b) => byName(a.name, b.name));
-const inList = (list, n) => list.some(x => sameName(x, n));
-const driverOf = n => roster.find(d => sameName(d.name, n));
-const agencyOf = n => (driverOf(n) || {}).agency || "";
-const colourOf = code => (AGENCIES.find(a => a.code === code) || {}).colour || "";
-const dot = n => { const a = agencyOf(n), c = colourOf(a); return `<i class="ag-dot" style="${c ? `background:${c}` : ""}" title="${esc(a || "No agency")}"></i>`; };
-const routeOf = n => { for (const k in day.assign) if (inList(day.assign[k], n)) return +k; return 0; };
-const freeToday = () => day.working.filter(n => !routeOf(n));
-function unassign(n){
-  for (const k in day.assign){
-    day.assign[k] = day.assign[k].filter(x => !sameName(x, n));
-    if (!day.assign[k].length) delete day.assign[k];
-  }
-}
-function assignTo(num, n){ unassign(n); (day.assign[num] ||= []).push(n); }
-// Older saves kept plain names. Turn them into { name, agency }.
-const toDriver = d => typeof d === "string" ? { name: tidyName(d), agency: "" } : { name: tidyName(d.name), agency: d.agency || "" };
+/* ---------- state ----------
+   Today's forecast is kept on this device so a reload doesn't lose it.
+   No driver names are asked for or kept anywhere. */
+const DAY_KEY = "routeDay";
+let day = { parcelText: "", open: {} };
+let rpParsed = null, rpS = null, rpEditing = false;
 
 function rpCompute(){
   rpParsed = RPC && day.parcelText.trim() ? rpParseParcels(day.parcelText, RPC) : null;
   rpS = rpParsed && rpParsed.rows.length ? rpStats(rpParsed, RPC) : null;
 }
-function rpSaveDay(){ try { localStorage.setItem(DAY_KEY, JSON.stringify(day)); } catch (e) {} }
-let rosterTimer, rosterWarned = false;
-function rpSaveRoster(){
-  try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) {}
-  if (!fb || preview || !user) return;
-  clearTimeout(rosterTimer);
-  rosterTimer = setTimeout(async () => {
-    try { await fb.fs.setDoc(fb.fs.doc(fb.db, "station", "drivers"), { drivers: roster, updated: Date.now(), by: profile?.name || "" }); }
-    catch (e) { if (!rosterWarned){ rosterWarned = true; toast("Driver list is only saved on this device. Add the drivers rule in Firebase.", "bad"); } }
-  }, 800);
-}
-async function rpLoad(){
-  try { roster = JSON.parse(localStorage.getItem(ROSTER_KEY) || "[]").map(toDriver).filter(d => d.name); } catch (e) { roster = []; }
-  sortRoster();
-  day = { parcelText: "", working: [], assign: {}, open: {} };
-  try { Object.assign(day, JSON.parse(localStorage.getItem(DAY_KEY) || "{}")); } catch (e) {}
+function rpSaveDay(){ try { localStorage.setItem(DAY_KEY, JSON.stringify({ parcelText: day.parcelText, open: day.open })); } catch (e) {} }
+function rpLoad(){
+  day = { parcelText: "", open: {} };
+  try { const d = JSON.parse(localStorage.getItem(DAY_KEY) || "{}"); day.parcelText = d.parcelText || ""; day.open = d.open || {}; } catch (e) {}
   $("rpParcels").value = day.parcelText;
   rpEditing = false; rpCompute();
-  if (fb && !preview && user){
-    try {
-      const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, "station", "drivers"));
-      if (snap.exists()){
-        const d = snap.data();
-        roster = (d.drivers || d.names || []).map(toDriver).filter(x => x.name); sortRoster();
-        localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
-      } else if (roster.length) rpSaveRoster();
-    } catch (e) {}
-  }
   if (tab === "routes") renderRoutes();
 }
 function rpChanged(){ rpSaveDay(); renderRoutes(); }
 
 /* ---------- drawing ---------- */
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-function rpSplit(x, n){
-  if (!n || !x.parcels) return "";
-  if (n === 1) return `1 driver · ${plural(x.parcels, "parcel", "parcels")}, ${plural(x.drops, "drop", "drops")}`;
-  const p = x.parcels / n, d = x.drops / n, exact = Number.isInteger(p) && Number.isInteger(d);
-  return `${n} drivers · ${exact ? "" : "about "}${Math.round(p)} parcels, ${Math.round(d)} drops each`;
-}
 function renderRoutes(){
   if (!RPC){ $("rpRoutes").innerHTML = `<p class="rp-empty">routes-config.js wasn't found. Upload it to the same folder as index.html.</p>`; return; }
   $("rpTotParcels").textContent = rpS ? rpS.totalParcels : "–";
   $("rpTotDrops").textContent = rpS ? rpS.totalDrops : "–";
-  $("rpTotWorking").textContent = day.working.length;
-  $("rpTotOn").textContent = day.working.filter(n => routeOf(n)).length;
-  rpRenderForecast(); rpRenderDrivers(); rpRenderRoster(); rpRenderList();
-  if (typeof rrRenderStamp === "function") try { rrRenderStamp(); } catch (e) {}
+  $("rpTotRoutes").textContent = rpS ? rpS.routes.filter(x => x.parcels).length : "–";
+  $("rpTotUn").textContent = rpS ? rpS.unassigned.parcels : "–";
+  rpRenderForecast(); rpRenderList();
   updateTitle();
 }
 
@@ -2312,132 +1683,21 @@ function rpRenderForecast(){
   box.innerHTML = `<div class="rp-ok"><span class="rp-ok-ic">✓</span><div><b>Forecast loaded</b><span>${plural(rpS.totalParcels, "parcel", "parcels")} · ${plural(rpS.totalDrops, "drop", "drops")}</span></div></div>${notes.join("")}`;
 }
 
-function rpRenderDrivers(){
-  $("rpWorkCount").textContent = day.working.length;
-  $("rpWorking").innerHTML = day.working.length
-    ? sortNames(day.working.slice()).map(n => { const r = routeOf(n);
-        return `<span class="rp-name ${r ? "on" : ""}">${dot(n)}${esc(n)}${r ? `<small>R${r}</small>` : ""}<button type="button" data-unwork="${esc(n)}" aria-label="${esc(n)} isn't working">✕</button></span>`; }).join("")
-    : `<p class="rp-hint">${roster.length ? "Start typing a name above. Drivers from All drivers will come up." : "Add your drivers under All drivers first, then type their names here."}</p>`;
-}
-
-// The full driver list: a searchable, scrolling list instead of a wall of names
-function rpRenderRoster(){
-  const counts = AGENCIES.map(a => `<span class="ag-key">${`<i class="ag-dot" style="background:${a.colour}"></i>`}${esc(a.code)} ${roster.filter(d => d.agency === a.code).length}</span>`).join("");
-  $("rpRosterCount").textContent = roster.length;
-  $("rpRosterKey").innerHTML = counts;
-  const q = tidyName($("rpRosterSearch").value).toLowerCase();
-  const list = roster.filter(d => !q || d.name.toLowerCase().includes(q));
-  $("rpRosterSearch").hidden = roster.length < 8;
-  $("rpRoster").innerHTML = list.length ? list.map(d => `<div class="rp-rrow">${dot(d.name)}<span class="rp-rname-t">${esc(d.name)}</span>
-      <select data-setag="${esc(d.name)}" aria-label="Agency for ${esc(d.name)}" class="${d.agency ? "" : "unset"}">${d.agency ? "" : `<option value="">Agency</option>`}${AGENCIES.map(a => `<option ${a.code === d.agency ? "selected" : ""}>${esc(a.code)}</option>`).join("")}</select>
-      <button class="rp-rdel" type="button" data-unroster="${esc(d.name)}" aria-label="Remove ${esc(d.name)}">✕</button></div>`).join("")
-    : `<p class="rp-hint">${roster.length ? "No drivers match." : "No drivers saved yet."}</p>`;
-  $("rpRosterNote").textContent = deviceMode ? "Saved on this device." : fb && !preview ? "Shared with everyone through Firebase." : "Saved on this device for now. Once Firebase is connected, it's shared with everyone.";
-}
-
 function rpRenderList(){
-  const free = sortNames(freeToday());
-  $("rpRouteNote").innerHTML = !day.working.length ? `<p class="rp-alert info">Add who's working today in step 2, then put them on routes here.</p>`
-    : !free.length ? `<p class="rp-alert good">✓ Everyone working today is on a route.</p>`
-    : `<p class="rp-alert info">${plural(free.length, "driver", "drivers")} still to place: ${free.map(esc).join(", ")}</p>`;
+  $("rpRouteNote").innerHTML = rpS ? "" : `<p class="rp-alert info">Paste the forecast in step 1 to see parcels and drops for each route.</p>`;
   $("rpRoutes").innerHTML = RPC.routes.map(r => {
     const x = rpS ? rpS.routes.find(y => y.num === r.num) : { parcels: 0, drops: 0, postcodes: new Map() };
-    const names = day.assign[r.num] || [], open = !!day.open[r.num];
+    const open = !!day.open[r.num];
     const pcs = [...x.postcodes].sort((a, b) => a[0].localeCompare(b[0], "en", { numeric: true }));
-    return `<article class="rp-route ${names.length ? "has" : ""} ${rpS && !x.parcels ? "zero" : ""}">
+    return `<article class="rp-route ${rpS && x.parcels ? "has" : ""} ${rpS && !x.parcels ? "zero" : ""}">
       <div class="rp-r-name"><i class="rp-badge">${r.num}</i><div><b>${esc(r.name)}</b>
         ${pcs.length ? `<button class="rp-pcbtn" type="button" data-pc="${r.num}" aria-expanded="${open}">Postcodes<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>` : `<small>${rpS ? "No parcels" : "Waiting for forecast"}</small>`}</div></div>
       <div class="rp-r-num"><b class="num">${rpS ? x.parcels : "–"}</b><span>parcels</span></div>
       <div class="rp-r-num"><b class="num">${rpS ? x.drops : "–"}</b><span>drops</span></div>
-      <div class="rp-r-drv">
-        <div class="rp-r-chips">
-          ${names.map(n => `<span class="rp-name on">${dot(n)}${esc(n)}<button type="button" data-off="${esc(n)}" aria-label="Take ${esc(n)} off Route ${r.num}">✕</button></span>`).join("")}
-          ${free.length ? `<select class="rp-add" data-addto="${r.num}" aria-label="Add a driver to Route ${r.num}">
-            <option value="">+ Add driver</option>${free.map(n => `<option value="${esc(n)}">${esc(n)}${agencyOf(n) ? " · " + esc(agencyOf(n)) : ""}</option>`).join("")}
-          </select>
-          <button class="rp-rand" type="button" data-rand="${r.num}" title="Add a random driver who's working today">
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Randomise</button>` : names.length ? "" : `<span class="rp-nodrv">No driver</span>`}
-        </div>
-        ${rpSplit(x, names.length) ? `<p class="rp-split">${rpSplit(x, names.length)}</p>` : ""}
-      </div>
       ${open ? `<div class="rp-pcs">${pcs.map(([pc, n]) => `<span>${esc(pc)}${n > 1 ? `<i>×${n}</i>` : ""}</span>`).join("")}</div>` : ""}
     </article>`;
   }).join("");
 }
-
-/* ---------- working today: type ahead from All drivers ---------- */
-function rpMatches(q){
-  q = q.toLowerCase();
-  const avail = roster.filter(d => !inList(day.working, d.name));
-  const starts = avail.filter(d => d.name.toLowerCase().startsWith(q));
-  const words = avail.filter(d => !starts.includes(d) && d.name.toLowerCase().split(" ").some(w => w.startsWith(q)));
-  return starts.concat(words).slice(0, 6);
-}
-function rpRenderSuggest(){
-  const box = $("rpSuggest"), q = tidyName($("rpWorkInput").value);
-  if (!q){ box.hidden = true; return; }
-  const m = rpMatches(q);
-  const exact = roster.some(d => sameName(d.name, q));
-  const already = inList(day.working, q);
-  sugIndex = Math.min(sugIndex, Math.max(m.length - 1, 0));
-  box.innerHTML = m.map((d, i) => `<button type="button" role="option" class="rp-sug ${i === sugIndex ? "active" : ""}" data-sug="${esc(d.name)}">${dot(d.name)}<span>${esc(d.name)}</span><small>${esc(d.agency || "")}</small></button>`).join("")
-    + (already ? `<p class="rp-sug-note">${esc(q)} is already working today</p>`
-      : !exact && !m.length ? `<div class="rp-sug-new"><span>New driver <b>${esc(q)}</b></span>${AGENCIES.map(a => `<button type="button" data-newag="${esc(a.code)}"><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</button>`).join("")}</div>` : "");
-  box.hidden = false;
-}
-function rpPickWorking(name){
-  if (!inList(day.working, name)) day.working.push(name);
-  $("rpWorkInput").value = ""; sugIndex = 0; $("rpSuggest").hidden = true;
-  rpChanged(); $("rpWorkInput").focus();
-}
-function rpWorkEnter(){
-  const q = tidyName($("rpWorkInput").value);
-  if (!q) return toast("Start typing a driver's name", "bad");
-  const m = rpMatches(q);
-  if (m.length) return rpPickWorking(m[sugIndex] ? m[sugIndex].name : m[0].name);
-  if (inList(day.working, q)) return toast(`${q} is already working today`);
-  rpRenderSuggest(); toast(`Pick ${AGENCIES.map(a => a.code).join(" or ")} to add ${q} as a new driver`, "bad");
-}
-$("rpWorkInput").addEventListener("input", () => { sugIndex = 0; rpRenderSuggest(); });
-$("rpWorkInput").addEventListener("focus", rpRenderSuggest);
-$("rpWorkInput").addEventListener("blur", () => setTimeout(() => { $("rpSuggest").hidden = true; }, 150));
-$("rpWorkInput").addEventListener("keydown", e => {
-  const n = $("rpSuggest").querySelectorAll("[data-sug]").length;
-  if (e.key === "ArrowDown" && n){ e.preventDefault(); sugIndex = (sugIndex + 1) % n; rpRenderSuggest(); }
-  else if (e.key === "ArrowUp" && n){ e.preventDefault(); sugIndex = (sugIndex - 1 + n) % n; rpRenderSuggest(); }
-  else if (e.key === "Enter"){ e.preventDefault(); rpWorkEnter(); }
-  else if (e.key === "Escape"){ $("rpSuggest").hidden = true; }
-});
-$("rpWorkAdd").addEventListener("click", rpWorkEnter);
-$("rpSuggest").addEventListener("pointerdown", e => e.preventDefault());   // keeps the keyboard open
-$("rpSuggest").addEventListener("click", e => {
-  const s = e.target.closest("[data-sug]"), a = e.target.closest("[data-newag]");
-  if (s) rpPickWorking(s.dataset.sug);
-  else if (a){
-    const name = tidyName($("rpWorkInput").value);
-    if (!name) return;
-    roster.push({ name, agency: a.dataset.newag }); sortRoster(); rpSaveRoster();
-    toast(`${name} added to All drivers`);
-    rpPickWorking(name);
-  }
-});
-
-/* ---------- all drivers ---------- */
-function rpRosterFromInput(){
-  const names = $("rpRosterInput").value.split(/[,\n]+/).map(tidyName).filter(Boolean);
-  const agency = $("rpRosterAgency").value;
-  if (!names.length) return toast("Type a driver's name", "bad");
-  if (!agency) return toast(`Choose ${AGENCIES.map(a => a.code).join(" or ")}`, "bad");
-  let added = 0;
-  names.forEach(n => { const d = driverOf(n); if (d) d.agency = agency; else { roster.push({ name: n, agency }); added++; } });
-  sortRoster(); rpSaveRoster();
-  $("rpRosterInput").value = ""; $("rpRosterInput").focus(); renderRoutes();
-  toast(added ? `${plural(added, "driver", "drivers")} added` : "Already on the list. Agency updated.");
-}
-$("rpRosterAgency").innerHTML = `<option value="">Agency</option>` + AGENCIES.map(a => `<option>${esc(a.code)}</option>`).join("");
-$("rpRosterAdd").addEventListener("click", rpRosterFromInput);
-$("rpRosterInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); rpRosterFromInput(); } });
-$("rpRosterSearch").addEventListener("input", rpRenderRoster);
 
 /* ---------- actions ---------- */
 $("rpProcess").addEventListener("click", () => {
@@ -2452,50 +1712,32 @@ $("rpProcess").addEventListener("click", () => {
 $("rpReplace").addEventListener("click", () => { rpEditing = true; $("rpParcels").value = ""; renderRoutes(); $("rpParcels").focus(); });
 $("rpCancel").addEventListener("click", () => { rpEditing = false; $("rpParcels").value = day.parcelText; renderRoutes(); });
 $("routesView").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
-  const d = b.dataset;
-  if (d.unwork){ day.working = day.working.filter(n => !sameName(n, d.unwork)); unassign(d.unwork); rpChanged(); }
-  else if (d.unroster){
-    if (!confirm(`Remove ${d.unroster} from All drivers?\n\nThey won't come up when you type names any more. You can add them back later.`)) return;
-    roster = roster.filter(x => !sameName(x.name, d.unroster)); rpSaveRoster(); renderRoutes();
-    toast(`${d.unroster} removed`);
-  }
-  else if (d.off){ unassign(d.off); rpChanged(); }
-  else if (d.pc){ if (day.open[d.pc]) delete day.open[d.pc]; else day.open[d.pc] = true; rpChanged(); }
-  else if (d.rand){
-    const free = freeToday();
-    if (!free.length) return toast(day.working.length ? "Everyone working today is already on a route" : "Add who's working today first", "bad");
-    const u = new Uint32Array(1); crypto.getRandomValues(u);
-    const pick = free[u[0] % free.length];
-    assignTo(+d.rand, pick); rpChanged(); toast(`${pick} added to Route ${d.rand}`);
-  }
-});
-$("routesView").addEventListener("change", e => {
-  const s = e.target.closest("[data-addto]"), a = e.target.closest("[data-setag]");
-  if (s && s.value){ assignTo(+s.dataset.addto, s.value); rpChanged(); }
-  else if (a){ const d = driverOf(a.dataset.setag); if (d){ d.agency = a.value; rpSaveRoster(); renderRoutes(); } }
+  const b = e.target.closest("button[data-pc]"); if (!b) return;
+  const n = b.dataset.pc;
+  if (day.open[n]) delete day.open[n]; else day.open[n] = true;
+  rpChanged();
 });
 
-// Plain text for WhatsApp: one route per line with a gap between, names only
+// Plain text for WhatsApp: parcels and drops for each route with parcels
 function rpPlanText(){
-  const lines = [`Routes for ${prettyDate(today(), { weekday: "long", day: "numeric", month: "long" })}`];
-  RPC.routes.forEach(r => { const names = day.assign[r.num] || []; if (names.length) lines.push("", `Route ${r.num}. ${names.join(", ")}`); });
+  const lines = [`Routes for ${prettyDate(today(), { weekday: "long", day: "numeric", month: "long" })}`, ""];
+  rpS.routes.filter(x => x.parcels).forEach(x => lines.push(`Route ${x.num} ${x.r.name}: ${plural(x.parcels, "parcel", "parcels")}, ${plural(x.drops, "drop", "drops")}`));
+  lines.push("", `Total: ${plural(rpS.totalParcels, "parcel", "parcels")}, ${plural(rpS.totalDrops, "drop", "drops")}`);
+  if (rpS.unassigned.parcels) lines.push(`Not on a route: ${plural(rpS.unassigned.parcels, "parcel", "parcels")}`);
   return lines.join("\n");
 }
 $("rpCopy").addEventListener("click", async () => {
-  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
-  toast(await copyText(rpPlanText()) ? "Plan copied. Paste it into WhatsApp" : "Couldn't copy. Your browser blocked it");
+  if (!rpS) return toast("Load the forecast first", "bad");
+  toast(await copyText(rpPlanText()) ? "Routes copied. Paste them into WhatsApp" : "Couldn't copy. Your browser blocked it");
 });
 $("rpNewDay").addEventListener("click", () => {
-  if (!confirm("Start a new day? This clears the forecast, who's working and the routes. Your saved drivers stay.")) return;
-  day = { parcelText: "", working: [], assign: {}, open: {} };
+  if (!confirm("Start a new day? This clears today's forecast.")) return;
+  day = { parcelText: "", open: {} };
   $("rpParcels").value = ""; rpEditing = false; rpCompute(); rpChanged();
 });
 
 /* ---------- display card to screenshot for the group ---------- */
 function rpShowCard(){
-  const anyDrivers = RPC.routes.some(r => (day.assign[r.num] || []).length);
-  const out = day.working.filter(n => routeOf(n)).length;
   const d = new Date(today() + "T12:00:00");
   const stat = (v, label) => `<div><b>${v}</b><span>${label}</span></div>`;
   $("rpPoster").innerHTML = `
@@ -2505,20 +1747,17 @@ function rpShowCard(){
       <div class="rp-p-date"><b>${d.toLocaleDateString("en-GB", { day: "numeric" })}</b><span>${d.toLocaleDateString("en-GB", { month: "short" })}</span></div>
     </header>
     <div class="rp-p-title"><h2>Today's routes<span>${esc(d.toLocaleDateString("en-GB", { weekday: "long" }))}</span></h2></div>
-    <div class="rp-p-stats">${stat(rpS ? rpS.totalParcels : "–", "Parcels")}${stat(rpS ? rpS.totalDrops : "–", "Drops")}${stat(anyDrivers ? out : RPC.routes.length, anyDrivers ? "Drivers" : "Routes")}</div>
+    <div class="rp-p-stats">${stat(rpS ? rpS.totalParcels : "–", "Parcels")}${stat(rpS ? rpS.totalDrops : "–", "Drops")}${stat(RPC.routes.length, "Routes")}</div>
     <div class="rp-p-grid">${RPC.routes.map(r => {
       const x = rpS ? rpS.routes.find(y => y.num === r.num) : null;
-      const names = day.assign[r.num] || [];
-      const zero = rpS && x && !x.parcels && !names.length;
+      const zero = rpS && x && !x.parcels;
       return `<div class="rp-p-tile ${zero ? "zero" : ""}">
         <div class="rp-p-th"><span class="rp-p-num">${r.num}</span><small>${esc(r.name)}</small></div>
         <div class="rp-p-n"><b>${x ? x.parcels : "–"}</b><span>${x ? plural(x.drops, "drop", "drops") : "parcels"}</span></div>
-        ${anyDrivers ? `<div class="rp-p-drv">${names.length ? names.map(n => `<span>${dot(n)}${esc(n)}</span>`).join("") : `<em>No driver</em>`}</div>` : ""}
       </div>`;
     }).join("")}</div>
     ${rpS && rpS.unassigned.parcels ? `<p class="rp-p-note">${plural(rpS.unassigned.parcels, "parcel isn't", "parcels aren't")} on a route yet</p>` : ""}
-    <footer class="rp-p-foot"><span>${rpS ? "Parcels and drops from today's forecast" : "Load a forecast to show parcel counts"}</span>
-      ${anyDrivers ? `<span class="rp-p-key">${AGENCIES.map(a => `<span><i class="ag-dot" style="background:${a.colour}"></i>${esc(a.code)}</span>`).join("")}</span>` : ""}</footer>`;
+    <footer class="rp-p-foot"><span>${rpS ? "Parcels and drops from today's forecast" : "Load a forecast to show parcel counts"}</span></footer>`;
   $("rpShow").hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -2534,124 +1773,41 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("rpShow
 // Read-only view of the routes, used for automated checks
 window.routePlanCheck = () => ({
   routes: rpS ? rpS.routes.map(x => ({ num: x.num, parcels: x.parcels, drops: x.drops })) : [],
-  assign: JSON.parse(JSON.stringify(day.assign)), working: day.working.slice(),
-  roster: roster.map(d => d.name), rosterFull: JSON.parse(JSON.stringify(roster)), text: rpPlanText()
+  text: rpS ? rpPlanText() : ""
 });
-
 
 /* =====================================================================
-   ROUTE RECORDS
-   "Record routes" saves who drove which route today. Kept on this device,
-   and in Firebase (routeRecords collection) once it's connected.
+   FORGET DRIVER NAMES
+   Earlier versions kept a driver list, who was working and recorded
+   routes. None of that is used any more, so it's removed: from this
+   device every time the app opens, and from Firebase the first time an
+   admin signs in on a device (anything left over is retried next time).
    ===================================================================== */
-const RR_KEY = "routeRecords";
-let routeRecords = [];          // newest first
-let hPane = "shifts";
-const rrLocal = () => { try { return JSON.parse(localStorage.getItem(RR_KEY) || "[]"); } catch (e) { return []; } };
-const rrSaveLocal = () => { try { localStorage.setItem(RR_KEY, JSON.stringify(routeRecords.slice(0, 180))); } catch (e) {} };
-const rrSort = () => routeRecords.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-async function rrLoad(){
-  routeRecords = rrLocal(); rrSort();
-  if (fb && !preview && user){
-    try {
-      const snap = await fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, "routeRecords"), fb.fs.orderBy("date", "desc"), fb.fs.limit(180)));
-      routeRecords = snap.docs.map(d => d.data()); rrSort(); rrSaveLocal();
-    } catch (e) {}
-  }
-  if (tab === "history" && hPane === "routes") renderRouteHistory();
-  if (tab === "routes") rrRenderStamp();
+function forgetDriverNames(){
+  try {
+    ["driverRoster", "routeRecords"].forEach(k => localStorage.removeItem(k));
+    const d = JSON.parse(localStorage.getItem(DAY_KEY) || "null");
+    if (d && (d.working || d.assign)) localStorage.setItem(DAY_KEY, JSON.stringify({ parcelText: d.parcelText || "", open: d.open || {} }));
+    Object.keys(localStorage).filter(k => k.startsWith("liveOps:")).forEach(k => {
+      const all = JSON.parse(localStorage.getItem(k) || "{}");
+      Object.values(all).forEach(sh => (sh.issues || []).forEach(x => { if (x.driver) x.driver = ""; }));
+      localStorage.setItem(k, JSON.stringify(all));
+    });
+  } catch (e) {}
+  if (fb && !preview && user && profile?.role === "admin") forgetDriverNamesInFirebase();
 }
-function rrRenderStamp(){
-  const r = routeRecords.find(x => x.date === today());
-  $("rpRecorded").textContent = r ? `Recorded at ${fmtTime(r.recordedAt)}` : "";
+async function forgetDriverNamesInFirebase(){
+  const FLAG = "driverNamesForgotten";
+  try { if (localStorage.getItem(FLAG)) return; } catch (e) {}
+  let left = false;
+  try { await fb.fs.deleteDoc(fb.fs.doc(fb.db, "station", "drivers")); } catch (e) { left = true; }
+  try {
+    const snap = await fb.fs.getDocs(fb.fs.collection(fb.db, "routeRecords"));
+    for (const d of snap.docs){ try { await fb.fs.deleteDoc(d.ref); } catch (e) { left = true; } }
+  } catch (e) { left = true; }
+  if (!left){ try { localStorage.setItem(FLAG, "1"); } catch (e) {} }
 }
-$("rpRecord").addEventListener("click", async () => {
-  if (!Object.keys(day.assign).length) return toast("Put drivers on routes first", "bad");
-  const existing = routeRecords.find(x => x.date === today());
-  if (existing && !confirm(`Today's routes were already recorded at ${fmtTime(existing.recordedAt)}. Replace them with what's on screen now?`)) return;
-  const rec = {
-    date: today(), recordedAt: Date.now(), by: profile?.name || "",
-    totalParcels: rpS ? rpS.totalParcels : null, totalDrops: rpS ? rpS.totalDrops : null,
-    routes: RPC.routes.map(r => {
-      const x = rpS ? rpS.routes.find(y => y.num === r.num) : null;
-      return { num: r.num, name: r.name, parcels: x ? x.parcels : null, drops: x ? x.drops : null,
-               drivers: (day.assign[r.num] || []).map(n => ({ name: n, agency: agencyOf(n) })) };
-    })
-  };
-  routeRecords = routeRecords.filter(x => x.date !== rec.date); routeRecords.push(rec); rrSort(); rrSaveLocal();
-  rrRenderStamp();
-  if (fb && !preview && user){
-    try { await fb.fs.setDoc(fb.fs.doc(fb.db, "routeRecords", rec.date), rec); toast("Routes recorded"); }
-    catch (e) { toast("Recorded on this device only. Add the route records rule in Firebase.", "bad"); }
-  } else toast("Routes recorded");
-});
 
-/* ---------- history: switch between shift reports and routes ---------- */
-function setHPane(p){
-  hPane = p;
-  document.querySelectorAll("[data-hpane]").forEach(b => b.setAttribute("aria-checked", b.dataset.hpane === p));
-  $("hShiftsPane").hidden = p !== "shifts";
-  $("hRoutesPane").hidden = p !== "routes";
-  if (p === "routes") renderRouteHistory();
-  updateTitle();
-}
-document.querySelectorAll("[data-hpane]").forEach(b => b.addEventListener("click", () => setHPane(b.dataset.hpane)));
-
-const rrDot = d => { const c = colourOf(d.agency); return `<i class="ag-dot" style="${c ? `background:${c}` : ""}"></i>`; };
-const rrDay = date => prettyDate(date, { weekday: "short", day: "numeric", month: "short" });
-let rrOpen = {};
-function renderRouteHistory(){
-  const q = tidyName($("rrSearch").value).toLowerCase();
-  const list = q ? routeRecords.filter(r => r.routes.some(x => x.drivers.some(d => d.name.toLowerCase().includes(q)))) : routeRecords;
-  // Driver look-up: every day a matching driver was recorded, and which route
-  let who = "";
-  if (q){
-    const by = new Map();
-    routeRecords.forEach(r => r.routes.forEach(x => x.drivers.forEach(d => {
-      if (!d.name.toLowerCase().includes(q)) return;
-      if (!by.has(d.name)) by.set(d.name, { d, days: [] });
-      by.get(d.name).days.push({ date: r.date, num: x.num, name: x.name });
-    })));
-    who = by.size ? [...by.values()].map(({ d, days }) => {
-      const tally = new Map(); days.forEach(t => tally.set(t.num, (tally.get(t.num) || 0) + 1));
-      return `<div class="rr-who"><div class="rr-who-h">${rrDot(d)}<b>${esc(d.name)}</b><span>${plural(days.length, "day", "days")} recorded</span></div>
-        <div class="rr-tally">${[...tally].sort((a, b) => b[1] - a[1]).map(([n, c]) => `<span class="chip violet">Route ${n} × ${c}</span>`).join("")}</div>
-        <div class="rr-days">${days.map(t => `<span><b>${esc(rrDay(t.date))}</b>Route ${t.num} ${esc(t.name)}</span>`).join("")}</div></div>`;
-    }).join("") : `<p class="rp-hint">No recorded routes for that driver.</p>`;
-  }
-  $("rrWho").innerHTML = who;
-  $("rrCount").textContent = plural(routeRecords.length, "day", "days");
-  $("rrList").innerHTML = list.length ? list.map(r => {
-    const open = !!rrOpen[r.date] || !!q, drivers = r.routes.reduce((a, x) => a + x.drivers.length, 0);
-    return `<div class="rr-item ${open ? "open" : ""}">
-      <button class="rr-row" type="button" data-rr="${esc(r.date)}" aria-expanded="${open}">
-        <span class="rr-date"><b>${esc(rrDay(r.date))}</b><small>Recorded ${fmtTime(r.recordedAt)}${r.by ? " by " + esc(r.by) : ""}</small></span>
-        <span class="rr-n"><b class="num">${drivers}</b><small>drivers</small></span>
-        <span class="rr-n"><b class="num">${r.totalParcels ?? "–"}</b><small>parcels</small></span>
-        <svg class="i rr-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      ${open ? `<div class="rr-detail">${r.routes.map(x => `<div class="rr-route ${x.drivers.length ? "" : "empty"}">
-          <i class="rp-badge">${x.num}</i><span class="rr-rname">${esc(x.name)}${x.parcels != null ? `<small>${x.parcels} parcels · ${x.drops} drops</small>` : ""}</span>
-          <span class="rr-names">${x.drivers.length ? x.drivers.map(d => `<span class="${q && d.name.toLowerCase().includes(q) ? "hit" : ""}">${rrDot(d)}${esc(d.name)}</span>`).join("") : `<em>No driver</em>`}</span></div>`).join("")}
-        <div class="rr-foot"><button class="link quiet" type="button" data-rrdel="${esc(r.date)}">Delete this record</button></div></div>` : ""}
-    </div>`; }).join("")
-    : `<p class="empty pad">${routeRecords.length ? "No days match." : "No routes recorded yet. Press Record routes on the Routes tab once drivers are on routes."}</p>`;
-}
-$("rrSearch").addEventListener("input", renderRouteHistory);
-$("rrList").addEventListener("click", async e => {
-  const row = e.target.closest("[data-rr]"), del = e.target.closest("[data-rrdel]");
-  if (row){ const d = row.dataset.rr; if (rrOpen[d]) delete rrOpen[d]; else rrOpen[d] = true; renderRouteHistory(); }
-  else if (del){
-    const d = del.dataset.rrdel;
-    if (!confirm(`Delete the route record for ${rrDay(d)}?`)) return;
-    if (fb && !preview && user){
-      try { await fb.fs.deleteDoc(fb.fs.doc(fb.db, "routeRecords", d)); }
-      catch (e) { return toast(e.code === "permission-denied" ? "Only an admin can delete records" : "Couldn't delete. Check your connection.", "bad"); }
-    }
-    routeRecords = routeRecords.filter(x => x.date !== d); rrSaveLocal(); renderRouteHistory(); rrRenderStamp(); toast("Record deleted");
-  }
-});
-$("rrRefresh").addEventListener("click", rrLoad);
 async function boot(){
   if (!REQUIRE_LOGIN){
     deviceMode = true;
