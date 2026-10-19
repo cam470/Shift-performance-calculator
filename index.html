@@ -258,7 +258,7 @@
             <p class="form-msg" id="sfMsg" role="status"></p>
           </form>
           <div class="staff-list" id="staffList"></div>
-          <p class="muted acct-note">Staff can't reset their own password. If someone forgets theirs, delete their account in Firebase (Authentication, Users), then add them again here with the same username.</p>
+          <p class="muted acct-note">Staff can't reset their own password. If someone forgets theirs, delete their account in Firebase (Authentication, Users), then add them again here with the same username. Their training progress carries over.</p>
         </section>
       </div>
     </main>
@@ -361,8 +361,8 @@
 let firebaseConfig = {};
 
 /* 1b. Sign in.
-   Firebase is only used to sign in: accounts and roles. Nothing else is
-   sent to it. Shift figures, routes and training stay on each device.
+   Firebase is only used for accounts: sign in, names and roles, and each
+   person's training progress. Shift figures and routes stay on each device.
    false = no sign in. Anyone with the link can use the app.
    true  = staff sign in with Firebase accounts. */
 const REQUIRE_LOGIN = true;
@@ -853,7 +853,7 @@ const motion = (() => {
    Change password, sign out, and for admins: staff accounts.
    ===================================================================== */
 const initials = n => (n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
-let staffRows = [];
+let staffRows = [], staffTraining = {};
 function renderAccount(){
   $("acctAvatar").textContent = initials(profile.name);
   $("acctName").textContent = profile.name;
@@ -885,22 +885,32 @@ $("signOut2").addEventListener("click", async () => { if (fb) await fb.a.signOut
 async function loadStaff(){
   $("staffList").innerHTML = `<p class="empty">Loading staff…</p>`;
   try {
-    const us = await fb.fs.getDocs(fb.fs.collection(fb.db, "users"));
+    const [us, ts] = await Promise.all([
+      fb.fs.getDocs(fb.fs.collection(fb.db, "users")),
+      fb.fs.getDocs(fb.fs.collection(fb.db, "training")).catch(() => null)
+    ]);
     staffRows = us.docs.map(d => ({ uid: d.id, ...d.data() }))
       .sort((a, b) => (a.active === false) - (b.active === false) || (a.name || "").localeCompare(b.name || ""));
+    staffTraining = {};
+    if (ts) ts.docs.forEach(d => staffTraining[d.id] = d.data());
     renderStaff();
   } catch (e) {
     $("staffList").innerHTML = `<p class="empty">Couldn't load staff. ${e.code === "permission-denied" ? "Check the Firestore rules have been published." : "Check your connection."}</p>`;
   }
 }
+function trainingDone(uid){
+  const d = staffTraining[uid]; if (!d || !T) return 0;
+  return T.modules.filter(m => d.modDone && d.modDone[m.id]).length;
+}
 function renderStaff(){
   $("staffCount").textContent = staffRows.filter(r => r.active !== false).length + " active";
   $("staffList").innerHTML = staffRows.length ? staffRows.map(r => {
-    const me = r.uid === user.uid, off = r.active === false;
+    const me = r.uid === user.uid, off = r.active === false, done = trainingDone(r.uid), total = T ? T.modules.length : 0;
     return `<div class="staff ${off ? "off" : ""}">
       <div class="staff-t"><b>${esc(r.name || r.username)}</b>${me ? ' <small class="you">(you)</small>' : ""}<small>${esc(r.username || "")}</small>
         <div class="staff-chips"><span class="chip ${r.role === "admin" ? "violet" : ""}">${r.role === "admin" ? "Admin" : "Staff"}</span>
-        ${off ? `<span class="chip bad">Turned off</span>` : ""}</div></div>
+        ${off ? `<span class="chip bad">Turned off</span>` : ""}
+        ${total ? `<span class="chip ${done === total ? "good" : ""}">Training ${done} of ${total}</span>` : ""}</div></div>
       ${me ? "" : `<div class="staff-btns">
         <button class="btn secondary sm" type="button" data-role="${esc(r.uid)}">${r.role === "admin" ? "Make staff" : "Make admin"}</button>
         <button class="btn ${off ? "secondary" : "danger"} sm" type="button" data-active="${esc(r.uid)}">${off ? "Turn on" : "Turn off"}</button></div>`}
@@ -931,9 +941,14 @@ $("staffForm").addEventListener("submit", async e => {
     const cred = await fb.a.createUserWithEmailAndPassword(secAuth, toEmail(username), pass);
     const newUid = cred.user.uid;
     await fb.a.signOut(secAuth);
-    // Someone being added again after a password reset: remove their old account record.
+    // Someone being added again after a password reset: bring their training across.
     for (const old of staffRows.filter(r => r.username === username && r.uid !== newUid)){
-      try { await fb.fs.deleteDoc(fb.fs.doc(fb.db, "users", old.uid)); } catch (err) {}
+      try {
+        const t = await fb.fs.getDoc(fb.fs.doc(fb.db, "training", old.uid));
+        if (t.exists()) await fb.fs.setDoc(fb.fs.doc(fb.db, "training", newUid), t.data());
+        if (t.exists()) await fb.fs.deleteDoc(fb.fs.doc(fb.db, "training", old.uid));
+        await fb.fs.deleteDoc(fb.fs.doc(fb.db, "users", old.uid));
+      } catch (err) {}
     }
     await fb.fs.setDoc(fb.fs.doc(fb.db, "users", newUid), {
       name, username, role, active: true, createdAt: fb.fs.serverTimestamp(), createdBy: profile.username || ""
@@ -1019,15 +1034,36 @@ function syncCompletion(){
   if (!all) tr.doneAt = null;
 }
 
-/* ---------- saving progress: on this device only ---------- */
+/* ---------- saving progress: on this device, and in Firebase when connected ---------- */
 const trKey = () => "trainingProgress:" + (user ? user.uid : "none");
+function trSaveLocal(){ try { localStorage.setItem(trKey(), JSON.stringify(tr)); } catch (e) {} }
+let trCloudTimer, trCloudWarned = false;
 function trSave(){
-  tr.updated = Date.now();
-  try { localStorage.setItem(trKey(), JSON.stringify(tr)); } catch (e) {}
+  tr.updated = Date.now(); trSaveLocal();
+  if (!fb || preview || !user) return;
+  clearTimeout(trCloudTimer);
+  trCloudTimer = setTimeout(async () => {
+    try {
+      await fb.fs.setDoc(fb.fs.doc(fb.db, "training", user.uid),
+        { steps: tr.steps, modDone: tr.modDone, doneAt: tr.doneAt, updated: tr.updated, name: profile?.name || "" });
+    } catch (e) {
+      if (!trCloudWarned){ trCloudWarned = true; toast("Training progress is only saved on this device. Add the training rule in Firebase.", "bad"); }
+    }
+  }, 1000);
 }
-function trLoad(){
+async function trLoad(){
   tr = { steps: {}, modDone: {}, doneAt: null, updated: 0 };
   try { Object.assign(tr, JSON.parse(localStorage.getItem(trKey()) || "{}")); } catch (e) {}
+  if (fb && !preview && user){
+    try {
+      const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, "training", user.uid));
+      const d = snap.exists() ? snap.data() : null;
+      if (d && (d.updated || 0) > (tr.updated || 0)){
+        tr = { steps: d.steps || {}, modDone: d.modDone || {}, doneAt: d.doneAt || null, updated: d.updated || 0 };
+        trSaveLocal();
+      } else if (tr.updated && (!d || tr.updated > (d.updated || 0))) trSave();
+    } catch (e) {}
+  }
   if (tab === "training") renderTraining();
 }
 

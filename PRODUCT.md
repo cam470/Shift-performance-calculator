@@ -31,7 +31,7 @@ Built for one station's real routine rather than a generic dashboard: the FTDS g
 ## Capabilities and Constraints
 
 - Sections: This shift (setup, results, FTDS live, copy summary), Routes (forecast, parcels and drops per route, group display card), Training (modules, glossary, checklist, progress), Live ops (recurring and one-off tasks, issues), Account (password, staff accounts for admins).
-- Plain HTML, CSS and JavaScript; no framework or build step. Firebase is used only to sign in: Firebase Authentication plus the `users` list of names and roles. Shift figures, the forecast, training progress and Live ops stay on each device. Route settings live in `routes-config.js`; training text in `training-content.js`.
+- Plain HTML, CSS and JavaScript; no framework or build step. Firebase is used only for accounts: Firebase Authentication, the `users` list of names and roles, and each person's training progress (`training`). Shift figures, the forecast and Live ops stay on each device. Route settings live in `routes-config.js`; training text in `training-content.js`.
 - Driver names are not asked for or kept anywhere. No shift reports, notes or route records are saved.
 - Roles: admin and staff. A preview mode shows the layout without signing in.
 - Terminology: FTDS (first-time delivery success), PPR, JDW numbers, redelivery, rejection, routes 1–9.
@@ -53,7 +53,7 @@ Built for one station's real routine rather than a generic dashboard: the FTDS g
 
 1. The shift comes first: the action people take most during a shift is the easiest one to reach.
 2. Numbers must be trustworthy at a glance: status always comes with words, not colour alone.
-3. Keep only what's needed: sign-in goes to Firebase, everything else stays on the device, and no driver names are kept.
+3. Keep only what's needed: accounts and training progress go to Firebase, everything else stays on the device, and no driver names are kept.
 4. Written for the station's own language and routine, not a generic template.
 5. Works one-handed on a phone and comfortably on a desk screen.
 
